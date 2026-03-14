@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Upload to Cloudinary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e0f7ef 0%, #f5f7fa 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: #27AE60;
+            margin-bottom: 1rem;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .test-section h2 {
+            color: #374151;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed #27AE60;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f0fdf4;
+            border-color: #229954;
+        }
+        
+        .upload-area.dragover {
+            background: #d1fae5;
+            border-color: #27AE60;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .preview {
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        button {
+            background: #27AE60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+        
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .result pre {
+            margin-top: 0.5rem;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+        
+        .user-type-select {
+            margin-bottom: 1rem;
+        }
+        
+        .user-type-select label {
+            display: inline-block;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+        
+        .user-type-select select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Cloudinary Image Upload Test</h1>
+        <p style="color: #6b7280; margin-bottom: 2rem;">Test uploading images (selfie, profile, ID front/back) to Cloudinary</p>
+        
+        <!-- Farmer Profile Images -->
+        <div class="test-section">
+            <h2>🌾 Farmer Profile Images</h2>
+            
+            <div class="user-type-select">
+                <label>User Type:</label>
+                <select id="farmer-user-type">
+                    <option value="farmer">Farmer</option>
+                </select>
+            </div>
+            
+            <!-- ID Front -->
+            <div>
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">ID Front</h3>
+                <div class="upload-area" id="farmer-id-front-area">
+                    <p>📄 Click or drag to upload ID Front</p>
+                    <input type="file" id="farmer-id-front" accept="image/*">
+                </div>
+                <div class="preview" id="farmer-id-front-preview">
+                    <img id="farmer-id-front-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadFarmerImage('id-front')" id="farmer-id-front-btn">Upload ID Front</button>
+                <div class="result" id="farmer-id-front-result"></div>
+            </div>
+            
+            <!-- ID Back -->
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">ID Back</h3>
+                <div class="upload-area" id="farmer-id-back-area">
+                    <p>📄 Click or drag to upload ID Back</p>
+                    <input type="file" id="farmer-id-back" accept="image/*">
+                </div>
+                <div class="preview" id="farmer-id-back-preview">
+                    <img id="farmer-id-back-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadFarmerImage('id-back')" id="farmer-id-back-btn">Upload ID Back</button>
+                <div class="result" id="farmer-id-back-result"></div>
+            </div>
+            
+            <!-- Profile Selfie -->
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Profile Selfie</h3>
+                <div class="upload-area" id="farmer-selfie-area">
+                    <p>📸 Click or drag to upload Selfie</p>
+                    <input type="file" id="farmer-selfie" accept="image/*">
+                </div>
+                <div class="preview" id="farmer-selfie-preview">
+                    <img id="farmer-selfie-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadFarmerImage('selfie')" id="farmer-selfie-btn">Upload Selfie</button>
+                <div class="result" id="farmer-selfie-result"></div>
+            </div>
+            
+            <!-- Profile Image -->
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Profile Image</h3>
+                <div class="upload-area" id="farmer-profile-area">
+                    <p>🖼️ Click or drag to upload Profile Image</p>
+                    <input type="file" id="farmer-profile" accept="image/*">
+                </div>
+                <div class="preview" id="farmer-profile-preview">
+                    <img id="farmer-profile-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadFarmerImage('profile')" id="farmer-profile-btn">Upload Profile Image</button>
+                <div class="result" id="farmer-profile-result"></div>
+            </div>
+        </div>
+        
+        <!-- Buyer Profile Images -->
+        <div class="test-section">
+            <h2>🛒 Buyer Profile Images</h2>
+            
+            <div class="user-type-select">
+                <label>User Type:</label>
+                <select id="buyer-user-type">
+                    <option value="buyer">Buyer</option>
+                </select>
+            </div>
+            
+            <!-- ID Front -->
+            <div>
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">ID Front</h3>
+                <div class="upload-area" id="buyer-id-front-area">
+                    <p>📄 Click or drag to upload ID Front</p>
+                    <input type="file" id="buyer-id-front" accept="image/*">
+                </div>
+                <div class="preview" id="buyer-id-front-preview">
+                    <img id="buyer-id-front-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadBuyerImage('id-front')" id="buyer-id-front-btn">Upload ID Front</button>
+                <div class="result" id="buyer-id-front-result"></div>
+            </div>
+            
+            <!-- ID Back -->
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">ID Back</h3>
+                <div class="upload-area" id="buyer-id-back-area">
+                    <p>📄 Click or drag to upload ID Back</p>
+                    <input type="file" id="buyer-id-back" accept="image/*">
+                </div>
+                <div class="preview" id="buyer-id-back-preview">
+                    <img id="buyer-id-back-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadBuyerImage('id-back')" id="buyer-id-back-btn">Upload ID Back</button>
+                <div class="result" id="buyer-id-back-result"></div>
+            </div>
+            
+            <!-- Profile Image -->
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Profile Image</h3>
+                <div class="upload-area" id="buyer-profile-area">
+                    <p>🖼️ Click or drag to upload Profile Image</p>
+                    <input type="file" id="buyer-profile" accept="image/*">
+                </div>
+                <div class="preview" id="buyer-profile-preview">
+                    <img id="buyer-profile-img" src="" alt="Preview">
+                </div>
+                <button onclick="uploadBuyerImage('profile')" id="buyer-profile-btn">Upload Profile Image</button>
+                <div class="result" id="buyer-profile-result"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API base URL - environment-aware
+        const isProduction = window.location.hostname !== 'localhost' && 
+                             window.location.hostname !== '127.0.0.1';
+        const API_BASE_URL = isProduction ? '/api' : 'http://localhost:5000/api';
+        
+        // Setup file input handlers
+        function setupFileInput(imageType, userType) {
+            const input = document.getElementById(`${userType}-${imageType}`);
+            const area = document.getElementById(`${userType}-${imageType}-area`);
+            const preview = document.getElementById(`${userType}-${imageType}-preview`);
+            const img = document.getElementById(`${userType}-${imageType}-img`);
+            
+            // Click to upload
+            area.addEventListener('click', () => input.click());
+            
+            // File selected
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Drag and drop
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+            
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+            
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    input.files = e.dataTransfer.files;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Setup all file inputs
+        ['id-front', 'id-back', 'selfie', 'profile'].forEach(type => {
+            setupFileInput(type, 'farmer');
+        });
+        
+        ['id-front', 'id-back', 'profile'].forEach(type => {
+            setupFileInput(type, 'buyer');
+        });
+        
+        // Convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Upload farmer image
+        async function uploadFarmerImage(imageType) {
+            const input = document.getElementById(`farmer-${imageType}`);
+            const btn = document.getElementById(`farmer-${imageType}-btn`);
+            const resultDiv = document.getElementById(`farmer-${imageType}-result`);
+            const userType = document.getElementById('farmer-user-type').value;
+            
+            if (!input.files[0]) {
+                showResult(resultDiv, 'error', 'Please select an image first');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const file = input.files[0];
+                const base64 = await fileToBase64(file);
+                
+                const response = await fetch(`${API_BASE_URL}/uploads/base64`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: base64,
+                        image_type: imageType,
+                        user_type: userType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult(resultDiv, 'success', `✅ Upload successful!\n\nSecure URL: ${data.image.secure_url}\nPublic ID: ${data.image.public_id}\nFormat: ${data.image.format}\nSize: ${data.image.width}x${data.image.height}\nBytes: ${data.image.bytes}`);
+                } else {
+                    showResult(resultDiv, 'error', `❌ Upload failed: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = `Upload ${imageType === 'id-front' ? 'ID Front' : imageType === 'id-back' ? 'ID Back' : imageType === 'selfie' ? 'Selfie' : 'Profile Image'}`;
+            }
+        }
+        
+        // Upload buyer image
+        async function uploadBuyerImage(imageType) {
+            const input = document.getElementById(`buyer-${imageType}`);
+            const btn = document.getElementById(`buyer-${imageType}-btn`);
+            const resultDiv = document.getElementById(`buyer-${imageType}-result`);
+            const userType = document.getElementById('buyer-user-type').value;
+            
+            if (!input.files[0]) {
+                showResult(resultDiv, 'error', 'Please select an image first');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const file = input.files[0];
+                const base64 = await fileToBase64(file);
+                
+                const response = await fetch(`${API_BASE_URL}/uploads/base64`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: base64,
+                        image_type: imageType,
+                        user_type: userType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult(resultDiv, 'success', `✅ Upload successful!\n\nSecure URL: ${data.image.secure_url}\nPublic ID: ${data.image.public_id}\nFormat: ${data.image.format}\nSize: ${data.image.width}x${data.image.height}\nBytes: ${data.image.bytes}`);
+                } else {
+                    showResult(resultDiv, 'error', `❌ Upload failed: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = `Upload ${imageType === 'id-front' ? 'ID Front' : imageType === 'id-back' ? 'ID Back' : 'Profile Image'}`;
+            }
+        }
+        
+        // Show result
+        function showResult(div, type, message) {
+            div.className = `result ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            div.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+

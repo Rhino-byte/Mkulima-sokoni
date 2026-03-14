@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Support Dashboard | AgroLink Kenya</title>
+  <meta name="description" content="Admin dashboard for managing users, verification, and support tickets." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --bg-light: #f9fafb;
+    }
+
+    body {
+      font-family: "Roboto", "Inter", sans-serif;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #6366f1 75%, #e0e7ff 100%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 3px solid var(--primary);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .nav {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 28px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+
+    .logo-text-main {
+      font-weight: 900;
+      font-size: 1.6rem;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-link {
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    main {
+      flex: 1;
+      padding: 40px 32px;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-header {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+      border: 2px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .dashboard-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #ffffff, #f9fafb);
+      border-radius: 20px;
+      padding: 28px;
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
+      border-color: var(--primary);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+
+    .stat-change {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+    }
+
+    .tab {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      background: #ffffff;
+      color: var(--text-main);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #ffffff;
+    }
+
+    th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    }
+
+    tr:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge.verified {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .badge.pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+
+    .badge.rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    .badge.farmer {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .badge.buyer {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .badge.open {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+
+    .badge.in-progress {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .badge.resolved {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 24px;
+      text-align: center;
+      border-top: 3px solid var(--primary);
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <nav class="nav">
+        <div class="logo-wrap">
+          <div class="logo-icon">⚙️</div>
+          <div>
+            <div class="logo-text-main">Admin Support</div>
+            <div class="logo-text-sub">User Management • Verification • Tickets</div>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="support.html" class="nav-link">Public Support</a>
+          <button class="btn btn-outline" onclick="logout()">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="dashboard-header">
+          <h1 class="dashboard-title">Admin Support Dashboard 👨‍💼</h1>
+          <p style="color: var(--text-muted); font-size: 1.1rem;">Manage users, handle verification, and resolve support tickets</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value">1,247</div>
+            <div class="stat-change">+23 new this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">Pending Verification</div>
+            <div class="stat-value">18</div>
+            <div class="stat-change">Requires attention</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎫</div>
+            <div class="stat-label">Open Tickets</div>
+            <div class="stat-value">12</div>
+            <div class="stat-change">3 high priority</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Verified Users</div>
+            <div class="stat-value">1,156</div>
+            <div class="stat-change">92.7% verified</div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('users')">👥 User Management</button>
+          <button class="tab" onclick="switchTab('verification')">✅ Verification</button>
+          <button class="tab" onclick="switchTab('tickets')">🎫 Support Tickets</button>
+          <button class="tab" onclick="switchTab('analytics')">📊 Analytics</button>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content active">
+          <div class="section-card">
+            <h2 class="section-title">All Users 👥</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Manage all registered users - farmers and buyers</p>
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>USER-2024-001</td>
+                    <td><strong>Wanjiku K.</strong></td>
+                    <td>wanjiku@example.com</td>
+                    <td><span class="badge farmer">Farmer</span></td>
+                    <td><span class="badge verified">Verified</span></td>
+                    <td>2024-01-15</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-001')">View</button>
+                        <button class="btn btn-primary btn-sm" onclick="editUser('USER-2024-001')">Edit</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>USER-2024-045</td>
+                    <td><strong>Nairobi Market Ltd</strong></td>
+                    <td>info@nairobi-market.co.ke</td>
+                    <td><span class="badge buyer">Buyer</span></td>
+                    <td><span class="badge verified">Verified</span></td>
+                    <td>2024-02-03</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-045')">View</button>
+                        <button class="btn btn-primary btn-sm" onclick="editUser('USER-2024-045')">Edit</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>USER-2024-089</td>
+                    <td><strong>John Mutiso</strong></td>
+                    <td>mutiso@example.com</td>
+                    <td><span class="badge farmer">Farmer</span></td>
+                    <td><span class="badge pending">Pending</span></td>
+                    <td>2024-03-10</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-089')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="verifyUser('USER-2024-089')">Verify</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>USER-2024-092</td>
+                    <td><strong>Export Co. Kenya</strong></td>
+                    <td>contact@exportco.ke</td>
+                    <td><span class="badge buyer">Buyer</span></td>
+                    <td><span class="badge pending">Pending</span></td>
+                    <td>2024-03-12</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-092')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="verifyUser('USER-2024-092')">Verify</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification Tab -->
+        <div id="verification" class="tab-content">
+          <div class="section-card">
+            <h2 class="section-title">Pending Verifications ⏳</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Review and verify new user accounts</p>
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Documents</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>USER-2024-089</td>
+                    <td><strong>John Mutiso</strong></td>
+                    <td><span class="badge farmer">Farmer</span></td>
+                    <td>
+                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-089')">📄 View Docs</button>
+                    </td>
+                    <td>2024-03-10</td>
+                    <td><span class="badge pending">Pending Review</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-089')">✅ Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-089')">❌ Reject</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>USER-2024-092</td>
+                    <td><strong>Export Co. Kenya</strong></td>
+                    <td><span class="badge buyer">Buyer</span></td>
+                    <td>
+                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-092')">📄 View Docs</button>
+                    </td>
+                    <td>2024-03-12</td>
+                    <td><span class="badge pending">Pending Review</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-092')">✅ Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-092')">❌ Reject</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>USER-2024-095</td>
+                    <td><strong>Sarah Njeri</strong></td>
+                    <td><span class="badge farmer">Farmer</span></td>
+                    <td>
+                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-095')">📄 View Docs</button>
+                    </td>
+                    <td>2024-03-14</td>
+                    <td><span class="badge pending">Pending Review</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-095')">✅ Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-095')">❌ Reject</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tickets Tab -->
+        <div id="tickets" class="tab-content">
+          <div class="section-card">
+            <h2 class="section-title">Support Tickets 🎫</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Manage and resolve support tickets from users</p>
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>User</th>
+                    <th>Subject</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#TKT-2024-001</td>
+                    <td><strong>Wanjiku K.</strong></td>
+                    <td>Payment issue with order</td>
+                    <td>Payment</td>
+                    <td><span class="badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">High</span></td>
+                    <td><span class="badge open">Open</span></td>
+                    <td>2024-03-15</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-001')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-001')">Assign</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#TKT-2024-002</td>
+                    <td><strong>Nairobi Market Ltd</strong></td>
+                    <td>Product quality concern</td>
+                    <td>Quality</td>
+                    <td><span class="badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">Medium</span></td>
+                    <td><span class="badge in-progress">In Progress</span></td>
+                    <td>2024-03-14</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-002')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="resolveTicket('#TKT-2024-002')">Resolve</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#TKT-2024-003</td>
+                    <td><strong>John Mutiso</strong></td>
+                    <td>Account verification question</td>
+                    <td>Account</td>
+                    <td><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">Low</span></td>
+                    <td><span class="badge resolved">Resolved</span></td>
+                    <td>2024-03-13</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="viewTicket('#TKT-2024-003')">View</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#TKT-2024-004</td>
+                    <td><strong>Export Co. Kenya</strong></td>
+                    <td>Delivery delay inquiry</td>
+                    <td>Delivery</td>
+                    <td><span class="badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">Medium</span></td>
+                    <td><span class="badge open">Open</span></td>
+                    <td>2024-03-15</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-004')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-004')">Assign</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+          <div class="section-card">
+            <h2 class="section-title">Platform Analytics 📊</h2>
+            <div class="stats-grid" style="margin-top: 24px;">
+              <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">1,247</div>
+                <div class="stat-change">+23 this week</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">🌾</div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value">3,456</div>
+                <div class="stat-change">+89 this week</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value">8,923</div>
+                <div class="stat-change">+156 this week</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">KSh 12.5M</div>
+                <div class="stat-change">+8% this month</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div style="max-width: 1600px; margin: 0 auto;">
+        <p style="color: var(--text-muted);">© <span id="year"></span> AgroLink Kenya. All rights reserved.</p>
+        <p style="color: var(--text-muted); margin-top: 8px;">Admin Support Dashboard · <a href="support.html" style="color: var(--primary); font-weight: 600;">Public Support</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function viewUser(userId) {
+      alert(`👤 Viewing user details for ${userId}`);
+    }
+
+    function editUser(userId) {
+      alert(`✏️ Edit user ${userId}`);
+    }
+
+    function verifyUser(userId) {
+      if (confirm(`Approve verification for ${userId}?`)) {
+        alert(`✅ User ${userId} verified successfully!`);
+      }
+    }
+
+    function viewDocuments(userId) {
+      alert(`📄 Viewing verification documents for ${userId}\n\nDocuments:\n- ID Card\n- Business License\n- Farm Registration`);
+    }
+
+    function approveVerification(userId) {
+      if (confirm(`Approve verification for ${userId}?`)) {
+        alert(`✅ Verification approved for ${userId}! User will be notified.`);
+      }
+    }
+
+    function rejectVerification(userId) {
+      const reason = prompt(`Reject verification for ${userId}?\n\nPlease provide reason:`);
+      if (reason) {
+        alert(`❌ Verification rejected for ${userId}.\nReason: ${reason}\nUser will be notified.`);
+      }
+    }
+
+    function viewTicket(ticketId) {
+      alert(`🎫 Viewing ticket ${ticketId}\n\nDetails:\n- User: Wanjiku K.\n- Subject: Payment issue\n- Status: Open\n- Priority: High`);
+    }
+
+    function assignTicket(ticketId) {
+      if (confirm(`Assign ticket ${ticketId} to support team?`)) {
+        alert(`✅ Ticket ${ticketId} assigned to support team.`);
+      }
+    }
+
+    function resolveTicket(ticketId) {
+      if (confirm(`Mark ticket ${ticketId} as resolved?`)) {
+        alert(`✅ Ticket ${ticketId} marked as resolved.`);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>

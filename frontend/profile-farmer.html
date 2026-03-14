@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Profile | Mkulima-Bora</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+      background: linear-gradient(135deg, #e0f7ef 0%, #f5f7fa 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .profile-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .profile-header {
+      background: linear-gradient(135deg, #27AE60, #229954);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .profile-header h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .profile-header p {
+      opacity: 0.9;
+    }
+    
+    .tabs {
+      display: flex;
+      background: #f9fafb;
+      border-bottom: 2px solid #e5e7eb;
+      overflow-x: auto;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #6b7280;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+    
+    .tab:hover {
+      background: #f3f4f6;
+      color: #27AE60;
+    }
+    
+    .tab.active {
+      color: #27AE60;
+      background: white;
+      border-bottom-color: #27AE60;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 2rem;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #27AE60;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e5e7eb;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #27AE60;
+      color: white;
+      flex: 1;
+    }
+    
+    .btn-primary:hover {
+      background: #229954;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    
+    .alert.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    
+    .alert.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    
+    .alert.show {
+      display: block;
+    }
+    
+    .help-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+    
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-wrap: nowrap;
+      }
+      
+      .tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <div class="profile-header">
+      <h1>🌾 Farmer Profile</h1>
+      <p>Complete your profile to connect with buyers</p>
+    </div>
+    
+    <div class="alert" id="alert"></div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('basic')">Basic Information</button>
+      <button class="tab" onclick="switchTab('farm')">Farm Details</button>
+      <button class="tab" onclick="switchTab('experience')">Experience</button>
+      <button class="tab" onclick="switchTab('additional')">Additional Info</button>
+    </div>
+    
+    <form id="farmerProfileForm">
+      <!-- Basic Information Tab -->
+      <div id="basic" class="tab-content active">
+        <h2 style="margin-bottom: 1.5rem; color: #27AE60;">Basic Information</h2>
+        
+        <div class="form-group">
+          <label for="farm-name">Farm Name *</label>
+          <input type="text" id="farm-name" name="farm_name" placeholder="e.g., Wanjiku K. Farm" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Location *</label>
+            <input type="text" id="location" name="location" placeholder="e.g., Kiambu County, Kenya" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="county">County *</label>
+            <input type="text" id="county" name="county" placeholder="e.g., Kiambu" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" readonly style="background: #f3f4f6;">
+          <p class="help-text">Email is linked from your account</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" readonly style="background: #f3f4f6;">
+          <p class="help-text">Phone number is linked from your account</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="national-id">National ID *</label>
+          <input type="text" id="national-id" name="national_id" placeholder="e.g., 12345678" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id-front">Upload ID Front *</label>
+            <input type="file" id="id-front" name="id_front" accept="image/*" required>
+            <p class="help-text">Upload front side of your ID</p>
+            <div id="id-front-preview" style="margin-top: 8px; display: none;">
+              <img id="id-front-img" src="" alt="ID Front Preview" style="max-width: 100%; max-height: 150px; border-radius: 8px; border: 2px solid #e5e7eb;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="id-back">Upload ID Back *</label>
+            <input type="file" id="id-back" name="id_back" accept="image/*" required>
+            <p class="help-text">Upload back side of your ID</p>
+            <div id="id-back-preview" style="margin-top: 8px; display: none;">
+              <img id="id-back-img" src="" alt="ID Back Preview" style="max-width: 100%; max-height: 150px; border-radius: 8px; border: 2px solid #e5e7eb;">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="profile-selfie">Profile Selfie *</label>
+          <input type="file" id="profile-selfie" name="profile_selfie" accept="image/*" required>
+          <p class="help-text">Upload a clear selfie photo</p>
+          <div id="selfie-preview" style="margin-top: 8px; display: none;">
+            <img id="selfie-img" src="" alt="Selfie Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Farm Details Tab -->
+      <div id="farm" class="tab-content">
+        <h2 style="margin-bottom: 1.5rem; color: #27AE60;">Farm Details</h2>
+        
+        <div class="form-group">
+          <label for="ward">Ward</label>
+          <input type="text" id="ward" name="ward" placeholder="e.g., Kasarani Ward">
+          <p class="help-text">Enter your ward name</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="farm-size">Farm Size (Acres)</label>
+          <input type="number" id="farm-size" name="farm_size_acres" step="0.01" min="0" placeholder="e.g., 5.5">
+          <p class="help-text">Enter the total size of your farm in acres</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="crops-select">Crops</label>
+          <select id="crops-select" multiple style="min-height: 120px;">
+            <option value="Maize">Maize</option>
+            <option value="Wheat">Wheat</option>
+            <option value="Rice">Rice</option>
+            <option value="Beans">Beans</option>
+            <option value="Potatoes">Potatoes</option>
+            <option value="Tomatoes">Tomatoes</option>
+            <option value="Onions">Onions</option>
+            <option value="Cabbage">Cabbage</option>
+            <option value="Carrots">Carrots</option>
+            <option value="Bananas">Bananas</option>
+            <option value="Coffee">Coffee</option>
+            <option value="Tea">Tea</option>
+            <option value="Sugarcane">Sugarcane</option>
+            <option value="Avocado">Avocado</option>
+            <option value="Mangoes">Mangoes</option>
+          </select>
+          <p class="help-text">Hold Ctrl/Cmd to select multiple crops</p>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" id="crop-custom" placeholder="Add custom crop (e.g., Kale)" style="flex: 1;">
+            <button type="button" onclick="addCustomCrop()" style="padding: 0.75rem 1.5rem; background: #27AE60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Add</button>
+          </div>
+          <div id="selected-crops" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
+          <input type="hidden" id="crops" name="crops">
+        </div>
+        
+        <div class="form-group">
+          <label for="livestock-select">Livestock</label>
+          <select id="livestock-select" multiple style="min-height: 120px;">
+            <option value="Cattle">Cattle</option>
+            <option value="Goats">Goats</option>
+            <option value="Sheep">Sheep</option>
+            <option value="Pigs">Pigs</option>
+            <option value="Chickens">Chickens</option>
+            <option value="Ducks">Ducks</option>
+            <option value="Turkeys">Turkeys</option>
+            <option value="Rabbits">Rabbits</option>
+            <option value="Fish">Fish</option>
+            <option value="Bees">Bees</option>
+          </select>
+          <p class="help-text">Hold Ctrl/Cmd to select multiple livestock</p>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" id="livestock-custom" placeholder="Add custom livestock (e.g., Donkeys)" style="flex: 1;">
+            <button type="button" onclick="addCustomLivestock()" style="padding: 0.75rem 1.5rem; background: #27AE60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Add</button>
+          </div>
+          <div id="selected-livestock" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
+          <input type="hidden" id="livestock" name="livestock">
+        </div>
+        
+        <div class="form-group">
+          <label for="certification-status">Certification Status</label>
+          <select id="certification-status" name="certification_status">
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <p class="help-text">Your certification status will be reviewed by our team</p>
+        </div>
+      </div>
+      
+      <!-- Experience Tab -->
+      <div id="experience" class="tab-content">
+        <h2 style="margin-bottom: 1.5rem; color: #27AE60;">Experience</h2>
+        
+        <div class="form-group">
+          <label for="farming-experience">Farming Experience (Years)</label>
+          <input type="number" id="farming-experience" name="farming_experience_years" min="0" placeholder="e.g., 10">
+          <p class="help-text">How many years have you been farming?</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="bio">Biography</label>
+          <textarea id="bio" name="bio" placeholder="Tell buyers about yourself, your farming practices, and what makes your produce special..."></textarea>
+          <p class="help-text">Share your story and farming expertise</p>
+        </div>
+      </div>
+      
+      <!-- Additional Info Tab -->
+      <div id="additional" class="tab-content">
+        <h2 style="margin-bottom: 1.5rem; color: #27AE60;">Additional Information</h2>
+        
+        <div class="form-group">
+          <label for="referral-source">How did you hear about us?</label>
+          <select id="referral-source" name="referral_source">
+            <option value="">Select an option</option>
+            <option value="social-media">Social Media</option>
+            <option value="friend-family">Friend or Family</option>
+            <option value="google-search">Google Search</option>
+            <option value="advertisement">Advertisement</option>
+            <option value="agricultural-event">Agricultural Event</option>
+            <option value="government-program">Government Program</option>
+            <option value="ngo-partner">NGO Partner</option>
+            <option value="other">Other (please specify)</option>
+          </select>
+          <div id="referral-other-container" style="margin-top: 0.5rem; display: none;">
+            <input type="text" id="referral-other" name="referral_other" placeholder="Please specify...">
+          </div>
+          <p class="help-text">Help us understand how you discovered our platform</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="profile-image">Profile Image URL</label>
+          <input type="url" id="profile-image" name="profile_image_url" placeholder="https://example.com/image.jpg">
+          <p class="help-text">Link to your profile image (optional)</p>
+        </div>
+        
+        <div class="form-group">
+          <label>Account Status</label>
+          <div style="padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 2px solid #27AE60;">
+            <span style="color: #27AE60; font-weight: 600;">✅ Account Verified</span>
+            <p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.9rem;">
+              Your account has been verified. Farm documents approved.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='farmer.html'">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+      </div>
+    </form>
+  </div>
+  
+  <script src="js/profile.js"></script>
+  <script>
+    // Helper function to convert file to base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    // Update crops display
+    function updateCropsDisplay() {
+      const cropsSelect = document.getElementById('crops-select');
+      const selectedCrops = Array.from(cropsSelect.selectedOptions).map(opt => opt.value);
+      const cropsHidden = document.getElementById('crops');
+      const customCrops = cropsHidden.value ? JSON.parse(cropsHidden.value) : [];
+      const allCrops = [...selectedCrops, ...customCrops.filter(c => !selectedCrops.includes(c))];
+      
+      const displayDiv = document.getElementById('selected-crops');
+      displayDiv.innerHTML = '';
+      
+      allCrops.forEach(crop => {
+        const badge = document.createElement('span');
+        badge.textContent = crop;
+        badge.style.cssText = 'padding: 6px 12px; background: #27AE60; color: white; border-radius: 20px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '×';
+        removeBtn.style.cssText = 'background: rgba(255,255,255,0.3); border: none; color: white; cursor: pointer; border-radius: 50%; width: 20px; height: 20px; font-size: 16px; line-height: 1; padding: 0;';
+        removeBtn.onclick = () => removeCrop(crop);
+        badge.appendChild(removeBtn);
+        
+        displayDiv.appendChild(badge);
+      });
+      
+      cropsHidden.value = JSON.stringify(customCrops);
+    }
+    
+    // Update livestock display
+    function updateLivestockDisplay() {
+      const livestockSelect = document.getElementById('livestock-select');
+      const selectedLivestock = Array.from(livestockSelect.selectedOptions).map(opt => opt.value);
+      const livestockHidden = document.getElementById('livestock');
+      const customLivestock = livestockHidden.value ? JSON.parse(livestockHidden.value) : [];
+      const allLivestock = [...selectedLivestock, ...customLivestock.filter(l => !selectedLivestock.includes(l))];
+      
+      const displayDiv = document.getElementById('selected-livestock');
+      displayDiv.innerHTML = '';
+      
+      allLivestock.forEach(livestock => {
+        const badge = document.createElement('span');
+        badge.textContent = livestock;
+        badge.style.cssText = 'padding: 6px 12px; background: #27AE60; color: white; border-radius: 20px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '×';
+        removeBtn.style.cssText = 'background: rgba(255,255,255,0.3); border: none; color: white; cursor: pointer; border-radius: 50%; width: 20px; height: 20px; font-size: 16px; line-height: 1; padding: 0;';
+        removeBtn.onclick = () => removeLivestock(livestock);
+        badge.appendChild(removeBtn);
+        
+        displayDiv.appendChild(badge);
+      });
+      
+      livestockHidden.value = JSON.stringify(customLivestock);
+    }
+    
+    // Add custom crop
+    function addCustomCrop() {
+      const input = document.getElementById('crop-custom');
+      const crop = input.value.trim();
+      if (crop) {
+        const cropsSelect = document.getElementById('crops-select');
+        const cropsHidden = document.getElementById('crops');
+        const customCrops = cropsHidden.value ? JSON.parse(cropsHidden.value) : [];
+        
+        if (!customCrops.includes(crop) && !Array.from(cropsSelect.options).some(opt => opt.value === crop)) {
+          customCrops.push(crop);
+          cropsHidden.value = JSON.stringify(customCrops);
+          updateCropsDisplay();
+        }
+        input.value = '';
+      }
+    }
+    
+    // Remove crop
+    function removeCrop(crop) {
+      const cropsSelect = document.getElementById('crops-select');
+      const cropsHidden = document.getElementById('crops');
+      const customCrops = cropsHidden.value ? JSON.parse(cropsHidden.value) : [];
+      
+      // Remove from select if it's selected
+      Array.from(cropsSelect.options).forEach(opt => {
+        if (opt.value === crop) {
+          opt.selected = false;
+        }
+      });
+      
+      // Remove from custom crops
+      const index = customCrops.indexOf(crop);
+      if (index > -1) {
+        customCrops.splice(index, 1);
+        cropsHidden.value = JSON.stringify(customCrops);
+      }
+      
+      updateCropsDisplay();
+    }
+    
+    // Add custom livestock
+    function addCustomLivestock() {
+      const input = document.getElementById('livestock-custom');
+      const livestock = input.value.trim();
+      if (livestock) {
+        const livestockSelect = document.getElementById('livestock-select');
+        const livestockHidden = document.getElementById('livestock');
+        const customLivestock = livestockHidden.value ? JSON.parse(livestockHidden.value) : [];
+        
+        if (!customLivestock.includes(livestock) && !Array.from(livestockSelect.options).some(opt => opt.value === livestock)) {
+          customLivestock.push(livestock);
+          livestockHidden.value = JSON.stringify(customLivestock);
+          updateLivestockDisplay();
+        }
+        input.value = '';
+      }
+    }
+    
+    // Remove livestock
+    function removeLivestock(livestock) {
+      const livestockSelect = document.getElementById('livestock-select');
+      const livestockHidden = document.getElementById('livestock');
+      const customLivestock = livestockHidden.value ? JSON.parse(livestockHidden.value) : [];
+      
+      // Remove from select if it's selected
+      Array.from(livestockSelect.options).forEach(opt => {
+        if (opt.value === livestock) {
+          opt.selected = false;
+        }
+      });
+      
+      // Remove from custom livestock
+      const index = customLivestock.indexOf(livestock);
+      if (index > -1) {
+        customLivestock.splice(index, 1);
+        livestockHidden.value = JSON.stringify(customLivestock);
+      }
+      
+      updateLivestockDisplay();
+    }
+    
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs and content
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      // Show selected tab and content
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+    
+    // Load profile data
+    async function loadProfile() {
+      const firebaseUid = getFirebaseUid();
+      if (!firebaseUid) {
+        showAlert('Please log in to view your profile', 'error');
+        return;
+      }
+      
+      try {
+        const profile = await loadFarmerProfile(firebaseUid);
+        const user = getCurrentUser();
+        
+        if (profile) {
+          // Populate form fields
+          document.getElementById('farm-name').value = profile.farm_name || '';
+          document.getElementById('location').value = profile.location || '';
+          document.getElementById('county').value = profile.county || '';
+          document.getElementById('national-id').value = profile.national_id || '';
+          document.getElementById('ward').value = profile.ward || '';
+          document.getElementById('farm-size').value = profile.farm_size_acres || '';
+          document.getElementById('farming-experience').value = profile.farming_experience_years || '';
+          document.getElementById('certification-status').value = profile.certification_status || 'pending';
+          document.getElementById('bio').value = profile.bio || '';
+          document.getElementById('profile-image').value = profile.profile_image_url || '';
+          
+          // Populate referral source
+          if (profile.referral_source) {
+            document.getElementById('referral-source').value = profile.referral_source;
+            if (profile.referral_source === 'other') {
+              document.getElementById('referral-other-container').style.display = 'block';
+              document.getElementById('referral-other').value = profile.referral_other || '';
+            }
+          }
+          
+          // Populate crops
+          if (profile.crops) {
+            const crops = typeof profile.crops === 'string' ? JSON.parse(profile.crops) : profile.crops;
+            const cropsSelect = document.getElementById('crops-select');
+            const cropsHidden = document.getElementById('crops');
+            const customCrops = [];
+            
+            crops.forEach(crop => {
+              const option = Array.from(cropsSelect.options).find(opt => opt.value === crop);
+              if (option) {
+                option.selected = true;
+              } else {
+                customCrops.push(crop);
+              }
+            });
+            
+            cropsHidden.value = JSON.stringify(customCrops);
+            updateCropsDisplay();
+          }
+          
+          // Populate livestock
+          if (profile.livestock) {
+            const livestock = typeof profile.livestock === 'string' ? JSON.parse(profile.livestock) : profile.livestock;
+            const livestockSelect = document.getElementById('livestock-select');
+            const livestockHidden = document.getElementById('livestock');
+            const customLivestock = [];
+            
+            livestock.forEach(livestockItem => {
+              const option = Array.from(livestockSelect.options).find(opt => opt.value === livestockItem);
+              if (option) {
+                option.selected = true;
+              } else {
+                customLivestock.push(livestockItem);
+              }
+            });
+            
+            livestockHidden.value = JSON.stringify(customLivestock);
+            updateLivestockDisplay();
+          }
+          
+          // Load image previews if URLs exist
+          if (profile.id_front_url) {
+            const preview = document.getElementById('id-front-preview');
+            const img = document.getElementById('id-front-img');
+            img.src = profile.id_front_url;
+            preview.style.display = 'block';
+          }
+          if (profile.id_back_url) {
+            const preview = document.getElementById('id-back-preview');
+            const img = document.getElementById('id-back-img');
+            img.src = profile.id_back_url;
+            preview.style.display = 'block';
+          }
+          if (profile.profile_selfie_url) {
+            const preview = document.getElementById('selfie-preview');
+            const img = document.getElementById('selfie-img');
+            img.src = profile.profile_selfie_url;
+            preview.style.display = 'block';
+          }
+        }
+        
+        // Populate user data (from users table)
+        if (profile && profile.user) {
+          document.getElementById('email').value = profile.user.email || '';
+          document.getElementById('phone').value = profile.user.phone_number || '';
+        } else if (user) {
+          document.getElementById('email').value = user.email || '';
+          document.getElementById('phone').value = user.phone_number || '';
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    }
+    
+    // Save profile
+    document.getElementById('farmerProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const firebaseUid = getFirebaseUid();
+      if (!firebaseUid) {
+        showAlert('Please log in to save your profile', 'error');
+        return;
+      }
+      
+      // Get selected crops
+      const cropsSelect = document.getElementById('crops-select');
+      const selectedCrops = Array.from(cropsSelect.selectedOptions).map(opt => opt.value);
+      const cropsHidden = document.getElementById('crops');
+      const cropsArray = cropsHidden.value ? JSON.parse(cropsHidden.value) : [];
+      const allCrops = [...selectedCrops, ...cropsArray.filter(c => !selectedCrops.includes(c))];
+      
+      // Get selected livestock
+      const livestockSelect = document.getElementById('livestock-select');
+      const selectedLivestock = Array.from(livestockSelect.selectedOptions).map(opt => opt.value);
+      const livestockHidden = document.getElementById('livestock');
+      const livestockArray = livestockHidden.value ? JSON.parse(livestockHidden.value) : [];
+      const allLivestock = [...selectedLivestock, ...livestockArray.filter(l => !selectedLivestock.includes(l))];
+      
+      // Handle file uploads (convert to base64 for now - backend should handle file storage)
+      const idFrontFile = document.getElementById('id-front').files[0];
+      const idBackFile = document.getElementById('id-back').files[0];
+      const selfieFile = document.getElementById('profile-selfie').files[0];
+      
+      let idFrontBase64 = null;
+      let idBackBase64 = null;
+      let selfieBase64 = null;
+      
+      if (idFrontFile) {
+        idFrontBase64 = await fileToBase64(idFrontFile);
+      }
+      if (idBackFile) {
+        idBackBase64 = await fileToBase64(idBackFile);
+      }
+      if (selfieFile) {
+        selfieBase64 = await fileToBase64(selfieFile);
+      }
+      
+      const formData = {
+        farm_name: document.getElementById('farm-name').value,
+        location: document.getElementById('location').value,
+        county: document.getElementById('county').value,
+        national_id: document.getElementById('national-id').value,
+        id_front: idFrontBase64,
+        id_back: idBackBase64,
+        profile_selfie: selfieBase64,
+        ward: document.getElementById('ward').value || null,
+        crops: allCrops.length > 0 ? JSON.stringify(allCrops) : null,
+        livestock: allLivestock.length > 0 ? JSON.stringify(allLivestock) : null,
+        farm_size_acres: document.getElementById('farm-size').value ? parseFloat(document.getElementById('farm-size').value) : null,
+        farming_experience_years: document.getElementById('farming-experience').value ? parseInt(document.getElementById('farming-experience').value) : null,
+        certification_status: document.getElementById('certification-status').value,
+        bio: document.getElementById('bio').value,
+        referral_source: document.getElementById('referral-source').value || null,
+        referral_other: document.getElementById('referral-source').value === 'other' ? document.getElementById('referral-other').value : null,
+        profile_image_url: document.getElementById('profile-image').value
+      };
+      
+      try {
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+        
+        await saveFarmerProfile(firebaseUid, formData);
+        
+        showAlert('Profile saved successfully!', 'success');
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Profile';
+      } catch (error) {
+        showAlert(error.message || 'Failed to save profile', 'error');
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        e.target.querySelector('button[type="submit"]').textContent = 'Save Profile';
+      }
+    });
+    
+    // Show alert
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert ${type} show`;
+      
+      setTimeout(() => {
+        alert.classList.remove('show');
+      }, 5000);
+    }
+    
+    // Image preview handlers
+    window.addEventListener('DOMContentLoaded', function() {
+      loadProfile();
+      
+      // ID Front preview
+      const idFrontInput = document.getElementById('id-front');
+      if (idFrontInput) {
+        idFrontInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.getElementById('id-front-preview');
+              const img = document.getElementById('id-front-img');
+              img.src = e.target.result;
+              preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+      
+      // ID Back preview
+      const idBackInput = document.getElementById('id-back');
+      if (idBackInput) {
+        idBackInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.getElementById('id-back-preview');
+              const img = document.getElementById('id-back-img');
+              img.src = e.target.result;
+              preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+      
+      // Selfie preview
+      const selfieInput = document.getElementById('profile-selfie');
+      if (selfieInput) {
+        selfieInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.getElementById('selfie-preview');
+              const img = document.getElementById('selfie-img');
+              img.src = e.target.result;
+              preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+      
+      // Update crops display when selection changes
+      const cropsSelect = document.getElementById('crops-select');
+      if (cropsSelect) {
+        cropsSelect.addEventListener('change', updateCropsDisplay);
+      }
+      
+      // Update livestock display when selection changes
+      const livestockSelect = document.getElementById('livestock-select');
+      if (livestockSelect) {
+        livestockSelect.addEventListener('change', updateLivestockDisplay);
+      }
+      
+      // Handle referral source "Other" option
+      const referralSource = document.getElementById('referral-source');
+      const referralOtherContainer = document.getElementById('referral-other-container');
+      if (referralSource && referralOtherContainer) {
+        referralSource.addEventListener('change', function() {
+          if (this.value === 'other') {
+            referralOtherContainer.style.display = 'block';
+          } else {
+            referralOtherContainer.style.display = 'none';
+            document.getElementById('referral-other').value = '';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+

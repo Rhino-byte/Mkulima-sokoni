@@ -1,0 +1,86 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+env.bak/
+venv.bak/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+*.log.*
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+mku_env
+
+# Dependencies (Vercel installs these automatically)
+node_modules/
+.pip/
+
+# Frontend files are now included in deployment
+# frontend/
+
+# Documentation
+*.md
+README*
+docs/
+*.txt
+!requirements.txt
+!**/requirements.txt
+
+# Migration files (not needed in production)
+migrations/
+migrate.py
+
+# Firebase service account (use environment variables instead)
+firebase_service_account.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Test files
+test/
+tests/
+*_test.py
+*_tests.py
+test_*.py
+
+# Other
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Large files that might be accidentally included
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z

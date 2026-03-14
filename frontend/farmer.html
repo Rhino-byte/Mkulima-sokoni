@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Dashboard | Soko Safi</title>
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── DESIGN TOKENS (matches index.html) ── */
+    :root {
+      --forest:    #1B4332;
+      --leaf:      #40916C;
+      --lime:      #74C69D;
+      --gold:      #E9C46A;
+      --amber:     #F4A261;
+      --cream:     #FAF6EF;
+      --ink:       #1A1A18;
+      --muted:     #6B705C;
+      --border:    #DDD8CE;
+      --danger:    #ef4444;
+      --warning:   #f59e0b;
+      --shadow-sm: 0 2px 12px rgba(27,67,50,.08);
+      --shadow-md: 0 8px 32px rgba(27,67,50,.13);
+      --shadow-lg: 0 20px 56px rgba(27,67,50,.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ════════════════════════════════════
+       TOPBAR  — identical to index.html
+    ════════════════════════════════════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 200;
+      background: var(--forest);
+      display: flex; align-items: center;
+      padding: 0 28px; height: 60px; gap: 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.25);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .logo-mark {
+      width: 36px; height: 36px; border-radius: 9px;
+      overflow: hidden; display: grid; place-items: center;
+      background: #fff; flex-shrink: 0;
+      box-shadow: 0 3px 12px rgba(116,198,157,.4);
+    }
+    .logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-label strong { display: block; font-size: .9rem; font-weight: 600; color: #fff; line-height: 1.2; }
+    .logo-label span   { font-size: .67rem; color: var(--lime); font-weight: 300; }
+
+    /* Nav links in topbar */
+    .topbar-nav {
+      flex: 1; display: flex; justify-content: center; align-items: center;
+      gap: 4px;
+    }
+    .topbar-nav-link {
+      display: flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,.65); font-size: .82rem; font-weight: 500;
+      padding: 6px 12px; border-radius: 8px;
+      transition: all .2s; cursor: pointer; border: none;
+      background: transparent; font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .topbar-nav-link:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .topbar-nav-link.active { color: var(--lime); background: rgba(116,198,157,.12); font-weight: 600; }
+
+    /* Right side of topbar */
+    .topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .verified-badge {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(116,198,157,.15); border: 1px solid rgba(116,198,157,.3);
+      border-radius: 100px; padding: 4px 10px;
+      font-size: .7rem; color: var(--lime); font-weight: 600;
+    }
+
+    /* User avatar + dropdown */
+    .user-menu { position: relative; }
+    .user-menu-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 100px; padding: 5px 12px 5px 5px;
+      cursor: pointer; transition: all .2s;
+    }
+    .user-menu-btn:hover { background: rgba(255,255,255,.12); }
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--leaf), var(--lime));
+      display: grid; place-items: center;
+      color: #fff; font-weight: 700; font-size: .82rem;
+    }
+    .user-name-text { font-size: .78rem; color: #fff; font-weight: 500; }
+    .chevron { font-size: .65rem; color: rgba(255,255,255,.5); transition: transform .2s; }
+    .user-menu.open .chevron { transform: rotate(180deg); }
+
+    .user-dropdown {
+      display: none; position: absolute; right: 0; top: calc(100% + 8px);
+      min-width: 220px; background: #fff; border-radius: 14px;
+      border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+      padding: 8px 0; z-index: 300;
+    }
+    .user-dropdown.open { display: block; }
+    .dd-header { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .dd-name  { font-size: .88rem; font-weight: 700; color: var(--ink); }
+    .dd-email { font-size: .75rem; color: var(--muted); margin-top: 1px; }
+    .dd-role  { font-size: .72rem; color: var(--leaf); font-weight: 600; margin-top: 2px; }
+    .dd-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 16px; font-size: .84rem; color: var(--ink);
+      cursor: pointer; transition: background .15s;
+    }
+    .dd-item:hover { background: rgba(27,67,50,.05); }
+    .dd-item.dd-logout { color: var(--danger); border-top: 1px solid var(--border); margin-top: 4px; }
+    .dd-item.dd-logout:hover { background: #fef2f2; }
+
+    /* ════════════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════════════ */
+    main { padding: 28px 28px; }
+    .container { max-width: 1300px; margin: 0 auto; }
+
+    /* Page sections */
+    .page-section { display: none; }
+    .page-section.active { display: block; animation: fadeUp .3s ease-out; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Welcome banner ── */
+    .welcome-banner {
+      background: var(--forest);
+      border-radius: 18px; padding: 22px 28px;
+      margin-bottom: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 14px;
+      position: relative; overflow: hidden;
+    }
+    .welcome-banner::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    .welcome-banner::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 120% at 100% 50%, rgba(116,198,157,.12) 0%, transparent 65%);
+    }
+    .welcome-text { position: relative; z-index: 1; }
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; color: #fff;
+      margin-bottom: 4px;
+    }
+    .welcome-title em { font-style: normal; color: var(--lime); }
+    .welcome-sub { font-size: .84rem; color: rgba(255,255,255,.6); font-weight: 300; }
+    .welcome-badge { position: relative; z-index: 1; }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 18px;
+      border: 1.5px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: all .25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--leaf), var(--lime));
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--lime); }
+    .stat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--forest), var(--leaf));
+      display: grid; place-items: center; font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .stat-label { font-size: .7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest); }
+    .stat-change { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+    .stat-change.up { color: var(--leaf); font-weight: 600; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      background: var(--forest); border-radius: 14px;
+      padding: 16px 22px; margin-bottom: 18px;
+    }
+    .section-header-text {}
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: #fff; }
+    .section-subtitle { font-size: .78rem; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 100px; border: none;
+      font-size: .78rem; font-weight: 600; cursor: pointer;
+      transition: all .2s; font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--leaf), var(--lime));
+      color: #fff; box-shadow: 0 3px 10px rgba(64,145,108,.3);
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-2px); }
+    .btn-white {
+      background: #fff; color: var(--forest); font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+    .btn-outline {
+      background: transparent; color: var(--leaf);
+      border: 1.5px solid var(--leaf);
+    }
+    .btn-outline:hover { background: var(--leaf); color: #fff; }
+    .btn-danger { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 5px 13px; font-size: .73rem; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; pointer-events: none; }
+
+    /* ── Card / panel ── */
+    .panel {
+      background: #fff; border-radius: 16px;
+      border: 1.5px solid var(--border); padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 700; color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .panel-sub { font-size: .82rem; color: var(--muted); margin-bottom: 22px; }
+
+    /* ── Products grid ── */
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px; margin-bottom: 30px;
+    }
+    .product-card {
+      background: #fff; border-radius: 14px; border: 1.5px solid var(--border);
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: all .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    .product-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--lime); }
+    .product-image {
+      height: 140px; background: linear-gradient(135deg, var(--forest), var(--leaf));
+      position: relative; overflow: hidden; display: grid; place-items: center; font-size: 48px;
+    }
+    .product-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .product-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(255,255,255,.93); backdrop-filter: blur(6px);
+      border-radius: 100px; padding: 3px 10px;
+      font-size: .66rem; font-weight: 700; color: var(--forest);
+    }
+    .product-status-badge {
+      position: absolute; top: 10px; right: 10px;
+      border-radius: 100px; padding: 3px 10px;
+      font-size: .66rem; font-weight: 700;
+    }
+    .product-status-badge.active   { background: rgba(64,145,108,.15); color: var(--leaf); }
+    .product-status-badge.draft    { background: rgba(107,112,92,.15); color: var(--muted); }
+    .product-status-badge.sold-out { background: rgba(239,68,68,.12);  color: var(--danger); }
+
+    .product-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+    .product-title { font-size: .92rem; font-weight: 700; margin-bottom: 6px; }
+    .product-meta { display: flex; justify-content: space-between; font-size: .7rem; color: var(--muted); margin-bottom: 6px; }
+    .product-price { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--forest); margin-top: auto; }
+    .product-price sub { font-size: .6rem; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 400; }
+
+    .product-footer {
+      padding: 9px 14px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--cream); gap: 8px;
+    }
+    .product-date { font-size: .67rem; color: var(--muted); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--forest); }
+    th { padding: 11px 14px; text-align: left; font-size: .75rem; font-weight: 700; color: #fff; white-space: nowrap; }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: .83rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(27,67,50,.03); }
+
+    .status-pill {
+      display: inline-flex; align-items: center;
+      padding: 4px 11px; border-radius: 100px;
+      font-size: .72rem; font-weight: 700;
+    }
+    .status-pill.pending   { background: rgba(245,158,11,.12); color: #b45309; }
+    .status-pill.confirmed { background: rgba(64,145,108,.12);  color: var(--leaf); }
+    .status-pill.completed { background: rgba(59,130,246,.12);  color: #2563eb; }
+    .status-pill.open      { background: rgba(245,158,11,.12); color: #b45309; }
+    .status-pill.bidding   { background: rgba(64,145,108,.12);  color: var(--leaf); }
+
+    /* ── Form styles ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: .78rem; font-weight: 600; color: var(--ink); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 10px 13px; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: .86rem;
+      font-family: 'DM Sans', sans-serif; color: var(--ink);
+      background: var(--cream); outline: none; transition: all .2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--leaf); background: #fff;
+      box-shadow: 0 0 0 3px rgba(64,145,108,.1);
+    }
+    .form-group input[readonly] { background: #f3f4f6; cursor: not-allowed; }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-hint { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+    /* Profile tabs */
+    .profile-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; overflow-x: auto; }
+    .profile-tab-btn {
+      padding: 10px 18px; background: none; border: none;
+      border-bottom: 2.5px solid transparent; margin-bottom: -2px;
+      font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; white-space: nowrap; transition: all .2s;
+    }
+    .profile-tab-btn:hover { color: var(--forest); }
+    .profile-tab-btn.active { color: var(--leaf); border-bottom-color: var(--leaf); }
+    .profile-tab-content { display: none; }
+    .profile-tab-content.active { display: block; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+      z-index: 500; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: 20px;
+      max-width: 680px; width: 100%; max-height: 92vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-head {
+      background: var(--forest); border-radius: 18px 18px 0 0;
+      padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-head h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 700; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      font-size: 1.1rem; cursor: pointer; display: grid; place-items: center;
+      transition: all .2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,.25); transform: rotate(90deg); }
+    .modal-body { padding: 22px; }
+    .modal-foot {
+      padding: 16px 22px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    /* Product type toggle */
+    .type-toggle {
+      display: flex; gap: 6px; background: rgba(27,67,50,.06);
+      padding: 4px; border-radius: 10px; margin-bottom: 18px;
+    }
+    .type-toggle-btn {
+      flex: 1; padding: 8px; border: none; border-radius: 8px;
+      background: transparent; font-family: 'DM Sans', sans-serif;
+      font-size: .8rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .2s;
+    }
+    .type-toggle-btn.active { background: var(--forest); color: #fff; }
+
+    /* File input */
+    .file-label {
+      display: block; padding: 12px; border: 2px dashed var(--border);
+      border-radius: 10px; text-align: center; cursor: pointer;
+      background: var(--cream); font-size: .8rem; color: var(--muted);
+      transition: all .2s;
+    }
+    .file-label:hover { border-color: var(--leaf); background: rgba(64,145,108,.04); }
+    .img-preview {
+      width: 100%; max-height: 180px; object-fit: cover;
+      border-radius: 9px; margin-top: 8px;
+      border: 1.5px solid var(--border); display: none;
+    }
+    .img-preview.show { display: block; }
+    .conditional-field { display: none; }
+    .conditional-field.show { display: block; }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
+      z-index: 600; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 52px; height: 52px; border: 4px solid rgba(116,198,157,.25);
+      border-top-color: var(--lime); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .spinner-sm {
+      width: 18px; height: 18px; border: 2px solid rgba(116,198,157,.3);
+      border-top-color: var(--lime); border-radius: 50%;
+      animation: spin 1s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-msg { color: #fff; font-size: 1rem; font-weight: 600; text-align: center; }
+    .loading-sub { color: rgba(255,255,255,.65); font-size: .84rem; margin-top: 4px; }
+
+    /* Alert */
+    .alert {
+      display: none; padding: 11px 14px; border-radius: 10px;
+      margin-bottom: 18px; font-size: .84rem; font-weight: 600;
+    }
+    .alert.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .alert.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .alert.show    { display: block; }
+
+    /* Contact info cards */
+    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .contact-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; background: #fff;
+      border: 1.5px solid var(--border); border-radius: 12px; transition: all .2s;
+    }
+    .contact-card:hover { border-color: var(--lime); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+    .contact-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--forest), var(--leaf));
+      display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+    }
+    .contact-card h4 { font-size: .82rem; font-weight: 700; margin-bottom: 1px; }
+    .contact-card p  { font-size: .76rem; color: var(--muted); }
+
+    /* Farmer card in table */
+    .farmer-name  { font-weight: 700; }
+    .farmer-sub   { font-size: .78rem; color: var(--muted); margin-top: 1px; }
+    .star-rating  { color: #f59e0b; font-weight: 700; font-size: .82rem; }
+
+    /* Empty / loading state */
+    .empty-state { text-align: center; padding: 52px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 44px; margin-bottom: 10px; }
+    .empty-state h4 { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+
+    /* ════════════════════════════════════
+       FOOTER  — identical to index.html
+    ════════════════════════════════════ */
+    footer { background: var(--forest); padding: 52px 28px 0; margin-top: 40px; }
+    .footer-grid {
+      max-width: 1300px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr;
+      gap: 40px; padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    /* Brand col — big logo left-aligned, text below */
+    .footer-flogo { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+    .footer-flogo-mark {
+      width: 100px; height: 100px; border-radius: 20px;
+      overflow: hidden; display: grid; place-items: center;
+      background: #fff; flex-shrink: 0;
+      box-shadow: 0 6px 28px rgba(116,198,157,.45);
+    }
+    .footer-flogo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .footer-flogo-label { text-align: left; }
+    .footer-flogo-label strong { display: block; font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.3; }
+    .footer-flogo-label span   { display: block; font-size: .82rem; color: var(--lime); font-weight: 300; }
+    .footer-social { display: flex; gap: 8px; }
+    .footer-social a {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06);
+      display: grid; place-items: center; font-size: 13px;
+      color: rgba(255,255,255,.6); text-decoration: none; transition: all .2s;
+    }
+    .footer-social a:hover { background: rgba(116,198,157,.2); border-color: var(--lime); color: #fff; }
+    .footer-col h5 {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: rgba(255,255,255,.35); margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a {
+      font-size: .82rem; color: rgba(255,255,255,.6); text-decoration: none;
+      display: flex; align-items: center; gap: 7px; transition: all .2s;
+    }
+    .footer-col ul li a::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: rgba(255,255,255,.2); flex-shrink: 0; transition: background .2s;
+    }
+    .footer-col ul li a:hover { color: var(--lime); padding-left: 4px; }
+    .footer-col ul li a:hover::before { background: var(--lime); }
+    .footer-bottom {
+      max-width: 1300px; margin: 0 auto; padding: 20px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .footer-copy { font-size: .76rem; color: rgba(255,255,255,.35); }
+    .footer-copy strong { color: var(--lime); font-weight: 600; }
+    .footer-badges { display: flex; gap: 8px; }
+    .footer-badge {
+      font-size: .68rem; color: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 100px; padding: 3px 10px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1000px) {
+      .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .footer-brand-col { grid-column: 1 / -1; }
+    }
+    @media (max-width: 768px) {
+      main { padding: 20px 14px; }
+      .topbar { padding: 0 14px; }
+      .topbar-nav { display: none; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      footer { padding: 36px 16px 0; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     TOPBAR
+════════════════════════════ -->
+<header class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-mark">
+      <img src="assets/img/sokosafi_logo.png" alt="Soko Safi" />
+    </div>
+    <div class="logo-label">
+      <strong>Soko Safi</strong>
+      <span>From farm to market, fairly.</span>
+    </div>
+  </a>
+
+  <nav class="topbar-nav">
+    <button class="topbar-nav-link active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+    <button class="topbar-nav-link" onclick="showPage('tenders',this)">📋 Tenders</button>
+    <button class="topbar-nav-link" onclick="showPage('orders',this)">🛒 Orders</button>
+    <button class="topbar-nav-link" onclick="showPage('analytics',this)">📊 Analytics</button>
+    <button class="topbar-nav-link" onclick="showPage('support',this)">💬 Support</button>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="verified-badge">✅ Verified</div>
+    <div class="user-menu" id="userMenu">
+      <div class="user-menu-btn" onclick="toggleDropdown()">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-name-text" id="userNameShort">Farmer</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dd-header">
+          <div class="dd-name"  id="userDisplayName">Loading…</div>
+          <div class="dd-email" id="userDisplayEmail">Loading…</div>
+          <div class="dd-role">🌾 Farmer</div>
+        </div>
+        <div class="dd-item" onclick="showPage('dashboard')"><span>🏠</span> Dashboard</div>
+        <div class="dd-item" onclick="showPage('profile')"><span>👤</span> Profile</div>
+        <div class="dd-item" onclick="showPage('profile')"><span>⚙️</span> Settings</div>
+        <div class="dd-item dd-logout" onclick="logout()"><span>🚪</span> Logout</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════
+     MAIN
+════════════════════════════ -->
+<main>
+<div class="container">
+
+  <!-- ── DASHBOARD ── -->
+  <div id="dashboard" class="page-section active">
+
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h1 class="welcome-title" id="welcomeTitle">Welcome back, <em>Farmer</em>! 👋</h1>
+        <p class="welcome-sub">Grow, sell, and thrive — manage your produce directly with buyers.</p>
+      </div>
+      <div class="welcome-badge">
+        <div class="verified-badge" style="background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); color:#fff;">✅ Account Verified</div>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">My Products 🌱</div>
+        <div class="section-subtitle">Manage your listed produce and inventory</div>
+      </div>
+      <button class="btn btn-white" onclick="addProduct()">+ Add New Product</button>
+    </div>
+
+    <div class="products-grid" id="products-grid">
+      <div id="products-loading" style="grid-column:1/-1; display:flex; flex-direction:column; align-items:center; padding:52px 20px; gap:14px;">
+        <div class="spinner"></div>
+        <p style="color:var(--muted); font-weight:600;">Loading your products…</p>
+      </div>
+    </div>
+
+    <!-- Farmers Near Me -->
+    <div class="section-header" style="margin-top:8px;">
+      <div class="section-header-text">
+        <div class="section-title">Farmers Near Me 👥</div>
+        <div class="section-subtitle">Connect with other farmers in your area</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:30px;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Farm Name & Location</th><th>Rating</th><th>Products</th><th>Distance</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="farmer-name">Kamau Family Farm</div><div class="farmer-sub">📍 Kiambu County</div></td>
+              <td><div class="star-rating">⭐⭐⭐⭐⭐</div><div class="farmer-sub">4.8</div></td>
+              <td><strong>12 active</strong><div class="farmer-sub">📅 Joined 2023</div></td>
+              <td><strong style="color:var(--leaf);">2.5 km</strong></td>
+              <td><button class="btn btn-primary btn-sm" onclick="connectFarmer(1)">Connect</button></td>
+            </tr>
+            <tr>
+              <td><div class="farmer-name">Njeri Produce Co-op</div><div class="farmer-sub">📍 Kiambu County</div></td>
+              <td><div class="star-rating">⭐⭐⭐⭐⭐</div><div class="farmer-sub">4.6</div></td>
+              <td><strong>8 active</strong><div class="farmer-sub">📅 Joined 2022</div></td>
+              <td><strong style="color:var(--leaf);">5.2 km</strong></td>
+              <td><button class="btn btn-primary btn-sm" onclick="connectFarmer(2)">Connect</button></td>
+            </tr>
+            <tr>
+              <td><div class="farmer-name">Green Valley Farm</div><div class="farmer-sub">📍 Kiambu County</div></td>
+              <td><div class="star-rating">⭐⭐⭐⭐⭐</div><div class="farmer-sub">4.9</div></td>
+              <td><strong>15 active</strong><div class="farmer-sub">📅 Joined 2021</div></td>
+              <td><strong style="color:var(--leaf);">7.8 km</strong></td>
+              <td><button class="btn btn-primary btn-sm" onclick="connectFarmer(3)">Connect</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ORDERS ── -->
+  <div id="orders" class="page-section">
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Recent Orders 📋</div>
+        <div class="section-subtitle">Manage incoming orders from buyers</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product & Buyer</th><th>Quantity</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Sukuma Wiki</strong><div class="farmer-sub">Buyer: Nairobi Market Ltd</div></td>
+              <td>10 crates</td><td><strong>KSh 2,800</strong></td>
+              <td><span class="status-pill pending">Pending</span></td>
+              <td><button class="btn btn-outline btn-sm" onclick="viewOrder(1)">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>Mango (Apple)</strong><div class="farmer-sub">Buyer: Export Co.</div></td>
+              <td>500 pcs</td><td><strong>KSh 19,000</strong></td>
+              <td><span class="status-pill confirmed">Confirmed</span></td>
+              <td><button class="btn btn-outline btn-sm" onclick="viewOrder(2)">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>Red Onions</strong><div class="farmer-sub">Buyer: Hotel Group</div></td>
+              <td>50 nets</td><td><strong>KSh 2,750</strong></td>
+              <td><span class="status-pill completed">Completed</span></td>
+              <td><button class="btn btn-outline btn-sm" onclick="viewOrder(3)">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS ── -->
+  <div id="analytics" class="page-section">
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Sales Analytics 📊</div>
+        <div class="section-subtitle">Track your performance and earnings</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Earnings</div><div class="stat-value">KSh 245,600</div><div class="stat-change up">↑ 12% from last month</div></div>
+      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Active Products</div><div class="stat-value">8</div><div class="stat-change">3 new this month</div></div>
+      <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-label">Pending Orders</div><div class="stat-value">5</div><div class="stat-change">2 require action</div></div>
+      <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">Total Sales</div><div class="stat-value">127</div><div class="stat-change up">↑ 8% from last month</div></div>
+      <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-label">This Month Revenue</div><div class="stat-value">KSh 89,400</div><div class="stat-change up">↑ 15% vs last month</div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Active Buyers</div><div class="stat-value">24</div><div class="stat-change up">↑ 3 new buyers</div></div>
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Average Rating</div><div class="stat-value">4.8</div><div class="stat-change">Based on 127 reviews</div></div>
+      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Total Products Sold</div><div class="stat-value">1,245</div><div class="stat-change up">↑ 8% this month</div></div>
+    </div>
+  </div>
+
+  <!-- ── TENDERS ── -->
+  <div id="tenders" class="page-section">
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Available Tenders 📋</div>
+        <div class="section-subtitle">Browse and bid on tenders posted by buyers</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tender & Buyer</th><th>Product Required</th><th>Quantity</th><th>Deadline</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Fresh Vegetables Supply</strong><div class="farmer-sub">Buyer: Nairobi Market Ltd</div></td>
+              <td><strong>Sukuma Wiki, Cabbage</strong><div class="farmer-sub">Grade A, Fresh</div></td>
+              <td>500 kg</td>
+              <td><strong>Dec 15, 2024</strong><div class="farmer-sub">5 days left</div></td>
+              <td><span class="status-pill open">Open</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="bidOnTender(1)">Bid</button></td>
+            </tr>
+            <tr>
+              <td><strong>Export Grade Mangoes</strong><div class="farmer-sub">Buyer: Export Co.</div></td>
+              <td><strong>Mango (Apple & Ngowe)</strong><div class="farmer-sub">Export quality, Certified</div></td>
+              <td>2,000 pcs</td>
+              <td><strong>Dec 20, 2024</strong><div class="farmer-sub">10 days left</div></td>
+              <td><span class="status-pill open">Open</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="bidOnTender(2)">Bid</button></td>
+            </tr>
+            <tr>
+              <td><strong>Bulk Maize Supply</strong><div class="farmer-sub">Buyer: Grain Millers Ltd</div></td>
+              <td><strong>Dry Maize</strong><div class="farmer-sub">13% moisture, Lab tested</div></td>
+              <td>10 tonnes</td>
+              <td><strong>Dec 18, 2024</strong><div class="farmer-sub">8 days left</div></td>
+              <td><span class="status-pill bidding">Bidding</span></td>
+              <td><button class="btn btn-outline btn-sm" onclick="viewTender(3)">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>Hass Avocado Export</strong><div class="farmer-sub">Buyer: Fresh Produce Exporters</div></td>
+              <td><strong>Hass Avocado</strong><div class="farmer-sub">GlobalG.A.P certified</div></td>
+              <td>5 tonnes</td>
+              <td><strong>Dec 12, 2024</strong><div class="farmer-sub">2 days left</div></td>
+              <td><span class="status-pill open">Open</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="bidOnTender(4)">Bid</button></td>
+            </tr>
+            <tr>
+              <td><strong>French Beans Supply</strong><div class="farmer-sub">Buyer: Hotel Group</div></td>
+              <td><strong>French Beans</strong><div class="farmer-sub">Export grade, Fresh</div></td>
+              <td>300 kg</td>
+              <td><strong>Dec 25, 2024</strong><div class="farmer-sub">15 days left</div></td>
+              <td><span class="status-pill open">Open</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="bidOnTender(5)">Bid</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUPPORT ── -->
+  <div id="support" class="page-section">
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Support & Contact 💬</div>
+        <div class="section-subtitle">We're here to help — Mon–Fri 8AM–6PM</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-title">Send Us a Message</div>
+      <div class="panel-sub">Can't find what you're looking for? We'll get back to you shortly.</div>
+      <form id="contactForm" class="form-grid" onsubmit="submitContact(event)">
+        <div class="form-group"><label>Your Name</label><input type="text" placeholder="Full name" required /></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+254 700 000 000" /></div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="your@email.com" required /></div>
+        <div class="form-group">
+          <label>I am a…</label>
+          <select><option>Farmer</option><option>Buyer</option><option>Other</option></select>
+        </div>
+        <div class="form-group form-full"><label>Subject</label><input type="text" placeholder="What's your question about?" required /></div>
+        <div class="form-group form-full"><label>Message</label><textarea placeholder="Tell us more about your issue…" required rows="5"></textarea></div>
+        <div class="form-full"><button type="submit" class="btn btn-primary">Send Message ✉️</button></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Get in Touch</div>
+      <div style="height:12px;"></div>
+      <div class="contact-grid">
+        <div class="contact-card"><div class="contact-icon">📧</div><div><h4>Email</h4><p>support@sokosafi.ke</p></div></div>
+        <div class="contact-card"><div class="contact-icon">📞</div><div><h4>Phone</h4><p>+254 700 000 000</p></div></div>
+        <div class="contact-card"><div class="contact-icon">🕒</div><div><h4>Hours</h4><p>Mon–Fri, 8AM – 6PM</p></div></div>
+        <div class="contact-card"><div class="contact-icon">📍</div><div><h4>Office</h4><p>Nairobi, Kenya</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROFILE ── -->
+  <div id="profile" class="page-section">
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Profile Settings 👤</div>
+        <div class="section-subtitle">Update your farm details and personal information</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="profileAlert" class="alert"></div>
+
+      <div class="profile-tabs">
+        <button class="profile-tab-btn active" onclick="switchTab('basic',this)">Basic Info</button>
+        <button class="profile-tab-btn" onclick="switchTab('farm',this)">Farm Details</button>
+        <button class="profile-tab-btn" onclick="switchTab('experience',this)">Experience</button>
+        <button class="profile-tab-btn" onclick="switchTab('additional',this)">Additional</button>
+      </div>
+
+      <form id="farmerProfileForm" onsubmit="saveProfile(event)" style="max-width:700px;">
+
+        <!-- Basic -->
+        <div id="tab-basic" class="profile-tab-content active">
+          <div class="form-grid">
+            <div class="form-group form-full"><label>Farm Name *</label><input type="text" id="farm-name" name="farm_name" placeholder="e.g., Wanjiku K. Farm" required /></div>
+            <div class="form-group"><label>Location *</label><input type="text" id="location" name="location" placeholder="e.g., Kiambu County" required /></div>
+            <div class="form-group"><label>County *</label><input type="text" id="county" name="county" placeholder="e.g., Kiambu" required /></div>
+            <div class="form-group"><label>Email</label><input type="email" id="email" name="email" readonly /><div class="form-hint">Linked from your account</div></div>
+            <div class="form-group"><label>Phone Number</label><input type="tel" id="phone" name="phone" readonly /><div class="form-hint">Linked from your account</div></div>
+            <div class="form-group form-full"><label>National ID *</label><input type="text" id="national-id" name="national_id" placeholder="e.g., 12345678" required /></div>
+            <div class="form-group">
+              <label>Upload ID Front *</label>
+              <label class="file-label" for="id-front">📎 Click to upload front side</label>
+              <input type="file" id="id-front" name="id_front" accept="image/*" required style="display:none;" />
+              <div id="id-front-preview" style="display:none;"><img id="id-front-img" src="" style="max-width:100%;max-height:130px;border-radius:8px;margin-top:6px;border:1.5px solid var(--border);" /></div>
+            </div>
+            <div class="form-group">
+              <label>Upload ID Back *</label>
+              <label class="file-label" for="id-back">📎 Click to upload back side</label>
+              <input type="file" id="id-back" name="id_back" accept="image/*" required style="display:none;" />
+              <div id="id-back-preview" style="display:none;"><img id="id-back-img" src="" style="max-width:100%;max-height:130px;border-radius:8px;margin-top:6px;border:1.5px solid var(--border);" /></div>
+            </div>
+            <div class="form-group form-full">
+              <label>Profile Selfie *</label>
+              <label class="file-label" for="profile-selfie">🤳 Click to upload a clear selfie</label>
+              <input type="file" id="profile-selfie" name="profile_selfie" accept="image/*" required style="display:none;" />
+              <div id="selfie-preview" style="display:none;"><img id="selfie-img" src="" style="max-width:180px;max-height:180px;border-radius:8px;margin-top:6px;border:1.5px solid var(--border);" /></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Farm Details -->
+        <div id="tab-farm" class="profile-tab-content">
+          <div class="form-grid">
+            <div class="form-group"><label>Ward</label><input type="text" id="ward" name="ward" placeholder="e.g., Kasarani Ward" /></div>
+            <div class="form-group"><label>Farm Size (Acres)</label><input type="number" id="farm-size" name="farm_size_acres" step="0.01" min="0" placeholder="e.g., 5.5" /></div>
+            <div class="form-group form-full">
+              <label>Crops (hold Ctrl/Cmd for multiple)</label>
+              <select id="crops-select" multiple style="min-height:110px;">
+                <option value="Maize">Maize</option><option value="Wheat">Wheat</option><option value="Rice">Rice</option><option value="Beans">Beans</option><option value="Potatoes">Potatoes</option><option value="Tomatoes">Tomatoes</option><option value="Onions">Onions</option><option value="Cabbage">Cabbage</option><option value="Carrots">Carrots</option><option value="Bananas">Bananas</option><option value="Coffee">Coffee</option><option value="Tea">Tea</option><option value="Sugarcane">Sugarcane</option><option value="Avocado">Avocado</option><option value="Mangoes">Mangoes</option>
+              </select>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <input type="text" id="crop-custom" placeholder="Add custom crop…" style="flex:1;" />
+                <button type="button" class="btn btn-outline btn-sm" onclick="addCustomCrop()">Add</button>
+              </div>
+              <div id="selected-crops" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+              <input type="hidden" id="crops" name="crops" />
+            </div>
+            <div class="form-group form-full">
+              <label>Livestock (hold Ctrl/Cmd for multiple)</label>
+              <select id="livestock-select" multiple style="min-height:110px;">
+                <option value="Cattle">Cattle</option><option value="Goats">Goats</option><option value="Sheep">Sheep</option><option value="Pigs">Pigs</option><option value="Chickens">Chickens</option><option value="Ducks">Ducks</option><option value="Rabbits">Rabbits</option><option value="Fish">Fish</option><option value="Bees">Bees</option>
+              </select>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <input type="text" id="livestock-custom" placeholder="Add custom livestock…" style="flex:1;" />
+                <button type="button" class="btn btn-outline btn-sm" onclick="addCustomLivestock()">Add</button>
+              </div>
+              <div id="selected-livestock" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+              <input type="hidden" id="livestock" name="livestock" />
+            </div>
+            <div class="form-group form-full">
+              <label>Certification Status</label>
+              <select id="certification-status" name="certification_status">
+                <option value="pending">Pending</option><option value="verified">Verified</option><option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience -->
+        <div id="tab-experience" class="profile-tab-content">
+          <div class="form-grid">
+            <div class="form-group form-full"><label>Farming Experience (Years)</label><input type="number" id="farming-experience" name="farming_experience_years" min="0" placeholder="e.g., 10" /></div>
+            <div class="form-group form-full"><label>Biography</label><textarea id="bio" name="bio" placeholder="Tell buyers about yourself, your farming practices, and what makes your produce special…" rows="6"></textarea></div>
+          </div>
+        </div>
+
+        <!-- Additional -->
+        <div id="tab-additional" class="profile-tab-content">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>How did you hear about us?</label>
+              <select id="referral-source" name="referral_source" onchange="toggleReferralOther()">
+                <option value="">Select an option</option>
+                <option value="social-media">Social Media</option><option value="friend-family">Friend or Family</option><option value="google-search">Google Search</option><option value="advertisement">Advertisement</option><option value="agricultural-event">Agricultural Event</option><option value="government-program">Government Program</option><option value="ngo-partner">NGO Partner</option><option value="other">Other</option>
+              </select>
+              <div id="referral-other-container" style="margin-top:10px;display:none;">
+                <input type="text" id="referral-other" name="referral_other" placeholder="Please specify…" />
+              </div>
+            </div>
+            <div class="form-group form-full">
+              <label>Profile Image</label>
+              <div style="display:flex;gap:16px;align-items:flex-start;">
+                <div style="flex:1;">
+                  <input type="file" id="profile-image-file" accept="image/*" />
+                  <div class="form-hint">JPG, PNG, WEBP — max 5MB</div>
+                  <div style="margin:10px 0;font-size:.75rem;color:var(--muted);">— OR —</div>
+                  <input type="url" id="profile-image-url" name="profile_image_url" placeholder="https://example.com/image.jpg" />
+                  <div class="form-hint">Paste an image URL</div>
+                </div>
+                <div style="flex-shrink:0;">
+                  <div id="profile-image-preview" style="width:130px;height:130px;border:2px dashed var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--cream);overflow:hidden;font-size:.75rem;color:var(--muted);text-align:center;">No image</div>
+                  <button type="button" id="remove-profile-image" onclick="removeProfileImage()" style="width:100%;margin-top:6px;padding:6px;background:#fee2e2;color:#991b1b;border:none;border-radius:8px;cursor:pointer;font-size:.78rem;display:none;">Remove</button>
+                </div>
+              </div>
+              <input type="hidden" id="profile-image" name="profile_image_url" />
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:28px;padding-top:20px;border-top:1.5px solid var(--border);">
+          <button type="button" class="btn btn-outline" onclick="showPage('dashboard')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-profile-btn" style="flex:1;">
+            <span id="save-btn-text">Save Changes</span>
+            <span id="save-btn-spinner" style="display:none;"><div class="spinner-sm"></div></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</main>
+
+<!-- ════════════════════════════
+     LOADING OVERLAY
+════════════════════════════ -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <div>
+    <div class="loading-msg" id="loadingMainMessage">Processing…</div>
+    <div class="loading-sub" id="loadingSubMessage">Please wait</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     ADD PRODUCT MODAL
+════════════════════════════ -->
+<div id="addProductModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>➕ Add New Product</h2>
+      <button class="modal-close" onclick="closeProductModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="addProductForm">
+        <div class="type-toggle">
+          <button type="button" class="type-toggle-btn active" onclick="toggleProductType('farm')">🌾 Farm Product</button>
+          <button type="button" class="type-toggle-btn" onclick="toggleProductType('livestock')">🐄 Livestock</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group form-full"><label>Product Name *</label><input type="text" id="product-name" name="name" placeholder="e.g., Fresh Sukuma Wiki bundle" required /></div>
+          <div class="form-group"><label>Category *</label>
+            <select id="product-category" name="category" required>
+              <option value="">Select category</option>
+              <option value="Vegetables">Vegetables</option><option value="Fruits">Fruits</option><option value="Cereals">Cereals</option><option value="Legumes">Legumes</option><option value="Nuts">Nuts</option><option value="Herbs">Herbs</option><option value="Potatoes">Potatoes</option><option value="Livestock">Livestock</option><option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Location (County) *</label><input type="text" id="product-location" name="location" placeholder="e.g., Kiambu" required /></div>
+        </div>
+
+        <!-- Farm-only fields -->
+        <div id="farming-methods" class="conditional-field show">
+          <div class="form-grid">
+            <div class="form-group"><label>Planting Time</label><input type="text" id="planting-time" name="planting_time" placeholder="e.g., March–April" /></div>
+            <div class="form-group"><label>Fertilizer Used</label><input type="text" id="fertilizer-used" name="fertilizer_used" placeholder="e.g., Organic compost" /></div>
+            <div class="form-group form-full"><label>Harvest Time</label><input type="text" id="harvest-time" name="harvest_time" placeholder="e.g., 3–4 weeks" /></div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group"><label>Quantity *</label><input type="number" id="product-quantity" name="quantity" placeholder="e.g., 45" required min="1" /></div>
+          <div class="form-group"><label>Measurement Unit *</label>
+            <select id="measurement-metric" name="measurement_metric" required>
+              <option value="">Select unit</option>
+              <option value="kg">Kilograms (kg)</option><option value="g">Grams (g)</option><option value="crate">Crate</option><option value="sack">Sack</option><option value="bag">Bag</option><option value="piece">Piece</option><option value="bunch">Bunch</option><option value="litre">Litre</option><option value="tonne">Tonne</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Single price (farm) -->
+        <div id="price-single" class="conditional-field show">
+          <div class="form-group"><label>Price (KSh) *</label><input type="number" id="product-price" name="price" placeholder="e.g., 280" required min="0" step="0.01" /><div class="form-hint">Price per unit</div></div>
+        </div>
+        <!-- Range price (livestock) -->
+        <div id="price-range" class="conditional-field">
+          <div class="form-grid">
+            <div class="form-group"><label>Min Price (KSh) *</label><input type="number" id="price-min" name="price_min" placeholder="Min" min="0" step="0.01" /></div>
+            <div class="form-group"><label>Max Price (KSh) *</label><input type="number" id="price-max" name="price_max" placeholder="Max" min="0" step="0.01" /></div>
+          </div>
+        </div>
+
+        <div class="form-group"><label>Minimum Order *</label><input type="number" id="min-order" name="min_order" placeholder="e.g., 5" required min="1" /></div>
+
+        <div class="form-group">
+          <label>Product Image *</label>
+          <label class="file-label" for="product-image">📷 Click to upload or drag and drop<br><span style="font-size:.72rem;">PNG, JPG up to 5MB</span></label>
+          <input type="file" id="product-image" name="image" accept="image/*" required style="display:none;" />
+          <img id="image-preview" class="img-preview" alt="Preview" />
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-outline" onclick="closeProductModal()" id="cancelProductBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="submitProductForm()" id="saveProductBtn">
+        <span id="saveProductBtnText">Save Product</span>
+        <span id="saveProductBtnSpinner" style="display:none;"><div class="spinner-sm"></div></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     FOOTER  — matches index.html
+════════════════════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand-col">
+      <div class="footer-flogo">
+        <div class="footer-flogo-mark">
+          <img src="assets/img/sokosafi_logo.png" alt="Soko Safi logo" />
+        </div>
+        <div class="footer-flogo-label">
+          <strong>Soko Safi</strong>
+          <span>From farm to market, fairly.</span>
+        </div>
+      </div>
+      <div class="footer-social">
+        <a href="#" title="Facebook">f</a>
+        <a href="#" title="X / Twitter">𝕏</a>
+        <a href="#" title="WhatsApp">💬</a>
+        <a href="#" title="Instagram">📷</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>About Us</h5>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Mission &amp; Vision</a></li>
+        <li><a href="#">Team</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Help Center</h5>
+      <ul>
+        <li><a href="#" onclick="showPage('support');return false;">Support</a></li>
+        <li><a href="#">FAQs</a></li>
+        <li><a href="#" onclick="showPage('support');return false;">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <ul>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="#">How It Works</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Guides</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+    <div class="footer-badges">
+      <span class="footer-badge">🇰🇪 Made in Kenya</span>
+      <span class="footer-badge">🔒 Secure Platform</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ── Init ── */
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  const isProduction = !['localhost','127.0.0.1'].includes(window.location.hostname);
+  const API_BASE_URL = isProduction ? '/api' : 'http://localhost:5000/api';
+
+  /* ── Navigation ── */
+  function showPage(pageName, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    const t = document.getElementById(pageName);
+    if (t) t.classList.add('active');
+
+    document.querySelectorAll('.topbar-nav-link').forEach(l => l.classList.remove('active'));
+    if (el) el.classList.add('active');
+    else {
+      const match = document.querySelector(`.topbar-nav-link[onclick*="${pageName}"]`);
+      if (match) match.classList.add('active');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (pageName === 'profile') loadFarmerProfile();
+  }
+
+  /* ── Dropdown ── */
+  function toggleDropdown() {
+    document.getElementById('userMenu').classList.toggle('open');
+    document.getElementById('userDropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    const m = document.getElementById('userMenu');
+    if (m && !m.contains(e.target)) {
+      m.classList.remove('open');
+      document.getElementById('userDropdown').classList.remove('open');
+    }
+  });
+
+  /* ── Loading overlay ── */
+  function showLoading(msg='Processing…', sub='Please wait') {
+    document.getElementById('loadingMainMessage').textContent = msg;
+    document.getElementById('loadingSubMessage').textContent = sub;
+    document.getElementById('loadingOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  /* ── Product modal ── */
+  function addProduct() {
+    document.getElementById('addProductModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProductModal() {
+    document.getElementById('addProductModal').classList.remove('active');
+    document.body.style.overflow = '';
+    document.getElementById('addProductForm').reset();
+    document.getElementById('image-preview').classList.remove('show');
+    toggleProductType('farm');
+    setSaveLoading(false);
+  }
+  document.getElementById('addProductModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeProductModal();
+  });
+
+  function toggleProductType(type) {
+    const btns = document.querySelectorAll('.type-toggle-btn');
+    btns.forEach(b => b.classList.remove('active'));
+    if (type === 'farm') {
+      btns[0].classList.add('active');
+      document.getElementById('farming-methods').classList.add('show');
+      document.getElementById('price-single').classList.add('show');
+      document.getElementById('price-range').classList.remove('show');
+      document.getElementById('product-price').required = true;
+      document.getElementById('price-min').required = false;
+      document.getElementById('price-max').required = false;
+    } else {
+      btns[1].classList.add('active');
+      document.getElementById('farming-methods').classList.remove('show');
+      document.getElementById('price-single').classList.remove('show');
+      document.getElementById('price-range').classList.add('show');
+      document.getElementById('product-price').required = false;
+      document.getElementById('price-min').required = true;
+      document.getElementById('price-max').required = true;
+    }
+  }
+
+  document.getElementById('product-image').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      const p = document.getElementById('image-preview');
+      p.src = ev.target.result;
+      p.classList.add('show');
+    };
+    r.readAsDataURL(f);
+  });
+
+  function setSaveLoading(on) {
+    const btn = document.getElementById('saveProductBtn');
+    const txt = document.getElementById('saveProductBtnText');
+    const spn = document.getElementById('saveProductBtnSpinner');
+    const can = document.getElementById('cancelProductBtn');
+    btn.disabled = on; can.disabled = on;
+    txt.textContent = on ? 'Saving…' : 'Save Product';
+    spn.style.display = on ? 'inline-flex' : 'none';
+  }
+
+  async function submitProductForm() {
+    const form = document.getElementById('addProductForm');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    const userStr = localStorage.getItem('user');
+    if (!userStr) { alert('❌ Please log in to add products'); return; }
+    const user = JSON.parse(userStr);
+    const firebaseUid = user.firebase_uid || user.id;
+    if (!firebaseUid) { alert('❌ Authentication required'); return; }
+
+    setSaveLoading(true);
+    showLoading('Uploading image…', 'Converting and uploading to Cloudinary');
+
+    const imageFile = document.getElementById('product-image').files[0];
+    if (!imageFile) { setSaveLoading(false); hideLoading(); alert('Please upload a product image'); return; }
+
+    const formData = new FormData(form);
+    const productType = document.querySelector('.type-toggle-btn.active').textContent.includes('Livestock') ? 'livestock' : 'farm';
+
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        showLoading('Saving product…', 'Creating product in database');
+        const data = {
+          firebase_uid: firebaseUid,
+          name: formData.get('name'),
+          category: formData.get('category'),
+          product_type: productType,
+          location: formData.get('location'),
+          county: formData.get('location'),
+          measurement_metric: formData.get('measurement_metric'),
+          quantity: parseInt(formData.get('quantity')),
+          min_order: parseInt(formData.get('min_order')) || 1,
+          image: e.target.result,
+          status: 'draft'
+        };
+        if (productType === 'farm') {
+          data.price = parseFloat(formData.get('price'));
+          data.planting_time  = formData.get('planting_time') || null;
+          data.fertilizer_used = formData.get('fertilizer_used') || null;
+          data.harvest_time   = formData.get('harvest_time') || null;
+        } else {
+          data.price_min = parseFloat(formData.get('price_min'));
+          data.price_max = parseFloat(formData.get('price_max'));
+        }
+
+        const res = await fetch(`${API_BASE_URL}/products`, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Failed to save product');
+
+        showLoading('Refreshing…', 'Loading your updated product list');
+        await loadProducts();
+        setSaveLoading(false); hideLoading(); closeProductModal();
+        alert('✅ Product added successfully!');
+      } catch (err) {
+        setSaveLoading(false); hideLoading();
+        alert('❌ Error: ' + err.message);
+      }
+    };
+    reader.onerror = () => { setSaveLoading(false); hideLoading(); alert('❌ Could not read image'); };
+    reader.readAsDataURL(imageFile);
+  }
+
+  /* ── Load products ── */
+  async function loadProducts() {
+    const grid = document.getElementById('products-grid');
+    const loading = document.getElementById('products-loading');
+    if (!grid) return;
+    if (loading) loading.style.display = 'flex';
+
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) { showProductsEmpty(grid, loading, 'Please log in to view your products'); return; }
+      const user = JSON.parse(userStr);
+      const uid = user.firebase_uid || user.id;
+      if (!uid) { showProductsEmpty(grid, loading, 'Please log in to view your products'); return; }
+
+      const res = await fetch(`${API_BASE_URL}/products/farmer/${uid}`);
+      if (!res.ok) throw new Error('Failed');
+      const products = await res.json();
+
+      if (loading) loading.style.display = 'none';
+      grid.querySelectorAll('.product-card,[data-empty]').forEach(el => el.remove());
+
+      if (!products || !products.length) {
+        showProductsEmpty(grid, null, 'No products yet — click "+ Add New Product" to get started!');
+        return;
+      }
+
+      const sorted = products.sort((a,b) => {
+        if (a.status==='draft' && b.status!=='draft') return -1;
+        if (a.status!=='draft' && b.status==='draft') return 1;
+        return new Date(b.created_at||0) - new Date(a.created_at||0);
+      });
+      sorted.forEach(p => grid.insertAdjacentHTML('beforeend', buildProductCard(p)));
+    } catch {
+      if (loading) loading.style.display = 'none';
+      grid.querySelectorAll('.product-card,[data-empty]').forEach(el => el.remove());
+      showProductsEmpty(grid, null, 'Error loading products — please refresh the page.');
+    }
+  }
+
+  function showProductsEmpty(grid, loading, msg) {
+    if (loading) loading.style.display = 'none';
+    grid.querySelectorAll('.product-card,[data-empty]').forEach(el => el.remove());
+    grid.insertAdjacentHTML('beforeend',
+      `<div data-empty style="grid-column:1/-1;" class="empty-state"><div class="icon">🌱</div><h4>Nothing here yet</h4><p style="font-size:.82rem;">${msg}</p></div>`
+    );
+  }
+
+  function buildProductCard(p) {
+    const type = p.product_type || 'farm';
+    const statusClass = p.status === 'active' ? 'active' : p.status === 'sold_out' ? 'sold-out' : 'draft';
+    const statusText  = p.status === 'active' ? 'Active' : p.status === 'sold_out' ? 'Sold Out' : 'Draft';
+    const price = type === 'livestock' && p.price_min && p.price_max
+      ? `KSh ${p.price_min}–${p.price_max} <sub>/ ${p.measurement_metric||'unit'}</sub>`
+      : p.price ? `KSh ${p.price} <sub>/ ${p.measurement_metric||'unit'}</sub>` : 'Price on request';
+
+    const dateText = (() => {
+      const d = new Date(p.created_at || p.updated_at || 0);
+      if (isNaN(d)) return '';
+      const diff = Math.floor((Date.now() - d) / 86400000);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return '1 day ago';
+      if (diff < 7)  return `${diff} days ago`;
+      return d.toLocaleDateString();
+    })();
+
+    let actions = '';
+    if (p.status === 'draft') {
+      actions = `<button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">Edit</button><button class="btn btn-primary btn-sm" onclick="publishProduct('${p.id}')">Publish</button>`;
+    } else if (p.status === 'active') {
+      actions = `<button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="updateProductStatus('${p.id}','sold_out')">Sold Out</button>`;
+    } else if (p.status === 'sold_out') {
+      actions = `<button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">Edit</button><button class="btn btn-primary btn-sm" onclick="updateProductStatus('${p.id}','active')">Restock</button>`;
+    }
+
+    const imgBg = p.image_url ? `style="background-image:url('${p.image_url}');background-size:cover;background-position:center;"` : '';
+    return `
+      <article class="product-card">
+        <div class="product-image" ${imgBg}>
+          ${!p.image_url ? '🌿' : ''}
+          <span class="product-badge">${p.location||'Kenya'} · ${p.category||''}</span>
+          <span class="product-status-badge ${statusClass}">${statusText}</span>
+        </div>
+        <div class="product-body">
+          <div class="product-title">${p.name||'Unnamed'}</div>
+          <div class="product-meta"><span>👁 ${p.views||0} views</span><span>🛒 ${p.orders||0} orders</span></div>
+          <div class="product-price">${price}</div>
+          <div class="product-meta"><span>📦 ${p.quantity||0} ${p.measurement_metric||''}</span>${type==='farm'&&p.harvest_time?`<span>⏱ ${p.harvest_time}</span>`:'<span>🐄 Available</span>'}</div>
+        </div>
+        <div class="product-footer">
+          <span class="product-date">${dateText}</span>
+          <div style="display:flex;gap:6px;">${actions}</div>
+        </div>
+      </article>`;
+  }
+
+  async function publishProduct(id) {
+    if (!confirm('Publish this product? It will be visible to all buyers.')) return;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const uid = user.firebase_uid || user.id;
+    try {
+      showLoading('Publishing…','Updating product status');
+      const res = await fetch(`${API_BASE_URL}/products/${id}/publish`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ firebase_uid: uid })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed');
+      await loadProducts();
+      hideLoading();
+      alert('✅ Product published! Now visible to buyers.');
+    } catch(err) { hideLoading(); alert('❌ '+err.message); }
+  }
+
+  async function updateProductStatus(id, status) {
+    const labels = { active:'activate', sold_out:'mark as sold out', draft:'save as draft' };
+    if (!confirm(`Are you sure you want to ${labels[status]||'update'} this product?`)) return;
+    const user = JSON.parse(localStorage.getItem('user')||'{}');
+    const uid = user.firebase_uid || user.id;
+    try {
+      showLoading('Updating…','Changing product status');
+      const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ firebase_uid: uid, status })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error||'Failed');
+      await loadProducts(); hideLoading();
+      alert(`✅ Status updated to ${status}!`);
+    } catch(err) { hideLoading(); alert('❌ '+err.message); }
+  }
+
+  function editProduct(id)   { alert(`✏️ Edit Product #${id}`); }
+  function viewOrder(id)     { alert(`📋 View Order #${id}`); }
+  function connectFarmer(id) { alert(`🤝 Request sent to farmer #${id}!`); }
+  function bidOnTender(id)   { alert(`💰 Bid form for Tender #${id}`); }
+  function viewTender(id)    { alert(`👁 Tender #${id} details`); }
+
+  /* ── User profile ── */
+  async function loadUserProfile() {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
+      const user = JSON.parse(userStr);
+      const uid = user.firebase_uid || user.id;
+      let firstName = user.first_name || '';
+      let lastName  = user.last_name  || '';
+
+      if (uid) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/profiles/farmer/${uid}`);
+          const d = await res.json();
+          if (d.profile?.user) {
+            firstName = d.profile.user.first_name || firstName;
+            lastName  = d.profile.user.last_name  || lastName;
+          }
+        } catch {}
+      }
+
+      const fullName = [firstName, lastName].filter(Boolean).join(' ') || user.email || 'Farmer';
+      const initials = fullName.charAt(0).toUpperCase();
+
+      document.getElementById('userAvatar').textContent       = initials;
+      document.getElementById('userNameShort').textContent    = firstName || 'Farmer';
+      document.getElementById('userDisplayName').textContent  = fullName;
+      document.getElementById('userDisplayEmail').textContent = user.email || '';
+      document.getElementById('welcomeTitle').innerHTML       = `Welcome back, <em>${firstName||'Farmer'}</em>! 👋`;
+    } catch {}
+  }
+
+  /* ── Farmer profile form ── */
+  let currentImageUrl = '';
+
+  async function loadFarmerProfile() {
+    const saveBtn = document.getElementById('save-profile-btn');
+    const saveTxt = document.getElementById('save-btn-text');
+    const saveSpn = document.getElementById('save-btn-spinner');
+    saveBtn.disabled = true; saveTxt.textContent = 'Loading…'; saveSpn.style.display = 'inline-flex';
+
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
+      const user = JSON.parse(userStr);
+      const uid = user.firebase_uid || user.id;
+      if (!uid) return;
+
+      const res = await fetch(`${API_BASE_URL}/profiles/farmer/${uid}`);
+      const data = await res.json();
+
+      if (data.success && data.profile) {
+        const p = data.profile;
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        set('farm-name',''); set('location',''); set('county',''); set('national-id','');
+        set('ward',''); set('farm-size',''); set('farming-experience',''); set('bio','');
+        set('farm-name', p.farm_name); set('location', p.location); set('county', p.county);
+        set('national-id', p.national_id); set('ward', p.ward);
+        set('farm-size', p.farm_size_acres); set('farming-experience', p.farming_experience_years);
+        set('certification-status', p.certification_status || 'pending'); set('bio', p.bio);
+        if (p.referral_source) {
+          set('referral-source', p.referral_source);
+          if (p.referral_source === 'other') {
+            document.getElementById('referral-other-container').style.display = 'block';
+            set('referral-other', p.referral_other);
+          }
+        }
+        currentImageUrl = p.profile_image_url || '';
+        set('profile-image', currentImageUrl);
+        if (p.user) { set('email', p.user.email); set('phone', p.user.phone_number); }
+        else { set('email', user.email); set('phone', user.phone_number); }
+        if (p.id_front_url)      { document.getElementById('id-front-img').src = p.id_front_url; document.getElementById('id-front-preview').style.display='block'; }
+        if (p.id_back_url)       { document.getElementById('id-back-img').src  = p.id_back_url;  document.getElementById('id-back-preview').style.display='block'; }
+        if (p.profile_selfie_url){ document.getElementById('selfie-img').src   = p.profile_selfie_url; document.getElementById('selfie-preview').style.display='block'; }
+        if (p.crops) {
+          const crops = typeof p.crops === 'string' ? JSON.parse(p.crops) : p.crops;
+          const sel = document.getElementById('crops-select');
+          Array.from(sel.options).forEach(o => { o.selected = crops.includes(o.value); });
+          updateCropsDisplay();
+        }
+        if (p.livestock) {
+          const lv = typeof p.livestock === 'string' ? JSON.parse(p.livestock) : p.livestock;
+          const sel = document.getElementById('livestock-select');
+          Array.from(sel.options).forEach(o => { o.selected = lv.includes(o.value); });
+          updateLivestockDisplay();
+        }
+      }
+    } catch(err) { console.error(err); }
+    finally {
+      saveBtn.disabled = false; saveTxt.textContent = 'Save Changes'; saveSpn.style.display = 'none';
+    }
+  }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-profile-btn');
+    const saveTxt = document.getElementById('save-btn-text');
+    const saveSpn = document.getElementById('save-btn-spinner');
+    saveBtn.disabled = true; saveTxt.textContent = 'Saving…'; saveSpn.style.display = 'inline-flex';
+
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) { showAlert('Please log in','error'); return; }
+      const user = JSON.parse(userStr);
+      const uid = user.firebase_uid || user.id;
+      if (!uid) { showAlert('Authentication required','error'); return; }
+
+      const selectedCrops = [...Array.from(document.getElementById('crops-select').selectedOptions).map(o=>o.value),
+        ...(JSON.parse(document.getElementById('crops').value||'[]'))];
+      const selectedLv = [...Array.from(document.getElementById('livestock-select').selectedOptions).map(o=>o.value),
+        ...(JSON.parse(document.getElementById('livestock').value||'[]'))];
+
+      const toBase64 = f => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+      const idFront = document.getElementById('id-front').files[0];
+      const idBack  = document.getElementById('id-back').files[0];
+      const selfie  = document.getElementById('profile-selfie').files[0];
+
+      const body = {
+        firebase_uid: uid,
+        farm_name: document.getElementById('farm-name').value,
+        location:  document.getElementById('location').value,
+        county:    document.getElementById('county').value,
+        national_id: document.getElementById('national-id').value,
+        id_front:  idFront ? await toBase64(idFront) : null,
+        id_back:   idBack  ? await toBase64(idBack)  : null,
+        profile_selfie: selfie ? await toBase64(selfie) : null,
+        ward: document.getElementById('ward').value || null,
+        crops: selectedCrops.length ? JSON.stringify([...new Set(selectedCrops)]) : null,
+        livestock: selectedLv.length ? JSON.stringify([...new Set(selectedLv)]) : null,
+        referral_source: document.getElementById('referral-source').value || null,
+        referral_other:  document.getElementById('referral-source').value === 'other' ? document.getElementById('referral-other').value : null,
+        farm_size_acres: document.getElementById('farm-size').value ? parseFloat(document.getElementById('farm-size').value) : null,
+        farming_experience_years: document.getElementById('farming-experience').value ? parseInt(document.getElementById('farming-experience').value) : null,
+        certification_status: document.getElementById('certification-status').value,
+        bio: document.getElementById('bio').value,
+        profile_image_url: document.getElementById('profile-image').value || currentImageUrl || ''
+      };
+
+      const res = await fetch(`${API_BASE_URL}/profiles/farmer`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Failed');
+      showAlert('✅ Profile saved successfully!','success');
+    } catch(err) {
+      showAlert(err.message || 'Failed to save profile','error');
+    } finally {
+      saveBtn.disabled = false; saveTxt.textContent = 'Save Changes'; saveSpn.style.display = 'none';
+    }
+  }
+
+  function showAlert(msg, type) {
+    const el = document.getElementById('profileAlert');
+    el.textContent = msg; el.className = `alert ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  /* ── Profile tabs ── */
+  function switchTab(name, btn) {
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.profile-tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  function toggleReferralOther() {
+    const v = document.getElementById('referral-source').value;
+    document.getElementById('referral-other-container').style.display = v === 'other' ? 'block' : 'none';
+  }
+
+  /* ── Crops & livestock ── */
+  function updateCropsDisplay() {
+    const sel = document.getElementById('crops-select');
+    const hid = document.getElementById('crops');
+    const custom = hid.value ? JSON.parse(hid.value) : [];
+    const selected = Array.from(sel.selectedOptions).map(o=>o.value);
+    const all = [...new Set([...selected,...custom])];
+    const div = document.getElementById('selected-crops');
+    div.innerHTML = '';
+    all.forEach(c => {
+      const span = document.createElement('span');
+      span.style.cssText = 'padding:4px 10px;background:var(--leaf);color:#fff;border-radius:100px;font-size:.75rem;display:inline-flex;align-items:center;gap:5px;';
+      span.textContent = c;
+      const x = document.createElement('button');
+      x.textContent='×'; x.type='button';
+      x.style.cssText='background:rgba(255,255,255,.3);border:none;color:#fff;cursor:pointer;border-radius:50%;width:16px;height:16px;font-size:12px;line-height:1;padding:0;';
+      x.onclick = () => removeCrop(c);
+      span.appendChild(x); div.appendChild(span);
+    });
+    hid.value = JSON.stringify(custom.filter(c => !Array.from(sel.selectedOptions).map(o=>o.value).includes(c)));
+  }
+  function addCustomCrop() {
+    const inp = document.getElementById('crop-custom');
+    const v = inp.value.trim();
+    if (!v) return;
+    const hid = document.getElementById('crops');
+    const arr = hid.value ? JSON.parse(hid.value) : [];
+    if (!arr.includes(v)) { arr.push(v); hid.value = JSON.stringify(arr); updateCropsDisplay(); }
+    inp.value = '';
+  }
+  function removeCrop(c) {
+    const sel = document.getElementById('crops-select');
+    Array.from(sel.options).forEach(o => { if(o.value===c) o.selected=false; });
+    const hid = document.getElementById('crops');
+    const arr = hid.value ? JSON.parse(hid.value) : [];
+    hid.value = JSON.stringify(arr.filter(x=>x!==c));
+    updateCropsDisplay();
+  }
+  function updateLivestockDisplay() {
+    const sel = document.getElementById('livestock-select');
+    const hid = document.getElementById('livestock');
+    const custom = hid.value ? JSON.parse(hid.value) : [];
+    const selected = Array.from(sel.selectedOptions).map(o=>o.value);
+    const all = [...new Set([...selected,...custom])];
+    const div = document.getElementById('selected-livestock');
+    div.innerHTML = '';
+    all.forEach(l => {
+      const span = document.createElement('span');
+      span.style.cssText = 'padding:4px 10px;background:var(--leaf);color:#fff;border-radius:100px;font-size:.75rem;display:inline-flex;align-items:center;gap:5px;';
+      span.textContent = l;
+      const x = document.createElement('button');
+      x.textContent='×'; x.type='button';
+      x.style.cssText='background:rgba(255,255,255,.3);border:none;color:#fff;cursor:pointer;border-radius:50%;width:16px;height:16px;font-size:12px;line-height:1;padding:0;';
+      x.onclick = () => removeLivestock(l);
+      span.appendChild(x); div.appendChild(span);
+    });
+    hid.value = JSON.stringify(custom.filter(l => !Array.from(sel.selectedOptions).map(o=>o.value).includes(l)));
+  }
+  function addCustomLivestock() {
+    const inp = document.getElementById('livestock-custom');
+    const v = inp.value.trim();
+    if (!v) return;
+    const hid = document.getElementById('livestock');
+    const arr = hid.value ? JSON.parse(hid.value) : [];
+    if (!arr.includes(v)) { arr.push(v); hid.value = JSON.stringify(arr); updateLivestockDisplay(); }
+    inp.value = '';
+  }
+  function removeLivestock(l) {
+    const sel = document.getElementById('livestock-select');
+    Array.from(sel.options).forEach(o => { if(o.value===l) o.selected=false; });
+    const hid = document.getElementById('livestock');
+    const arr = hid.value ? JSON.parse(hid.value) : [];
+    hid.value = JSON.stringify(arr.filter(x=>x!==l));
+    updateLivestockDisplay();
+  }
+
+  document.getElementById('crops-select').addEventListener('change', updateCropsDisplay);
+  document.getElementById('livestock-select').addEventListener('change', updateLivestockDisplay);
+
+  /* ── Profile image preview ── */
+  document.getElementById('id-front').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = ev => { document.getElementById('id-front-img').src = ev.target.result; document.getElementById('id-front-preview').style.display='block'; }; r.readAsDataURL(f);
+  });
+  document.getElementById('id-back').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = ev => { document.getElementById('id-back-img').src = ev.target.result; document.getElementById('id-back-preview').style.display='block'; }; r.readAsDataURL(f);
+  });
+  document.getElementById('profile-selfie').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = ev => { document.getElementById('selfie-img').src = ev.target.result; document.getElementById('selfie-preview').style.display='block'; }; r.readAsDataURL(f);
+  });
+  function removeProfileImage() {
+    document.getElementById('profile-image').value = '';
+    currentImageUrl = '';
+    document.getElementById('profile-image-preview').innerHTML = '<span style="font-size:.75rem;color:var(--muted);">No image</span>';
+    document.getElementById('remove-profile-image').style.display = 'none';
+  }
+
+  /* ── Contact form ── */
+  function submitContact(e) {
+    e.preventDefault();
+    alert('✅ Message sent! Our team will get back to you shortly.');
+    e.target.reset();
+  }
+
+  /* ── Logout ── */
+  function logout(skip=false) {
+    if (!skip && !confirm('Are you sure you want to logout?')) return;
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('authToken');
+    window.location.href = 'index.html';
+  }
+
+  /* ── Session timeout (30 min) ── */
+  let sessionTimer;
+  function resetSession() {
+    clearTimeout(sessionTimer);
+    sessionTimer = setTimeout(() => { alert('Session expired.'); logout(true); }, 30*60*1000);
+  }
+  ['mousedown','keypress','scroll','touchstart'].forEach(ev => document.addEventListener(ev, resetSession, { passive: true }));
+  resetSession();
+
+  /* ── Init on load ── */
+  window.addEventListener('DOMContentLoaded', () => {
+    showPage('dashboard');
+    loadUserProfile();
+    loadProducts();
+  });
+</script>
+</body>
+</html>
