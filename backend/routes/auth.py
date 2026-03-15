@@ -375,6 +375,103 @@ def get_user(firebase_uid):
         logger.error(f"Get user error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@auth_bp.route('/user-by-email', methods=['GET'])
+def get_user_by_email():
+    """
+    Get user by email (for admin/super-user client access).
+    Query param: ?email=user@example.com
+    """
+    try:
+        email = request.args.get('email', '').strip()
+        if not email:
+            return jsonify({'error': 'email query parameter is required'}), 400
+
+        user = User.get_user_by_email(email)
+        if not user:
+            return jsonify({'error': 'No user found with that email'}), 404
+
+        user_id = extract_user_id(user)
+        if user_id:
+            user_roles = User.get_user_roles(user_id)
+            if user_roles:
+                user['roles'] = user_roles
+
+        return jsonify({'success': True, 'user': user}), 200
+
+    except Exception as e:
+        logger.error(f"Get user by email error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/admin/stats', methods=['GET'])
+def admin_stats():
+    """
+    Return live platform stats for the admin dashboard.
+    """
+    try:
+        from database import execute_query
+
+        total_users = execute_query("SELECT COUNT(*) AS c FROM users", fetch_one=True)['c']
+        new_this_week = execute_query(
+            "SELECT COUNT(*) AS c FROM users WHERE created_at >= NOW() - INTERVAL '7 days'",
+            fetch_one=True
+        )['c']
+        pending_verification = execute_query(
+            "SELECT COUNT(*) AS c FROM farmer_profiles WHERE certification_status = 'pending'",
+            fetch_one=True
+        )['c']
+        verified_users = execute_query(
+            "SELECT COUNT(*) AS c FROM farmer_profiles WHERE certification_status IN ('verified','approved')",
+            fetch_one=True
+        )['c']
+        total_products = execute_query("SELECT COUNT(*) AS c FROM products", fetch_one=True)['c']
+        active_products = execute_query(
+            "SELECT COUNT(*) AS c FROM products WHERE status = 'active'",
+            fetch_one=True
+        )['c']
+
+        return jsonify({
+            'total_users': total_users,
+            'new_this_week': new_this_week,
+            'pending_verification': pending_verification,
+            'verified_users': verified_users,
+            'total_products': total_products,
+            'active_products': active_products
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Admin stats error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_bp.route('/admin/users', methods=['GET'])
+def admin_users():
+    """
+    Return all users for the admin users table.
+    """
+    try:
+        from database import execute_query
+        rows = execute_query("""
+            SELECT u.id, u.firebase_uid, u.email, u.first_name, u.last_name,
+                   u.role, u.is_active, u.created_at,
+                   fp.certification_status
+            FROM users u
+            LEFT JOIN farmer_profiles fp ON fp.user_id = u.id
+            ORDER BY u.created_at DESC
+        """, fetch_all=True)
+
+        users = []
+        for r in rows:
+            d = dict(r)
+            d['id'] = str(d['id'])
+            users.append(d)
+
+        return jsonify(users), 200
+
+    except Exception as e:
+        logger.error(f"Admin users error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @auth_bp.route('/dashboard-route', methods=['POST'])
 def get_dashboard_route():
     """

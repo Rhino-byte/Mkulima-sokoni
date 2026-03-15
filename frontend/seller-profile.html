@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Profile | Soko Safi</title>
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --forest: #1B4332; --leaf: #40916C; --lime: #74C69D; --gold: #E9C46A;
+      --amber: #F4A261; --cream: #FAF6EF; --ink: #1A1A18; --muted: #6B705C;
+      --border: #DDD8CE; --danger: #ef4444; --success: #10b981;
+      --shadow-sm: 0 2px 12px rgba(27,67,50,.08);
+      --shadow-md: 0 8px 32px rgba(27,67,50,.13);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    .topbar { position: sticky; top: 0; z-index: 100; background: var(--forest); display: flex; align-items: center; padding: 0 28px; height: 60px; gap: 20px; box-shadow: 0 2px 16px rgba(0,0,0,.22); }
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .logo-mark { width: 36px; height: 36px; border-radius: 9px; overflow: hidden; display: grid; place-items: center; background: #fff; box-shadow: 0 3px 12px rgba(116,198,157,.4); flex-shrink: 0; }
+    .logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-label strong { display: block; font-size: .9rem; font-weight: 600; color: #fff; line-height: 1.2; }
+    .logo-label span { font-size: .67rem; color: var(--lime); font-weight: 300; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .topbar-btn { height: 33px; padding: 0 15px; border-radius: 100px; border: 1.5px solid rgba(255,255,255,.25); background: transparent; color: #fff; font-size: .78rem; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+    .topbar-btn:hover { background: rgba(255,255,255,.1); }
+
+    /* Profile header banner */
+    .profile-banner { background: var(--forest); padding: 0 28px 0; position: relative; overflow: hidden; }
+    .profile-banner::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(116,198,157,.12) 0%, transparent 60%); }
+    .profile-banner::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px); background-size: 26px 26px; }
+    .banner-inner { max-width: 900px; margin: 0 auto; padding: 36px 0 28px; display: flex; align-items: center; gap: 24px; position: relative; z-index: 1; }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 22px; overflow: hidden; background: rgba(255,255,255,.12); border: 3px solid rgba(255,255,255,.25); display: grid; place-items: center; flex-shrink: 0; }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .profile-avatar .initials { color: #fff; font-weight: 700; font-size: 2rem; }
+    .profile-header-text {}
+    .profile-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: #fff; line-height: 1.25; }
+    .profile-farm { font-size: .88rem; color: var(--lime); margin-top: 2px; }
+    .profile-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .role-badge { padding: 3px 11px; border-radius: 100px; font-size: .72rem; font-weight: 600; background: rgba(116,198,157,.18); color: var(--lime); }
+    .verify-badge { padding: 3px 11px; border-radius: 100px; font-size: .72rem; font-weight: 600; }
+    .verify-badge.verified { background: rgba(16,185,129,.15); color: var(--success); }
+    .verify-badge.not-verified { background: rgba(239,68,68,.12); color: var(--danger); }
+
+    /* Back link */
+    .back-bar { max-width: 900px; margin: 0 auto; padding: 14px 28px 0; }
+    .back-link { display: inline-flex; align-items: center; gap: 5px; font-size: .85rem; font-weight: 600; color: var(--leaf); transition: all .2s; }
+    .back-link:hover { color: var(--forest); gap: 7px; }
+
+    /* Main content */
+    .profile-wrap { max-width: 900px; margin: 0 auto; padding: 24px 28px 40px; }
+    .profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+
+    /* Sidebar */
+    .sidebar {}
+    .sidebar-card { background: #fff; border: 1.5px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+    .sidebar-card h4 { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 14px; }
+    .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: .84rem; }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; margin-top: 2px; }
+    .info-label { color: var(--muted); min-width: 72px; font-size: .78rem; }
+    .info-value { font-weight: 600; color: var(--ink); word-break: break-word; }
+
+    /* Contact actions */
+    .contact-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .btn { padding: 10px 18px; border-radius: 100px; border: none; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; text-align: center; display: block; width: 100%; }
+    .btn-primary { background: linear-gradient(135deg, var(--forest), var(--leaf)); color: #fff; box-shadow: 0 4px 12px rgba(27,67,50,.2); }
+    .btn-primary:hover { transform: translateY(-2px); opacity: .92; }
+    .btn-outline { background: transparent; color: var(--forest); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--leaf); color: var(--leaf); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-whatsapp:hover { background: #1fba59; }
+
+    /* Share profile */
+    .share-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .share-pill { padding: 5px 12px; border-radius: 100px; border: 1.5px solid var(--border); background: #fff; font-size: .72rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; color: var(--ink); }
+    .share-pill:hover { border-color: var(--leaf); color: var(--leaf); }
+
+    /* Main column */
+    .main-col {}
+    .section-card { background: #fff; border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+    .section-card h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--forest); margin-bottom: 14px; }
+    .bio-text { font-size: .88rem; color: var(--muted); line-height: 1.7; }
+
+    /* Products grid */
+    .profile-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .pp-card { background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; transition: all .2s; cursor: pointer; }
+    .pp-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--lime); }
+    .pp-img { height: 100px; background: linear-gradient(135deg, var(--forest), var(--leaf)); overflow: hidden; display: grid; place-items: center; font-size: 30px; position: relative; }
+    .pp-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .pp-body { padding: 10px 11px; }
+    .pp-name { font-weight: 600; font-size: .82rem; margin-bottom: 3px; }
+    .pp-price { font-family: 'Playfair Display', serif; font-size: .95rem; font-weight: 700; color: var(--forest); }
+
+    .empty-msg { text-align: center; padding: 30px; color: var(--muted); font-size: .88rem; }
+
+    /* Login modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.5); align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: #fff; border-radius: 18px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center; }
+    .modal-box h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 8px; color: var(--forest); }
+    .modal-box p { font-size: .86rem; color: var(--muted); margin-bottom: 16px; }
+    .modal-close { margin-top: 10px; width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border); background: #fff; font-size: .86rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+    /* Footer */
+    footer { background: var(--forest); padding: 44px 28px 0; }
+    .footer-bottom { max-width: 900px; margin: 0 auto; padding: 20px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: .76rem; color: rgba(255,255,255,.35); }
+    .footer-copy strong { color: var(--lime); font-weight: 600; }
+    .footer-badge { font-size: .68rem; color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.1); border-radius: 100px; padding: 3px 10px; }
+
+    .loading-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .loading-state .icon { font-size: 44px; margin-bottom: 8px; }
+
+    @media (max-width: 768px) {
+      .profile-grid { grid-template-columns: 1fr; }
+      .banner-inner { flex-direction: column; text-align: center; padding: 28px 0 22px; }
+      .profile-avatar { width: 80px; height: 80px; }
+      .topbar { padding: 0 14px; }
+      .profile-wrap { padding: 16px 14px 30px; }
+      .back-bar { padding: 10px 14px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
+    <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+  </a>
+  <div class="topbar-actions">
+    <button class="topbar-btn" onclick="location.href='market.html'">Marketplace</button>
+    <button class="topbar-btn" onclick="location.href='auth.html'" id="authBtn">Sign In</button>
+  </div>
+</header>
+
+<!-- Banner -->
+<div class="profile-banner">
+  <div class="banner-inner" id="bannerInner">
+    <div class="profile-avatar" id="profileAvatar"><span class="initials">…</span></div>
+    <div class="profile-header-text">
+      <div class="profile-name" id="profileName">Loading…</div>
+      <div class="profile-farm" id="profileFarm"></div>
+      <div class="profile-badges" id="profileBadges"></div>
+    </div>
+  </div>
+</div>
+
+<div class="back-bar">
+  <a href="javascript:history.back()" class="back-link">← Back</a>
+</div>
+
+<div class="profile-wrap">
+  <div class="profile-grid">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-card" id="infoCard">
+        <h4>Profile Details</h4>
+        <div id="infoRows" style="color:var(--muted);font-size:.85rem;">Loading…</div>
+      </div>
+      <div class="sidebar-card" id="contactCard" style="display:none;">
+        <h4>Contact & Connect</h4>
+        <div class="contact-actions" id="contactActions"></div>
+      </div>
+      <div class="sidebar-card">
+        <h4>Share Profile</h4>
+        <div class="share-row">
+          <button class="share-pill" onclick="requireAuth(function(){shareProfile('whatsapp')})">💬 WhatsApp</button>
+          <button class="share-pill" onclick="requireAuth(function(){shareProfile('facebook')})">f Facebook</button>
+          <button class="share-pill" onclick="requireAuth(function(){shareProfile('x')})">𝕏 X</button>
+          <button class="share-pill" onclick="requireAuth(function(){shareProfile('copy')})">🔗 Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN COL -->
+    <div class="main-col" id="mainCol">
+      <div class="section-card" id="aboutCard" style="display:none;">
+        <h3>About</h3>
+        <p class="bio-text" id="bioText"></p>
+      </div>
+      <div class="section-card">
+        <h3 id="productsHeading">Listed Products</h3>
+        <div id="productsContainer">
+          <div class="loading-state"><div class="icon">🌱</div><p>Loading products…</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <h3>Sign In Required</h3>
+    <p>You need to be signed in to contact this farmer or share their profile.</p>
+    <a href="auth.html" class="btn btn-primary" style="text-decoration:none;margin-bottom:8px;">Sign In / Create Account</a>
+    <button class="modal-close" onclick="closeModal('loginModal')">Cancel</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+    <span class="footer-badge">Powered by TaiStat Firm</span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+var isProduction = !['localhost','127.0.0.1'].includes(window.location.hostname);
+var API = isProduction ? '/api' : 'http://localhost:5000/api';
+var EMOJI = { Vegetables:'🥬', Fruits:'🍊', Cereals:'🌽', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Other:'📦' };
+
+var profileData = {};
+
+function isSignedIn() { try { return !!localStorage.getItem('user'); } catch(e) { return false; } }
+function requireAuth(fn) { if (isSignedIn()) fn(); else openModal('loginModal'); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function esc(s) { return (s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function getUid() { return new URLSearchParams(window.location.search).get('uid'); }
+
+function priceStr(p) {
+  if (p.product_type === 'livestock' && p.price_min != null && p.price_max != null)
+    return 'KSh ' + Number(p.price_min).toLocaleString() + '–' + Number(p.price_max).toLocaleString();
+  if (p.price) return 'KSh ' + Number(p.price).toLocaleString();
+  return 'Price on request';
+}
+
+async function loadProfile() {
+  var uid = getUid();
+  if (!uid) {
+    document.getElementById('profileName').textContent = 'Profile not found';
+    document.getElementById('mainCol').innerHTML = '<div class="loading-state"><div class="icon">⚠️</div><p>No user specified. <a href="market.html" style="color:var(--leaf);font-weight:600;">Browse marketplace</a></p></div>';
+    return;
+  }
+
+  try {
+    var res = await fetch(API + '/profiles/farmer/' + uid);
+    if (!res.ok) throw new Error('Profile not found');
+    var data = await res.json();
+    var profile = data.profile || data;
+    var user = profile.user || {};
+    profileData = { profile: profile, user: user };
+    renderBanner(profile, user);
+    renderSidebar(profile, user);
+    renderAbout(profile);
+    loadFarmerProducts(uid);
+    document.title = esc((profile.farm_name || user.first_name || 'Farmer')) + ' | Soko Safi';
+  } catch(e) {
+    document.getElementById('profileName').textContent = 'Could not load profile';
+    document.getElementById('infoRows').textContent = e.message || 'Error loading profile.';
+    document.getElementById('productsContainer').innerHTML = '<div class="empty-msg">Could not load products.</div>';
+  }
+}
+
+function renderBanner(p, u) {
+  var name = esc((u.first_name || p.first_name || '') + ' ' + (u.last_name || p.last_name || '')).trim() || 'Farmer';
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileFarm').textContent = p.farm_name || 'Independent Farmer';
+
+  var initials = ((u.first_name||p.first_name||'')[0]||'') + ((u.last_name||p.last_name||'')[0]||'');
+  var av = document.getElementById('profileAvatar');
+  if (p.profile_image_url) {
+    av.innerHTML = '<img src="' + esc(p.profile_image_url) + '" alt="" />';
+  } else {
+    av.innerHTML = '<span class="initials">' + initials.toUpperCase() + '</span>';
+  }
+
+  var isVerified = p.certification_status && p.certification_status.toLowerCase() !== 'pending';
+  var badges = '<span class="role-badge">🌾 Farmer</span>';
+  badges += isVerified
+    ? '<span class="verify-badge verified">✅ Verified</span>'
+    : '<span class="verify-badge not-verified">❌ Not Verified</span>';
+  document.getElementById('profileBadges').innerHTML = badges;
+}
+
+function renderSidebar(p, u) {
+  var memberSince = p.created_at ? new Date(p.created_at).toLocaleDateString('en-KE',{year:'numeric',month:'short'}) : '';
+  var rows = '';
+  rows += '<div class="info-row"><span class="info-icon">📍</span><span class="info-label">Location</span><span class="info-value">' + esc(p.location||'N/A') + (p.county ? ', ' + esc(p.county) : '') + '</span></div>';
+  if (memberSince) rows += '<div class="info-row"><span class="info-icon">📅</span><span class="info-label">Joined</span><span class="info-value">' + memberSince + '</span></div>';
+  if (p.farming_experience_years) rows += '<div class="info-row"><span class="info-icon">🌾</span><span class="info-label">Experience</span><span class="info-value">' + p.farming_experience_years + ' years</span></div>';
+  if (p.farm_size_acres) rows += '<div class="info-row"><span class="info-icon">📐</span><span class="info-label">Farm Size</span><span class="info-value">' + p.farm_size_acres + ' acres</span></div>';
+  if (u.email) rows += '<div class="info-row"><span class="info-icon">📧</span><span class="info-label">Email</span><span class="info-value" style="font-size:.78rem;">' + esc(u.email) + '</span></div>';
+  if (u.phone_number) rows += '<div class="info-row"><span class="info-icon">📞</span><span class="info-label">Phone</span><span class="info-value">' + esc(u.phone_number) + '</span></div>';
+  document.getElementById('infoRows').innerHTML = rows;
+
+  if (u.phone_number || u.email) {
+    var cc = document.getElementById('contactCard');
+    cc.style.display = '';
+    var phone = u.phone_number || '';
+    var clean = phone.replace(/\s/g,'');
+    var name = ((u.first_name||p.first_name||'')+ ' '+(u.last_name||p.last_name||'')).trim();
+    var msg = encodeURIComponent('Hi ' + name + ', I found your profile on Soko Safi and would like to connect. ' + window.location.href);
+    var html = '';
+    if (phone) {
+      html += '<a href="https://wa.me/' + clean.replace('+','') + '?text=' + msg + '" target="_blank" class="btn btn-whatsapp" onclick="return requireAuthLink(event)" style="text-decoration:none;">💬 WhatsApp</a>';
+      html += '<a href="tel:' + clean + '" class="btn btn-primary" onclick="return requireAuthLink(event)" style="text-decoration:none;">📞 Call ' + esc(phone) + '</a>';
+    }
+    if (u.email) {
+      html += '<a href="mailto:' + esc(u.email) + '" class="btn btn-outline" onclick="return requireAuthLink(event)" style="text-decoration:none;">📧 Send Email</a>';
+    }
+    document.getElementById('contactActions').innerHTML = html;
+  }
+}
+
+function renderAbout(p) {
+  if (p.bio) {
+    document.getElementById('aboutCard').style.display = '';
+    document.getElementById('bioText').textContent = p.bio;
+  }
+}
+
+async function loadFarmerProducts(uid) {
+  try {
+    var res = await fetch(API + '/products/farmer/' + uid + '?status=active');
+    if (!res.ok) throw new Error();
+    var products = await res.json();
+    if (!products.length) {
+      document.getElementById('productsContainer').innerHTML = '<div class="empty-msg">No active listings yet.</div>';
+      return;
+    }
+    document.getElementById('productsHeading').textContent = 'Listed Products (' + products.length + ')';
+    document.getElementById('productsContainer').innerHTML =
+      '<div class="profile-products">' +
+      products.map(function(p) {
+        var imgInner = p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" />' : (EMOJI[p.category]||'🌿');
+        return '<a class="pp-card" href="product-detail.html?id=' + p.id + '" style="text-decoration:none;">' +
+          '<div class="pp-img">' + imgInner + '</div>' +
+          '<div class="pp-body"><div class="pp-name">' + esc(p.name) + '</div>' +
+          '<div class="pp-price">' + priceStr(p) + '</div></div></a>';
+      }).join('') +
+      '</div>';
+  } catch(e) {
+    document.getElementById('productsContainer').innerHTML = '<div class="empty-msg">Could not load products.</div>';
+  }
+}
+
+function requireAuthLink(e) {
+  if (!isSignedIn()) { e.preventDefault(); openModal('loginModal'); return false; }
+  return true;
+}
+
+function shareProfile(platform) {
+  var url = window.location.href;
+  var name = document.getElementById('profileName').textContent;
+  var text = name + ' on Soko Safi — Farmer profile';
+  switch (platform) {
+    case 'whatsapp': window.open('https://wa.me/?text=' + encodeURIComponent(text+' '+url),'_blank'); break;
+    case 'facebook': window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),'_blank'); break;
+    case 'x': window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text)+'&url='+encodeURIComponent(url),'_blank'); break;
+    case 'copy': navigator.clipboard.writeText(url).then(function(){ alert('Profile link copied!'); }); break;
+  }
+}
+
+if (isSignedIn()) {
+  var u = JSON.parse(localStorage.getItem('user')||'{}');
+  document.getElementById('authBtn').textContent = (u.first_name||'Account');
+}
+
+window.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+</body>
+</html>

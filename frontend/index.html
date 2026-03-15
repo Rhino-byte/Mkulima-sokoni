@@ -82,6 +82,20 @@
     .hnc-arrow { font-size: .85rem; color: rgba(255,255,255,.3); transition: all .2s; }
     .hero-nav-card:hover .hnc-arrow { color: rgba(255,255,255,.8); transform: translateX(3px); }
 
+    /* ── PRODUCT TICKER (below topbar, same theme) ── */
+    .product-ticker { background: var(--forest); padding: 12px 0; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.1); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .product-ticker-track { display: flex; gap: 0; width: max-content; animation: tickerScroll 50s linear infinite; }
+    .product-ticker:hover .product-ticker-track { animation-play-state: paused; }
+    .product-ticker-item { flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 6px 24px; color: rgba(255,255,255,.95); font-size: .85rem; white-space: nowrap; border-right: 1px solid rgba(255,255,255,.12); text-decoration: none; transition: background .2s; }
+    .product-ticker-item:hover { background: rgba(255,255,255,.06); }
+    .product-ticker-item .ticker-thumb { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: rgba(255,255,255,.1); display: grid; place-items: center; font-size: 22px; }
+    .product-ticker-item .ticker-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .product-ticker-item .ticker-info { display: flex; flex-direction: column; gap: 1px; }
+    .product-ticker-item .ticker-name { font-weight: 600; color: #fff; }
+    .product-ticker-item .ticker-price { font-size: .8rem; color: var(--gold); font-weight: 600; }
+    .product-ticker-item .ticker-loc { font-size: .72rem; color: var(--lime); opacity: .85; }
+    @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
     /* ── FILTER BAR ── */
     .filter-bar { background: var(--cream); border-bottom: 1px solid var(--border); padding: 0 28px; overflow-x: auto; scrollbar-width: none; }
     .filter-bar::-webkit-scrollbar { display: none; }
@@ -92,9 +106,14 @@
 
     /* ── MARKET ── */
     .market-wrap { max-width: 1200px; margin: 0 auto; padding: 28px; }
-    .market-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
+    .market-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
+    .market-head .market-head-left { flex: 1; min-width: 0; text-align: left; }
+    .market-head .market-head-center { flex: 1; min-width: 0; text-align: center; }
+    .market-head .market-head-right { flex: 1; min-width: 0; text-align: right; }
     .market-head h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; }
-    .market-count { font-size: .8rem; color: var(--muted); }
+    .market-count { font-size: .9rem; color: var(--muted); }
+    .market-view-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 100px; background: var(--forest); color: #fff; font-size: .85rem; font-weight: 600; text-decoration: none; font-family: 'DM Sans', sans-serif; transition: all .2s; border: 1.5px solid var(--forest); }
+    .market-view-btn:hover { background: var(--leaf); border-color: var(--leaf); color: #fff; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
     .cat-section { margin-bottom: 32px; }
     .cat-title { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .cat-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
@@ -155,7 +174,6 @@
       border-bottom: 1px solid rgba(255,255,255,.1);
     }
     /* Brand column — logo big, left-aligned, text below */
-    .footer-brand-col {}
     .footer-flogo { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
     .footer-flogo-mark {
       width: 100px; height: 100px; border-radius: 20px;
@@ -197,9 +215,18 @@
       .hero-nav-cards { flex-direction: row; flex-wrap: wrap; }
       .hero-nav-card { flex: 1; min-width: 130px; }
     }
+    @media (max-width: 768px) {
+      .market-head .market-head-left { flex: 0 1 auto; }
+      .market-head .market-head-center { flex: 0 1 auto; }
+      .market-head .market-head-right { flex: 1 1 auto; justify-content: flex-end; display: flex; }
+      .market-head h2 { font-size: 1.25rem; }
+    }
     @media (max-width: 640px) {
       .topbar { padding: 0 14px; }
       .topbar-search { display: none; }
+      .product-ticker-item { padding: 6px 16px; gap: 10px; }
+      .product-ticker-item .ticker-thumb { width: 38px; height: 38px; font-size: 18px; }
+      .product-ticker-item .ticker-name { font-size: .8rem; }
       .hero { padding: 18px 16px; }
       .filter-bar { padding: 0 12px; }
       .market-wrap { padding: 20px 14px; }
@@ -240,6 +267,11 @@
   </div>
 </header>
 
+<!-- ── PRODUCT TICKER (stock-style, right to left) ── -->
+<div class="product-ticker" id="productTicker" aria-hidden="true">
+  <div class="product-ticker-track" id="productTickerTrack"></div>
+</div>
+
 <!-- ── HERO ── -->
 <section class="hero">
   <div class="hero-inner">
@@ -249,7 +281,7 @@
         <span>Kenya's Agricultural Marketplace</span>
       </div>
       <h1 class="hero-title">Connecting <em>Kenyan Farmers</em> to Buyers, Fairly.</h1>
-      <p class="hero-body">Transparent pricing, real-time listings, and direct deals — across all 47 counties.</p>
+      <p class="hero-body">Transparent pricing, real-time listings, and direct deals across all 47 counties.</p>
       <div class="hero-pills">
         <div class="hero-pill"><span class="hero-pill-dot"></span> 47 Counties</div>
         <div class="hero-pill"><span class="hero-pill-dot gold"></span> Fair Prices</div>
@@ -306,8 +338,9 @@
   <div id="products" class="page-section active">
     <div class="market-wrap">
       <div class="market-head">
-        <h2>Fresh From the Farm</h2>
-        <span class="market-count" id="product-count">Loading…</span>
+        <div class="market-head-left"><h2>Fresh From the Farm</h2></div>
+        <div class="market-head-center"><span class="market-count" id="product-count">Loading…</span></div>
+        <div class="market-head-right"><a href="market.html" class="market-view-btn">View Marketplace →</a></div>
       </div>
       <div id="products-container">
         <div class="empty-state">
@@ -452,8 +485,7 @@
   <div class="footer-bottom">
     <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
     <div class="footer-badges">
-      <span class="footer-badge">🇰🇪 Made in Kenya</span>
-      <span class="footer-badge">🔒 Secure Platform</span>
+      <span class="footer-badge">Powered by TaiStat Firm</span>
     </div>
   </div>
 </footer>
@@ -484,24 +516,76 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── Load products ── */
+  /* ── Load products (instant from cache, then background refresh) ── */
   async function loadProducts() {
     const container = document.getElementById('products-container');
+
+    // Instant render from cache
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('productsCache'));
+      if (cached && cached.length) {
+        allProducts = cached;
+        renderProducts(cached);
+        renderProductTicker(cached);
+      }
+    } catch(e) {}
+
+    // Fetch fresh data in background
     try {
       const res = await fetch(`${API}/products?status=active`);
       if (!res.ok) throw new Error();
       const products = await res.json();
       allProducts = products;
+      try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
       renderProducts(products);
+      renderProductTicker(products);
     } catch {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">⚠️</div>
-          <h4>Could not load listings</h4>
-          <p>Please check your connection and try again.</p>
-        </div>`;
-      document.getElementById('product-count').textContent = '';
+      if (!allProducts.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">⚠️</div>
+            <h4>Could not load listings</h4>
+            <p>Please check your connection and try again.</p>
+          </div>`;
+        document.getElementById('product-count').textContent = '';
+        document.getElementById('productTicker').style.display = 'none';
+      }
     }
+  }
+
+  /* ── Product ticker (image, name, location; below topbar) ── */
+  const EMOJI = { Vegetables:'🥬', Fruits:'🍊', Cereals:'🌽', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Other:'📦' };
+  function renderProductTicker(products) {
+    const ticker = document.getElementById('productTicker');
+    const track = document.getElementById('productTickerTrack');
+    if (!products.length) {
+      ticker.style.display = 'none';
+      return;
+    }
+    const tickerPriceStr = (p) => {
+      if (p.product_type === 'livestock' && p.price_min != null && p.price_max != null)
+        return `KSh ${Number(p.price_min).toLocaleString()}–${Number(p.price_max).toLocaleString()}`;
+      if (p.price) return `KSh ${Number(p.price).toLocaleString()}`;
+      return '';
+    };
+    const itemHTML = (p) => {
+      const name = (p.name || 'Unnamed').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      const loc = (p.county || p.location || 'Kenya').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      const price = tickerPriceStr(p);
+      const thumb = p.image_url
+        ? `<img src="${p.image_url.replace(/"/g, '&quot;')}" alt="" loading="lazy" />`
+        : (EMOJI[p.category] || '🌿');
+      return `<a href="product-detail.html?id=${p.id}" onclick="try{sessionStorage.setItem('productCache_${p.id}',JSON.stringify(allProducts.find(x=>x.id==='${p.id}')));sessionStorage.setItem('productsCache',JSON.stringify(allProducts))}catch(e){}" class="product-ticker-item" title="${name} — ${loc}">` +
+        `<span class="ticker-thumb">${thumb}</span>` +
+        `<span class="ticker-info">` +
+        `<span class="ticker-name">${name}</span>` +
+        (price ? `<span class="ticker-price">${price}</span>` : '') +
+        `<span class="ticker-loc">📍 ${loc}</span>` +
+        `</span></a>`;
+    };
+    const chunk = products.map(itemHTML).join('');
+    track.innerHTML = chunk + chunk; /* duplicate for seamless loop */
+    ticker.style.display = '';
   }
 
   /* ── Render products ── */
@@ -536,6 +620,14 @@
       </div>`).join('');
   }
 
+  function goToProduct(p) {
+    try {
+      sessionStorage.setItem('productCache_' + p.id, JSON.stringify(p));
+      sessionStorage.setItem('productsCache', JSON.stringify(allProducts));
+    } catch(e) {}
+    location.href = 'product-detail.html?id=' + p.id;
+  }
+
   /* ── Product card ── */
   function productCardHTML(p) {
     const EMOJI = { Vegetables:'🥬', Fruits:'🍊', Cereals:'🌽', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Other:'🌿' };
@@ -543,9 +635,8 @@
     const price = (p.product_type === 'livestock' && p.price_min && p.price_max)
       ? `KSh ${p.price_min}–${p.price_max}`
       : p.price ? `KSh ${p.price}` : 'Price on request';
-    const safeName = (p.name || '').replace(/'/g, "\\'");
     return `
-      <article class="product-card" onclick="alert('Viewing: ${safeName} — ID ${p.id}')">
+      <article class="product-card" onclick="goToProduct(allProducts.find(x=>x.id==='${p.id}')||{id:'${p.id}'})">
         <div class="product-img">
           ${imgHTML}
           ${!p.image_url ? (EMOJI[p.category] || '🌿') : ''}
@@ -600,6 +691,7 @@
         const res = await fetch(`${API}/products?status=active`);
         if (!res.ok) return;
         const data = await res.json();
+        try { sessionStorage.setItem('productsCache', JSON.stringify(data)); } catch(e) {}
         if (lastCount > 0 && data.length !== lastCount) {
           allProducts = data;
           applyFilters();

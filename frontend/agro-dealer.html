@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agro-Dealer Dashboard | Soko Safi</title>
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --forest: #1B4332; --leaf: #40916C; --lime: #74C69D; --gold: #E9C46A;
+      --amber: #F4A261; --cream: #FAF6EF; --ink: #1A1A18; --muted: #6B705C;
+      --border: #DDD8CE; --danger: #ef4444; --warning: #f59e0b;
+      --shadow-sm: 0 2px 12px rgba(27,67,50,.08);
+      --shadow-md: 0 8px 32px rgba(27,67,50,.13);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    .topbar { position: sticky; top: 0; z-index: 200; background: var(--forest); display: flex; align-items: center; padding: 0 28px; height: 60px; gap: 20px; box-shadow: 0 2px 16px rgba(0,0,0,.25); }
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .logo-mark { width: 36px; height: 36px; border-radius: 9px; overflow: hidden; display: grid; place-items: center; background: #fff; flex-shrink: 0; box-shadow: 0 3px 12px rgba(116,198,157,.4); }
+    .logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-label strong { display: block; font-size: .9rem; font-weight: 600; color: #fff; line-height: 1.2; }
+    .logo-label span { font-size: .67rem; color: var(--lime); font-weight: 300; }
+    .topbar-nav { flex: 1; display: flex; justify-content: center; align-items: center; gap: 4px; }
+    .topbar-nav-link { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.65); font-size: .82rem; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: all .2s; cursor: pointer; border: none; background: transparent; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+    .topbar-nav-link:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .topbar-nav-link.active { color: var(--lime); background: rgba(116,198,157,.12); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .topbar-btn { height: 33px; padding: 0 15px; border-radius: 100px; border: 1.5px solid rgba(255,255,255,.25); background: transparent; color: #fff; font-size: .78rem; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+    .topbar-btn:hover { background: rgba(255,255,255,.1); }
+    .topbar-btn.danger { border-color: rgba(239,68,68,.4); color: #fca5a5; }
+    .topbar-btn.danger:hover { background: rgba(239,68,68,.15); }
+
+    .page-section { display: none; animation: fadeUp .3s ease-out; }
+    .page-section.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 28px; }
+
+    .dash-hero { background: var(--forest); padding: 28px; border-radius: 20px; margin-bottom: 28px; position: relative; overflow: hidden; }
+    .dash-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 50% 120% at 100% 50%, rgba(116,198,157,.1) 0%, transparent 60%); }
+    .dash-hero h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: #fff; position: relative; z-index: 1; }
+    .dash-hero p { font-size: .88rem; color: rgba(255,255,255,.6); position: relative; z-index: 1; margin-top: 4px; }
+    .dash-hero-name { color: var(--lime); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border-radius: 16px; padding: 20px; border: 1.5px solid var(--border); transition: all .2s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--lime); }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+    .stat-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest); }
+
+    .section-card { background: #fff; border-radius: 18px; padding: 24px; border: 1.5px solid var(--border); margin-bottom: 24px; }
+    .section-card h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-card p.sub { font-size: .85rem; color: var(--muted); margin: -10px 0 16px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--forest); color: #fff; }
+    th { padding: 12px 14px; text-align: left; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    th:first-child { border-radius: 10px 0 0 0; }
+    th:last-child { border-radius: 0 10px 0 0; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: .88rem; }
+    tr:hover { background: rgba(116,198,157,.04); }
+    .badge { padding: 4px 10px; border-radius: 100px; font-size: .72rem; font-weight: 600; display: inline-block; }
+    .badge-active { background: rgba(116,198,157,.15); color: var(--leaf); }
+    .badge-pending { background: rgba(245,158,11,.15); color: var(--warning); }
+    .badge-low { background: rgba(239,68,68,.12); color: var(--danger); }
+
+    .btn-sm { padding: 5px 13px; border-radius: 100px; border: 1.5px solid var(--leaf); background: transparent; color: var(--leaf); font-size: .75rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+    .btn-sm:hover { background: var(--leaf); color: #fff; }
+    .btn-sm.solid { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .btn-sm.solid:hover { background: var(--leaf); border-color: var(--leaf); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-group { margin-bottom: 0; }
+    .form-group label { display: block; font-size: .78rem; font-weight: 600; margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: .86rem; font-family: 'DM Sans', sans-serif; color: var(--ink); background: var(--cream); outline: none; transition: all .2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--leaf); background: #fff; box-shadow: 0 0 0 3px rgba(64,145,108,.1); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-submit { padding: 12px 24px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--forest), var(--leaf)); color: #fff; font-size: .88rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; box-shadow: 0 4px 14px rgba(27,67,50,.22); }
+    .form-submit:hover { opacity: .92; transform: translateY(-2px); }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+    .empty-state h4 { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+
+    footer { background: var(--forest); margin-top: 40px; padding: 20px 28px; text-align: center; }
+    .footer-copy { font-size: .76rem; color: rgba(255,255,255,.35); }
+    .footer-copy strong { color: var(--lime); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .topbar-nav { display: none; }
+      .wrap { padding: 18px 14px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SUPER-USER BANNER (shown when admin accesses client account) ── -->
+<div id="superUserBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:10px 24px;font-family:'DM Sans',system-ui,sans-serif;font-size:.85rem;box-shadow:0 4px 20px rgba(124,58,237,.35);">
+  <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:100px;font-weight:700;font-size:.75rem;letter-spacing:.04em;">SUPER USER</span>
+      <span>You are viewing <strong id="suClientName">this client</strong>'s account as admin</span>
+    </div>
+    <button onclick="exitSuperUser()" style="padding:6px 16px;border-radius:100px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;">← Back to Admin</button>
+  </div>
+</div>
+<script>
+(function() {
+  if (sessionStorage.getItem('superUser') === 'true') {
+    var banner = document.getElementById('superUserBanner');
+    banner.style.display = 'block';
+    document.body.style.paddingTop = '44px';
+    var user = JSON.parse(localStorage.getItem('user') || '{}');
+    var name = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || user.email || 'this client';
+    document.getElementById('suClientName').textContent = name;
+  }
+})();
+function exitSuperUser() {
+  sessionStorage.removeItem('superUser');
+  sessionStorage.removeItem('superUserAdmin');
+  window.close();
+  setTimeout(function() { window.location.href = 'admin-support.html'; }, 200);
+}
+</script>
+
+<header class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
+    <div class="logo-label"><strong>Soko Safi</strong><span>Agro-Dealer</span></div>
+  </a>
+  <nav class="topbar-nav">
+    <button class="topbar-nav-link active" onclick="showPage('dashboard')">🏠 Dashboard</button>
+    <button class="topbar-nav-link" onclick="showPage('inventory')">📦 Inventory</button>
+    <button class="topbar-nav-link" onclick="showPage('add-product')">➕ Add Product</button>
+    <button class="topbar-nav-link" onclick="showPage('orders')">🛒 Orders</button>
+    <button class="topbar-nav-link" onclick="showPage('profile')">👤 Profile</button>
+  </nav>
+  <div class="topbar-right">
+    <button class="topbar-btn danger" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard" class="page-section active">
+  <div class="wrap">
+    <div class="dash-hero">
+      <h1>Welcome, <span class="dash-hero-name" id="dealer-name">Agro-Dealer</span> 🏪</h1>
+      <p>Manage your farm inputs, seeds, fertilizers, and equipment listings</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Active Listings</div><div class="stat-value" id="stat-listings">0</div></div>
+      <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-label">Total Orders</div><div class="stat-value" id="stat-orders">0</div></div>
+      <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-label">Total Views</div><div class="stat-value" id="stat-views">0</div></div>
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Rating</div><div class="stat-value" id="stat-rating">--</div></div>
+    </div>
+    <div class="section-card">
+      <h2>🔔 Recent Activity</h2>
+      <div id="recent-activity">
+        <div class="empty-state"><div class="icon">📋</div><h4>No recent activity</h4><p>Start by adding your products to the marketplace</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── INVENTORY ── -->
+<div id="inventory" class="page-section">
+  <div class="wrap">
+    <div class="section-card">
+      <h2>📦 My Inventory</h2>
+      <p class="sub">All your listed products and farm inputs</p>
+      <div id="inventory-table" style="overflow-x:auto;">
+        <div class="empty-state"><div class="icon">🌱</div><h4>No products listed yet</h4><p>Add your first product to start selling</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD PRODUCT ── -->
+<div id="add-product" class="page-section">
+  <div class="wrap">
+    <div class="section-card">
+      <h2>➕ Add New Product</h2>
+      <p class="sub">List a farm input, seed, fertilizer, or piece of equipment</p>
+      <form id="addProductForm" onsubmit="submitProduct(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" placeholder="e.g. DAP Fertilizer 50kg" required />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select required>
+              <option value="">Select category</option>
+              <option>Seeds</option>
+              <option>Fertilizers</option>
+              <option>Pesticides</option>
+              <option>Equipment</option>
+              <option>Animal Feed</option>
+              <option>Veterinary</option>
+              <option>Irrigation</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Price (KSh)</label>
+            <input type="number" placeholder="e.g. 3500" required />
+          </div>
+          <div class="form-group">
+            <label>Quantity Available</label>
+            <input type="number" placeholder="e.g. 100" required />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select>
+              <option>Kg</option>
+              <option>Bag</option>
+              <option>Litre</option>
+              <option>Piece</option>
+              <option>Pack</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Location / County</label>
+            <input type="text" placeholder="e.g. Nairobi" required />
+          </div>
+          <div class="form-group form-full">
+            <label>Description</label>
+            <textarea placeholder="Describe the product, brand, specifications…" required></textarea>
+          </div>
+          <div class="form-group form-full">
+            <label>Product Image</label>
+            <input type="file" accept="image/*" />
+          </div>
+          <div class="form-full">
+            <button type="submit" class="form-submit">Publish Listing</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── ORDERS ── -->
+<div id="orders" class="page-section">
+  <div class="wrap">
+    <div class="section-card">
+      <h2>🛒 Orders</h2>
+      <p class="sub">View and manage incoming orders from farmers and buyers</p>
+      <div id="orders-table" style="overflow-x:auto;">
+        <div class="empty-state"><div class="icon">🛒</div><h4>No orders yet</h4><p>Orders will appear here when farmers purchase your products</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROFILE ── -->
+<div id="profile" class="page-section">
+  <div class="wrap">
+    <div class="section-card">
+      <h2>👤 Business Profile</h2>
+      <p class="sub">Manage your agro-dealer business information</p>
+      <form id="profileForm" onsubmit="saveProfile(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Business Name</label>
+            <input type="text" id="profile-business" placeholder="Your business name" />
+          </div>
+          <div class="form-group">
+            <label>Owner Name</label>
+            <input type="text" id="profile-owner" placeholder="Full name" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="profile-email" readonly />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="profile-phone" placeholder="+254 700 000 000" />
+          </div>
+          <div class="form-group">
+            <label>Location / County</label>
+            <input type="text" id="profile-location" placeholder="e.g. Nakuru" />
+          </div>
+          <div class="form-group">
+            <label>Specialization</label>
+            <select id="profile-specialization">
+              <option value="">Select</option>
+              <option>Seeds & Seedlings</option>
+              <option>Fertilizers & Chemicals</option>
+              <option>Farm Equipment</option>
+              <option>Animal Health & Feed</option>
+              <option>Irrigation</option>
+              <option>General Agro-dealer</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label>About Your Business</label>
+            <textarea id="profile-about" placeholder="Tell farmers about what you offer…"></textarea>
+          </div>
+          <div class="form-full">
+            <button type="submit" class="form-submit">Save Profile</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  const isProduction = !['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const API = isProduction ? '/api' : 'http://localhost:5000/api';
+
+  function showPage(name) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.topbar-nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function submitProduct(e) {
+    e.preventDefault();
+    alert('Product listed successfully! (API integration pending)');
+    e.target.reset();
+  }
+
+  function saveProfile(e) {
+    e.preventDefault();
+    alert('Profile saved successfully!');
+  }
+
+  function loadUserProfile() {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        const name = (user.first_name || '') + ' ' + (user.last_name || '');
+        document.getElementById('dealer-name').textContent = name.trim() || 'Agro-Dealer';
+        if (user.email) document.getElementById('profile-email').value = user.email;
+        if (user.phone_number) document.getElementById('profile-phone').value = user.phone_number;
+      }
+    } catch {}
+  }
+
+  function logout() {
+    if (!confirm('Are you sure you want to logout?')) return;
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('authToken');
+    window.location.href = 'index.html';
+  }
+
+  window.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>
+</body>
+</html>

@@ -3,442 +3,199 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Support Dashboard | AgroLink Kenya</title>
+  <title>Admin Support Dashboard | Soko Safi</title>
   <meta name="description" content="Admin dashboard for managing users, verification, and support tickets." />
-
-  <!-- Google Fonts -->
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #818cf8;
-      --accent: #ec4899;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
-      --bg-light: #f9fafb;
+      --forest: #1B4332; --leaf: #40916C; --lime: #74C69D; --gold: #E9C46A;
+      --cream: #FAF6EF; --ink: #1A1A18; --muted: #6B705C; --border: #DDD8CE;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow-md: 0 8px 32px rgba(27,67,50,.13);
     }
-
-    body {
-      font-family: "Roboto", "Inter", sans-serif;
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #6366f1 75%, #e0e7ff 100%);
-      background-attachment: fixed;
-      color: var(--text-main);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; min-height: 100vh; }
     a { color: inherit; text-decoration: none; }
 
-    .page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    /* ── LOGIN GATE ── */
+    .login-gate {
+      position: fixed; inset: 0; z-index: 9999; background: var(--forest);
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
     }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 3px solid var(--primary);
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    .login-gate::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 80% at 20% 100%, rgba(116,198,157,.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 70% at 80% 20%, rgba(233,196,106,.08) 0%, transparent 55%);
     }
-
-    .nav {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 20px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 32px;
+    .login-gate::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px); background-size: 28px 28px;
     }
-
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .login-gate.hidden { display: none; }
+    .login-box { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+    .login-box-logo { text-align: center; margin-bottom: 24px; }
+    .login-box-logo-mark {
+      width: 72px; height: 72px; border-radius: 18px; overflow: hidden;
+      display: inline-grid; place-items: center; background: #fff;
+      box-shadow: 0 8px 32px rgba(116,198,157,.45); margin-bottom: 12px;
     }
-
-    .logo-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-weight: 900;
-      font-size: 28px;
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    .login-box-logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .login-box-logo h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #fff; }
+    .login-box-logo p { font-size: .82rem; color: var(--lime); }
+    .login-card {
+      background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
     }
-
-    .logo-text-main {
-      font-weight: 900;
-      font-size: 1.6rem;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .login-card h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--forest); margin-bottom: 4px; text-align: center; }
+    .login-card .sub { font-size: .82rem; color: var(--muted); text-align: center; margin-bottom: 18px; }
+    .login-card .lg-group { margin-bottom: 14px; }
+    .login-card .lg-group label { display: block; font-size: .8rem; font-weight: 600; margin-bottom: 4px; }
+    .login-card .lg-group input {
+      width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: .88rem; font-family: 'DM Sans', sans-serif; color: var(--ink); background: var(--cream); outline: none; transition: all .2s;
     }
-
-    .logo-text-sub {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
+    .login-card .lg-group input:focus { border-color: var(--leaf); background: #fff; box-shadow: 0 0 0 3px rgba(64,145,108,.1); }
+    .login-card .login-btn {
+      width: 100%; padding: 12px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--forest), var(--leaf)); color: #fff;
+      font-size: .9rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 4px 14px rgba(27,67,50,.25); transition: all .2s;
     }
+    .login-card .login-btn:hover { opacity: .92; transform: translateY(-2px); }
+    .login-error { background: #fef2f2; color: #991b1b; padding: 8px 12px; border-radius: 8px; font-size: .82rem; margin-bottom: 12px; display: none; border: 1px solid #fecaca; text-align: center; }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    /* ── PAGE LAYOUT ── */
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+    header { position: sticky; top: 0; z-index: 100; background: var(--forest); box-shadow: 0 2px 16px rgba(0,0,0,.22); }
+    .nav { max-width: 1400px; margin: 0 auto; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: grid; place-items: center; background: #fff; flex-shrink: 0; box-shadow: 0 3px 12px rgba(116,198,157,.4); }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-text-main { font-weight: 700; font-size: 1rem; color: #fff; }
+    .logo-text-sub { font-size: .72rem; color: var(--lime); font-weight: 400; }
+    .nav-links { display: flex; align-items: center; gap: 10px; }
+    .nav-link { color: rgba(255,255,255,.7); font-weight: 500; font-size: .85rem; padding: 7px 14px; border-radius: 8px; transition: all .2s; }
+    .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .btn { padding: 8px 18px; border-radius: 100px; border: none; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
+    .btn-primary { background: linear-gradient(135deg, var(--forest), var(--leaf)); color: #fff; box-shadow: 0 4px 12px rgba(27,67,50,.2); }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.25); }
+    .btn-outline:hover { background: rgba(255,255,255,.1); }
 
-    .nav-link {
-      color: var(--text-main);
-      font-weight: 600;
-      padding: 10px 20px;
-      border-radius: 12px;
-      transition: all 0.3s;
-    }
-
-    .nav-link:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--primary);
-    }
-
-    .btn {
-      padding: 10px 24px;
-      border-radius: 12px;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: inherit;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #ffffff;
-    }
-
-    .btn-warning {
-      background: var(--warning);
-      color: #ffffff;
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: #ffffff;
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-    }
-
-    .btn-outline:hover {
-      background: var(--primary);
-      color: #ffffff;
-    }
-
-    main {
-      flex: 1;
-      padding: 40px 32px;
-    }
-
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-    }
-
+    main { flex: 1; padding: 28px; }
+    .container { max-width: 1400px; margin: 0 auto; }
     .dashboard-header {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-      border-radius: 24px;
-      padding: 32px;
-      margin-bottom: 32px;
-      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
-      border: 2px solid rgba(99, 102, 241, 0.2);
+      background: var(--forest); border-radius: 18px; padding: 28px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
     }
+    .dashboard-header::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 50% 120% at 100% 50%, rgba(116,198,157,.1) 0%, transparent 60%);
+    }
+    .dashboard-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 6px; position: relative; z-index: 1; }
 
-    .dashboard-title {
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border-radius: 16px; padding: 22px; border: 1.5px solid var(--border); transition: all .2s; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--forest), var(--lime)); }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--lime); }
+    .stat-icon { font-size: 28px; margin-bottom: 10px; }
+    .stat-label { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--forest); margin-bottom: 2px; }
+    .stat-change { font-size: .8rem; color: var(--muted); }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; background: #fff; padding: 10px; border-radius: 14px; border: 1.5px solid var(--border); }
+    .tab { padding: 10px 20px; border-radius: 10px; border: 1.5px solid var(--border); background: #fff; color: var(--ink); font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; font-size: .85rem; }
+    .tab.active { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .tab:hover:not(.active) { border-color: var(--lime); color: var(--leaf); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    .stat-card {
-      background: linear-gradient(135deg, #ffffff, #f9fafb);
-      border-radius: 20px;
-      padding: 28px;
-      border: 2px solid rgba(99, 102, 241, 0.2);
-      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
+    .section-card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(27,67,50,.06); border: 1.5px solid var(--border); margin-bottom: 24px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--forest); margin-bottom: 18px; }
 
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--forest); color: #fff; }
+    th { padding: 12px 14px; text-align: left; font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    th:first-child { border-radius: 10px 0 0 0; }
+    th:last-child { border-radius: 0 10px 0 0; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: .88rem; }
+    tr:hover { background: rgba(116,198,157,.04); }
 
-    .stat-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
-      border-color: var(--primary);
-    }
+    .badge { padding: 4px 10px; border-radius: 100px; font-size: .72rem; font-weight: 600; display: inline-block; }
+    .badge.verified { background: rgba(16,185,129,.15); color: var(--success); }
+    .badge.pending { background: rgba(245,158,11,.15); color: var(--warning); }
+    .badge.rejected { background: rgba(239,68,68,.15); color: var(--danger); }
+    .badge.farmer { background: rgba(16,185,129,.15); color: var(--success); }
+    .badge.buyer { background: rgba(59,130,246,.15); color: #3b82f6; }
+    .badge.open { background: rgba(245,158,11,.15); color: var(--warning); }
+    .badge.in-progress { background: rgba(59,130,246,.15); color: #3b82f6; }
+    .badge.resolved { background: rgba(16,185,129,.15); color: var(--success); }
+    .action-buttons { display: flex; gap: 6px; }
+    .btn-sm { padding: 5px 12px; font-size: .78rem; border-radius: 100px; }
 
-    .stat-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-      margin-bottom: 4px;
-    }
-
-    .stat-change {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-    }
-
-    .tab {
-      padding: 12px 24px;
-      border-radius: 12px;
-      border: 2px solid rgba(99, 102, 241, 0.2);
-      background: #ffffff;
-      color: var(--text-main);
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .tab.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #ffffff;
-      border-color: var(--primary);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .section-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
-      border: 2px solid rgba(99, 102, 241, 0.2);
-      margin-bottom: 32px;
-    }
-
-    .section-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-      margin-bottom: 24px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #ffffff;
-    }
-
-    th {
-      padding: 16px;
-      text-align: left;
-      font-weight: 700;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    td {
-      padding: 16px;
-      border-bottom: 1px solid rgba(99, 102, 241, 0.1);
-    }
-
-    tr:hover {
-      background: rgba(99, 102, 241, 0.05);
-    }
-
-    .badge {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      display: inline-block;
-    }
-
-    .badge.verified {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-    }
-
-    .badge.pending {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--warning);
-    }
-
-    .badge.rejected {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger);
-    }
-
-    .badge.farmer {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-    }
-
-    .badge.buyer {
-      background: rgba(59, 130, 246, 0.2);
-      color: #3b82f6;
-    }
-
-    .badge.open {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--warning);
-    }
-
-    .badge.in-progress {
-      background: rgba(59, 130, 246, 0.2);
-      color: #3b82f6;
-    }
-
-    .badge.resolved {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 0.85rem;
-    }
-
-    footer {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 24px;
-      text-align: center;
-      border-top: 3px solid var(--primary);
-      margin-top: 40px;
-    }
+    footer { background: var(--forest); padding: 20px 28px; text-align: center; margin-top: 28px; }
+    .footer-text { font-size: .76rem; color: rgba(255,255,255,.4); }
+    .footer-text strong { color: var(--lime); }
+    .footer-text a { color: var(--lime); font-weight: 500; }
 
     @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-      }
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      .tabs {
-        flex-direction: column;
-      }
+      .nav-links { display: none; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .tabs { flex-direction: column; }
+      main { padding: 18px 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
+
+  <!-- ── LOGIN GATE ── -->
+  <div class="login-gate" id="loginGate">
+    <div class="login-box">
+      <div class="login-box-logo">
+        <div class="login-box-logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
+        <h2>Admin Portal</h2>
+        <p>Soko Safi Support Dashboard</p>
+      </div>
+      <div class="login-card">
+        <h3>Sign In to Continue</h3>
+        <p class="sub">Authorized personnel only</p>
+        <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
+        <form id="adminLoginForm">
+          <div class="lg-group">
+            <label for="admin-email">Username / Email</label>
+            <input type="email" id="admin-email" placeholder="admin@sokosafi.com" required />
+          </div>
+          <div class="lg-group" style="margin-bottom:18px;">
+            <label for="admin-password">Password</label>
+            <input type="password" id="admin-password" placeholder="Enter password" required />
+          </div>
+          <button type="submit" class="login-btn">Access Dashboard</button>
+        </form>
+      </div>
+      <p style="text-align:center;margin-top:16px;font-size:.8rem;color:rgba(255,255,255,.4);">
+        <a href="index.html" style="color:#74C69D;">← Back to Soko Safi</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ADMIN DASHBOARD (hidden until login) ── -->
+  <div class="page" id="adminPage" style="display:none;">
     <header>
       <nav class="nav">
         <div class="logo-wrap">
-          <div class="logo-icon">⚙️</div>
+          <div class="logo-icon"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
           <div>
             <div class="logo-text-main">Admin Support</div>
-            <div class="logo-text-sub">User Management • Verification • Tickets</div>
+            <div class="logo-text-sub">User Management &bull; Verification &bull; Tickets</div>
           </div>
         </div>
         <div class="nav-links">
           <a href="index.html" class="nav-link">Home</a>
-          <a href="support.html" class="nav-link">Public Support</a>
           <button class="btn btn-outline" onclick="logout()">Logout</button>
         </div>
       </nav>
@@ -447,34 +204,34 @@
     <main>
       <div class="container">
         <div class="dashboard-header">
-          <h1 class="dashboard-title">Admin Support Dashboard 👨‍💼</h1>
-          <p style="color: var(--text-muted); font-size: 1.1rem;">Manage users, handle verification, and resolve support tickets</p>
+          <h1 class="dashboard-title">Admin Support Dashboard</h1>
+          <p style="color:rgba(255,255,255,.6);font-size:.9rem;position:relative;z-index:1;">Manage users, handle verification, and resolve support tickets</p>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">👥</div>
             <div class="stat-label">Total Users</div>
-            <div class="stat-value">1,247</div>
-            <div class="stat-change">+23 new this week</div>
+            <div class="stat-value" id="stat-total-users">—</div>
+            <div class="stat-change" id="stat-new-week">Loading…</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">⏳</div>
             <div class="stat-label">Pending Verification</div>
-            <div class="stat-value">18</div>
+            <div class="stat-value" id="stat-pending">—</div>
             <div class="stat-change">Requires attention</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">🎫</div>
-            <div class="stat-label">Open Tickets</div>
-            <div class="stat-value">12</div>
-            <div class="stat-change">3 high priority</div>
+            <div class="stat-icon">🌾</div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value" id="stat-products">—</div>
+            <div class="stat-change" id="stat-active-products">Loading…</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">✅</div>
             <div class="stat-label">Verified Users</div>
-            <div class="stat-value">1,156</div>
-            <div class="stat-change">92.7% verified</div>
+            <div class="stat-value" id="stat-verified">—</div>
+            <div class="stat-change" id="stat-verified-pct">Loading…</div>
           </div>
         </div>
 
@@ -482,6 +239,7 @@
           <button class="tab active" onclick="switchTab('users')">👥 User Management</button>
           <button class="tab" onclick="switchTab('verification')">✅ Verification</button>
           <button class="tab" onclick="switchTab('tickets')">🎫 Support Tickets</button>
+          <button class="tab" onclick="switchTab('client-access')">🔑 Client Access</button>
           <button class="tab" onclick="switchTab('analytics')">📊 Analytics</button>
         </div>
 
@@ -489,77 +247,12 @@
         <div id="users" class="tab-content active">
           <div class="section-card">
             <h2 class="section-title">All Users 👥</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Manage all registered users - farmers and buyers</p>
-            <div style="overflow-x: auto;">
+            <p style="color:var(--muted);margin-bottom:18px;">Manage all registered users - farmers, buyers, and agro-dealers</p>
+            <div style="overflow-x:auto;">
               <table>
-                <thead>
-                  <tr>
-                    <th>User ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Joined</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>USER-2024-001</td>
-                    <td><strong>Wanjiku K.</strong></td>
-                    <td>wanjiku@example.com</td>
-                    <td><span class="badge farmer">Farmer</span></td>
-                    <td><span class="badge verified">Verified</span></td>
-                    <td>2024-01-15</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-001')">View</button>
-                        <button class="btn btn-primary btn-sm" onclick="editUser('USER-2024-001')">Edit</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>USER-2024-045</td>
-                    <td><strong>Nairobi Market Ltd</strong></td>
-                    <td>info@nairobi-market.co.ke</td>
-                    <td><span class="badge buyer">Buyer</span></td>
-                    <td><span class="badge verified">Verified</span></td>
-                    <td>2024-02-03</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-045')">View</button>
-                        <button class="btn btn-primary btn-sm" onclick="editUser('USER-2024-045')">Edit</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>USER-2024-089</td>
-                    <td><strong>John Mutiso</strong></td>
-                    <td>mutiso@example.com</td>
-                    <td><span class="badge farmer">Farmer</span></td>
-                    <td><span class="badge pending">Pending</span></td>
-                    <td>2024-03-10</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-089')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="verifyUser('USER-2024-089')">Verify</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>USER-2024-092</td>
-                    <td><strong>Export Co. Kenya</strong></td>
-                    <td>contact@exportco.ke</td>
-                    <td><span class="badge buyer">Buyer</span></td>
-                    <td><span class="badge pending">Pending</span></td>
-                    <td>2024-03-12</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="viewUser('USER-2024-092')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="verifyUser('USER-2024-092')">Verify</button>
-                      </div>
-                    </td>
-                  </tr>
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+                <tbody id="users-table-body">
+                  <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">Loading users…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -570,69 +263,12 @@
         <div id="verification" class="tab-content">
           <div class="section-card">
             <h2 class="section-title">Pending Verifications ⏳</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Review and verify new user accounts</p>
-            <div style="overflow-x: auto;">
+            <p style="color:var(--muted);margin-bottom:18px;">Review and verify new user accounts</p>
+            <div style="overflow-x:auto;">
               <table>
-                <thead>
-                  <tr>
-                    <th>User ID</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Documents</th>
-                    <th>Submitted</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>USER-2024-089</td>
-                    <td><strong>John Mutiso</strong></td>
-                    <td><span class="badge farmer">Farmer</span></td>
-                    <td>
-                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-089')">📄 View Docs</button>
-                    </td>
-                    <td>2024-03-10</td>
-                    <td><span class="badge pending">Pending Review</span></td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-089')">✅ Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-089')">❌ Reject</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>USER-2024-092</td>
-                    <td><strong>Export Co. Kenya</strong></td>
-                    <td><span class="badge buyer">Buyer</span></td>
-                    <td>
-                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-092')">📄 View Docs</button>
-                    </td>
-                    <td>2024-03-12</td>
-                    <td><span class="badge pending">Pending Review</span></td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-092')">✅ Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-092')">❌ Reject</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>USER-2024-095</td>
-                    <td><strong>Sarah Njeri</strong></td>
-                    <td><span class="badge farmer">Farmer</span></td>
-                    <td>
-                      <button class="btn btn-outline btn-sm" onclick="viewDocuments('USER-2024-095')">📄 View Docs</button>
-                    </td>
-                    <td>2024-03-14</td>
-                    <td><span class="badge pending">Pending Review</span></td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-success btn-sm" onclick="approveVerification('USER-2024-095')">✅ Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectVerification('USER-2024-095')">❌ Reject</button>
-                      </div>
-                    </td>
-                  </tr>
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="verification-table-body">
+                  <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">Loading verifications…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -643,81 +279,91 @@
         <div id="tickets" class="tab-content">
           <div class="section-card">
             <h2 class="section-title">Support Tickets 🎫</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Manage and resolve support tickets from users</p>
-            <div style="overflow-x: auto;">
+            <p style="color:var(--muted);margin-bottom:18px;">Manage and resolve support tickets from users</p>
+            <div style="overflow-x:auto;">
               <table>
-                <thead>
-                  <tr>
-                    <th>Ticket ID</th>
-                    <th>User</th>
-                    <th>Subject</th>
-                    <th>Category</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Ticket ID</th><th>User</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
                 <tbody>
                   <tr>
-                    <td>#TKT-2024-001</td>
-                    <td><strong>Wanjiku K.</strong></td>
-                    <td>Payment issue with order</td>
-                    <td>Payment</td>
-                    <td><span class="badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">High</span></td>
-                    <td><span class="badge open">Open</span></td>
-                    <td>2024-03-15</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-001')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-001')">Assign</button>
-                      </div>
-                    </td>
+                    <td>#TKT-2024-001</td><td><strong>Wanjiku K.</strong></td><td>Payment issue with order</td><td>Payment</td>
+                    <td><span class="badge" style="background:rgba(239,68,68,.15);color:var(--danger);">High</span></td>
+                    <td><span class="badge open">Open</span></td><td>2024-03-15</td>
+                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-001')">View</button><button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-001')">Assign</button></div></td>
                   </tr>
                   <tr>
-                    <td>#TKT-2024-002</td>
-                    <td><strong>Nairobi Market Ltd</strong></td>
-                    <td>Product quality concern</td>
-                    <td>Quality</td>
-                    <td><span class="badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">Medium</span></td>
-                    <td><span class="badge in-progress">In Progress</span></td>
-                    <td>2024-03-14</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-002')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="resolveTicket('#TKT-2024-002')">Resolve</button>
-                      </div>
-                    </td>
+                    <td>#TKT-2024-002</td><td><strong>Nairobi Market Ltd</strong></td><td>Product quality concern</td><td>Quality</td>
+                    <td><span class="badge" style="background:rgba(245,158,11,.15);color:var(--warning);">Medium</span></td>
+                    <td><span class="badge in-progress">In Progress</span></td><td>2024-03-14</td>
+                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-002')">View</button><button class="btn btn-success btn-sm" onclick="resolveTicket('#TKT-2024-002')">Resolve</button></div></td>
                   </tr>
                   <tr>
-                    <td>#TKT-2024-003</td>
-                    <td><strong>John Mutiso</strong></td>
-                    <td>Account verification question</td>
-                    <td>Account</td>
-                    <td><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">Low</span></td>
-                    <td><span class="badge resolved">Resolved</span></td>
-                    <td>2024-03-13</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="viewTicket('#TKT-2024-003')">View</button>
-                      </div>
-                    </td>
+                    <td>#TKT-2024-003</td><td><strong>John Mutiso</strong></td><td>Account verification question</td><td>Account</td>
+                    <td><span class="badge" style="background:rgba(16,185,129,.15);color:var(--success);">Low</span></td>
+                    <td><span class="badge resolved">Resolved</span></td><td>2024-03-13</td>
+                    <td><div class="action-buttons"><button class="btn btn-outline btn-sm" onclick="viewTicket('#TKT-2024-003')">View</button></div></td>
                   </tr>
                   <tr>
-                    <td>#TKT-2024-004</td>
-                    <td><strong>Export Co. Kenya</strong></td>
-                    <td>Delivery delay inquiry</td>
-                    <td>Delivery</td>
-                    <td><span class="badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">Medium</span></td>
-                    <td><span class="badge open">Open</span></td>
-                    <td>2024-03-15</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-004')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-004')">Assign</button>
-                      </div>
-                    </td>
+                    <td>#TKT-2024-004</td><td><strong>Export Co. Kenya</strong></td><td>Delivery delay inquiry</td><td>Delivery</td>
+                    <td><span class="badge" style="background:rgba(245,158,11,.15);color:var(--warning);">Medium</span></td>
+                    <td><span class="badge open">Open</span></td><td>2024-03-15</td>
+                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-004')">View</button><button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-004')">Assign</button></div></td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client Access Tab -->
+        <div id="client-access" class="tab-content">
+          <div class="section-card">
+            <h2 class="section-title">🔑 Client Account Access</h2>
+            <p style="color:var(--muted);margin-bottom:18px;">Log in as any user to see exactly what they see on their dashboard. Enter their email and click Access.</p>
+            <div style="max-width:560px;">
+              <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:20px;">
+                <div style="flex:1;">
+                  <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:5px;">User Email</label>
+                  <input type="email" id="client-email" placeholder="user@example.com" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);outline:none;" />
+                </div>
+                <button class="btn btn-primary" id="access-btn" style="height:42px;padding:0 22px;white-space:nowrap;" onclick="accessClientAccount()">Access Account →</button>
+              </div>
+              <div id="client-error" style="background:#fef2f2;color:#991b1b;padding:10px 14px;border-radius:9px;font-size:.85rem;display:none;border:1px solid #fecaca;margin-bottom:16px;"></div>
+              <div id="client-result" style="display:none;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px;">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                  <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--forest),var(--leaf));display:grid;place-items:center;color:#fff;font-weight:700;font-size:1.1rem;" id="client-avatar">--</div>
+                  <div>
+                    <div style="font-weight:700;font-size:1rem;" id="client-name">--</div>
+                    <div style="font-size:.82rem;color:var(--muted);" id="client-email-display">--</div>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+                  <div style="padding:10px 14px;background:var(--cream);border-radius:10px;">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;">Role</div>
+                    <div style="font-weight:700;color:var(--forest);font-size:.92rem;" id="client-role">--</div>
+                  </div>
+                  <div style="padding:10px 14px;background:var(--cream);border-radius:10px;">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;">Status</div>
+                    <div style="font-weight:700;font-size:.92rem;" id="client-status">--</div>
+                  </div>
+                  <div style="padding:10px 14px;background:var(--cream);border-radius:10px;">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;">Joined</div>
+                    <div style="font-weight:700;color:var(--forest);font-size:.92rem;" id="client-joined">--</div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" style="width:100%;padding:12px;font-size:.9rem;" onclick="openClientDashboard()">
+                  Open Client Dashboard →
+                </button>
+                <p style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:8px;">Opens in a new tab with super-user access. A banner will show you are viewing as admin.</p>
+              </div>
+            </div>
+          </div>
+          <div class="section-card">
+            <h2 class="section-title" style="font-size:1.1rem;">📋 Recent Client Access Log</h2>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Accessed At</th></tr></thead>
+                <tbody id="access-log-body">
+                  <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px;">No client accounts accessed this session</td></tr>
                 </tbody>
               </table>
             </div>
@@ -728,31 +374,11 @@
         <div id="analytics" class="tab-content">
           <div class="section-card">
             <h2 class="section-title">Platform Analytics 📊</h2>
-            <div class="stats-grid" style="margin-top: 24px;">
-              <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-label">Total Users</div>
-                <div class="stat-value">1,247</div>
-                <div class="stat-change">+23 this week</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">🌾</div>
-                <div class="stat-label">Total Products</div>
-                <div class="stat-value">3,456</div>
-                <div class="stat-change">+89 this week</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">🛒</div>
-                <div class="stat-label">Total Orders</div>
-                <div class="stat-value">8,923</div>
-                <div class="stat-change">+156 this week</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value">KSh 12.5M</div>
-                <div class="stat-change">+8% this month</div>
-              </div>
+            <div class="stats-grid" style="margin-top:18px;">
+              <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Users</div><div class="stat-value" id="an-total-users">—</div><div class="stat-change" id="an-new-week">Loading…</div></div>
+              <div class="stat-card"><div class="stat-icon">🌾</div><div class="stat-label">Total Products</div><div class="stat-value" id="an-total-products">—</div><div class="stat-change" id="an-active-products">Loading…</div></div>
+              <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Verified Users</div><div class="stat-value" id="an-verified">—</div><div class="stat-change" id="an-verified-pct">Loading…</div></div>
+              <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">Pending Verification</div><div class="stat-value" id="an-pending">—</div><div class="stat-change">Requires action</div></div>
             </div>
           </div>
         </div>
@@ -760,72 +386,289 @@
     </main>
 
     <footer>
-      <div style="max-width: 1600px; margin: 0 auto;">
-        <p style="color: var(--text-muted);">© <span id="year"></span> AgroLink Kenya. All rights reserved.</p>
-        <p style="color: var(--text-muted); margin-top: 8px;">Admin Support Dashboard · <a href="support.html" style="color: var(--primary); font-weight: 600;">Public Support</a></p>
-      </div>
+      <p class="footer-text">&copy; <span id="year"></span> <strong>Soko Safi</strong>. All rights reserved. &middot; <a href="index.html">Home</a></p>
     </footer>
   </div>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
+    var API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5000/api' : '/api';
+
+    /* ── Admin Login Gate ── */
+    var ADMIN_USER = 'TaiStat@sokosafi.com';
+    var ADMIN_PASS = 'Soko_Safi@2026';
+
+    function showDashboard() {
+      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('adminPage').style.display = '';
+      loadAdminStats();
+      loadAdminUsers();
+    }
+
+    (function checkSession() {
+      if (sessionStorage.getItem('adminAuth') === 'true') showDashboard();
+    })();
+
+    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('admin-email').value.trim();
+      var pass = document.getElementById('admin-password').value;
+      if (email === ADMIN_USER && pass === ADMIN_PASS) {
+        sessionStorage.setItem('adminAuth', 'true');
+        showDashboard();
+      } else {
+        var err = document.getElementById('loginError');
+        err.style.display = 'block';
+        setTimeout(function() { err.style.display = 'none'; }, 4000);
+      }
+    });
+
+    /* ── Live Stats ── */
+    async function loadAdminStats() {
+      try {
+        var res = await fetch(API_BASE + '/auth/admin/stats');
+        if (!res.ok) throw new Error();
+        var s = await res.json();
+
+        var fmt = function(n) { return (n || 0).toLocaleString(); };
+        var pct = (s.total_users > 0) ? ((s.verified_users / s.total_users) * 100).toFixed(1) : '0';
+
+        document.getElementById('stat-total-users').textContent = fmt(s.total_users);
+        document.getElementById('stat-new-week').textContent = '+' + fmt(s.new_this_week) + ' new this week';
+        document.getElementById('stat-pending').textContent = fmt(s.pending_verification);
+        document.getElementById('stat-products').textContent = fmt(s.total_products);
+        document.getElementById('stat-active-products').textContent = fmt(s.active_products) + ' active';
+        document.getElementById('stat-verified').textContent = fmt(s.verified_users);
+        document.getElementById('stat-verified-pct').textContent = pct + '% verified';
+
+        document.getElementById('an-total-users').textContent = fmt(s.total_users);
+        document.getElementById('an-new-week').textContent = '+' + fmt(s.new_this_week) + ' this week';
+        document.getElementById('an-total-products').textContent = fmt(s.total_products);
+        document.getElementById('an-active-products').textContent = fmt(s.active_products) + ' active';
+        document.getElementById('an-verified').textContent = fmt(s.verified_users);
+        document.getElementById('an-verified-pct').textContent = pct + '% verified';
+        document.getElementById('an-pending').textContent = fmt(s.pending_verification);
+      } catch (e) {
+        console.error('Failed to load admin stats:', e);
+      }
+    }
+
+    /* ── Live Users & Verification Tables ── */
+    var allAdminUsers = [];
+
+    async function loadAdminUsers() {
+      try {
+        var res = await fetch(API_BASE + '/auth/admin/users');
+        if (!res.ok) throw new Error();
+        allAdminUsers = await res.json();
+        renderUsersTable(allAdminUsers);
+        renderVerificationTable(allAdminUsers.filter(function(u) {
+          return (u.certification_status || '').toLowerCase() === 'pending';
+        }));
+      } catch (e) {
+        document.getElementById('users-table-body').innerHTML =
+          '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:28px;">Failed to load users</td></tr>';
+        document.getElementById('verification-table-body').innerHTML =
+          '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:28px;">Failed to load verifications</td></tr>';
+      }
+    }
+
+    function esc(s) { return (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-KE', { year:'numeric', month:'short', day:'numeric' }) : '—'; }
+    function roleBadge(r) {
+      var cls = (r || '').toLowerCase();
+      if (cls === 'farmer') return '<span class="badge farmer">Farmer</span>';
+      if (cls === 'buyer') return '<span class="badge buyer">Buyer</span>';
+      if (cls === 'agro-dealer' || cls === 'agrodealer') return '<span class="badge" style="background:rgba(233,196,106,.2);color:#b88a00;">Agro-Dealer</span>';
+      return '<span class="badge">' + esc(r || 'Unknown') + '</span>';
+    }
+    function statusBadge(u) {
+      var cs = (u.certification_status || '').toLowerCase();
+      if (cs === 'verified' || cs === 'approved') return '<span class="badge verified">Verified</span>';
+      if (cs === 'pending') return '<span class="badge pending">Pending</span>';
+      if (cs === 'rejected') return '<span class="badge rejected">Rejected</span>';
+      return u.is_active !== false ? '<span class="badge verified">Active</span>' : '<span class="badge rejected">Inactive</span>';
+    }
+
+    function renderUsersTable(users) {
+      var tbody = document.getElementById('users-table-body');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">No users found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(function(u) {
+        var name = esc((u.first_name || '') + ' ' + (u.last_name || '')).trim() || esc(u.email);
+        return '<tr>' +
+          '<td><strong>' + name + '</strong></td>' +
+          '<td>' + esc(u.email) + '</td>' +
+          '<td>' + roleBadge(u.role) + '</td>' +
+          '<td>' + statusBadge(u) + '</td>' +
+          '<td>' + fmtDate(u.created_at) + '</td>' +
+          '<td><div class="action-buttons"><button class="btn btn-outline btn-sm" onclick="viewUser(\'' + esc(u.email) + '\')">View</button></div></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderVerificationTable(users) {
+      var tbody = document.getElementById('verification-table-body');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">No pending verifications</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(function(u) {
+        var name = esc((u.first_name || '') + ' ' + (u.last_name || '')).trim() || esc(u.email);
+        return '<tr>' +
+          '<td><strong>' + name + '</strong></td>' +
+          '<td>' + esc(u.email) + '</td>' +
+          '<td>' + roleBadge(u.role) + '</td>' +
+          '<td>' + fmtDate(u.created_at) + '</td>' +
+          '<td><span class="badge pending">Pending Review</span></td>' +
+          '<td><div class="action-buttons">' +
+            '<button class="btn btn-success btn-sm" onclick="approveVerification(\'' + esc(u.id) + '\')">Approve</button>' +
+            '<button class="btn btn-danger btn-sm" onclick="rejectVerification(\'' + esc(u.id) + '\')">Reject</button>' +
+          '</div></td></tr>';
+      }).join('');
+    }
+
+    /* ── Tab Switching ── */
     function switchTab(tabName) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(function(tab) { tab.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(content) { content.classList.remove('active'); });
       event.target.classList.add('active');
       document.getElementById(tabName).classList.add('active');
     }
 
-    function viewUser(userId) {
-      alert(`👤 Viewing user details for ${userId}`);
+    /* ── User / Verification Actions ── */
+    function viewUser(email) {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      document.querySelector('.tab[onclick*="client-access"]').classList.add('active');
+      document.getElementById('client-access').classList.add('active');
+      document.getElementById('client-email').value = email;
+      accessClientAccount();
     }
+    function approveVerification(userId) { if (confirm('Approve verification for this user?')) { alert('Verification approved! User will be notified.'); loadAdminUsers(); loadAdminStats(); } }
+    function rejectVerification(userId) { var reason = prompt('Reject verification?\n\nPlease provide reason:'); if (reason) { alert('Verification rejected.\nReason: ' + reason); loadAdminUsers(); loadAdminStats(); } }
+    function viewTicket(ticketId) { alert('Viewing ticket ' + ticketId); }
+    function assignTicket(ticketId) { if (confirm('Assign ticket ' + ticketId + ' to support team?')) alert('Ticket ' + ticketId + ' assigned.'); }
+    function resolveTicket(ticketId) { if (confirm('Mark ticket ' + ticketId + ' as resolved?')) alert('Ticket ' + ticketId + ' resolved.'); }
 
-    function editUser(userId) {
-      alert(`✏️ Edit user ${userId}`);
-    }
+    /* ── Client Access (Super User) ── */
+    var currentClientData = null;
+    var accessLog = [];
 
-    function verifyUser(userId) {
-      if (confirm(`Approve verification for ${userId}?`)) {
-        alert(`✅ User ${userId} verified successfully!`);
+    async function accessClientAccount() {
+      var email = document.getElementById('client-email').value.trim();
+      var errEl = document.getElementById('client-error');
+      var resEl = document.getElementById('client-result');
+      var btn = document.getElementById('access-btn');
+      errEl.style.display = 'none';
+      resEl.style.display = 'none';
+      currentClientData = null;
+
+      if (!email) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Loading…';
+
+      try {
+        var res = await fetch(API_BASE + '/auth/user-by-email?email=' + encodeURIComponent(email));
+        if (!res.ok) {
+          var errData = await res.json().catch(function() { return {}; });
+          throw new Error(errData.error || 'User not found with that email.');
+        }
+        var data = await res.json();
+        var user = data.user || data;
+
+        currentClientData = user;
+
+        var initials = ((user.first_name || '')[0] || '') + ((user.last_name || '')[0] || '');
+        document.getElementById('client-avatar').textContent = initials.toUpperCase() || email[0].toUpperCase();
+        document.getElementById('client-name').textContent = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || email;
+        document.getElementById('client-email-display').textContent = user.email || email;
+        document.getElementById('client-role').textContent = (user.role || 'Unknown').charAt(0).toUpperCase() + (user.role || 'unknown').slice(1);
+
+        var active = user.is_active !== false;
+        var statusEl = document.getElementById('client-status');
+        statusEl.textContent = active ? 'Active' : 'Inactive';
+        statusEl.style.color = active ? 'var(--success)' : 'var(--danger)';
+
+        var joined = user.created_at ? new Date(user.created_at).toLocaleDateString('en-KE', { year:'numeric', month:'short', day:'numeric' }) : '--';
+        document.getElementById('client-joined').textContent = joined;
+
+        resEl.style.display = 'block';
+      } catch (e) {
+        errEl.textContent = e.message || 'Failed to find user. Please check the email.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Access Account →';
       }
     }
 
-    function viewDocuments(userId) {
-      alert(`📄 Viewing verification documents for ${userId}\n\nDocuments:\n- ID Card\n- Business License\n- Farm Registration`);
-    }
+    function openClientDashboard() {
+      if (!currentClientData) return;
 
-    function approveVerification(userId) {
-      if (confirm(`Approve verification for ${userId}?`)) {
-        alert(`✅ Verification approved for ${userId}! User will be notified.`);
+      var role = (currentClientData.role || '').toLowerCase();
+      var dashboardMap = { farmer: 'farmer.html', buyer: 'buyer.html', 'agro-dealer': 'agro-dealer.html', agrodealer: 'agro-dealer.html' };
+      var target = dashboardMap[role] || 'buyer.html';
+
+      var superUserPayload = {
+        id: currentClientData.id,
+        firebase_uid: currentClientData.firebase_uid,
+        email: currentClientData.email,
+        first_name: currentClientData.first_name || '',
+        last_name: currentClientData.last_name || '',
+        role: currentClientData.role,
+        phone_number: currentClientData.phone_number || ''
+      };
+
+      addAccessLog(currentClientData);
+
+      var w = window.open('', '_blank');
+      if (w) {
+        w.document.write('<html><head><title>Loading...</title></head><body><script>' +
+          'localStorage.setItem("user", ' + JSON.stringify(JSON.stringify(superUserPayload)) + ');' +
+          'localStorage.setItem("userRole", ' + JSON.stringify(currentClientData.role || '') + ');' +
+          'sessionStorage.setItem("superUser", "true");' +
+          'sessionStorage.setItem("superUserAdmin", "TaiStat@sokosafi.com");' +
+          'window.location.href = ' + JSON.stringify(target) + ';' +
+          '<\/script></body></html>');
+        w.document.close();
       }
     }
 
-    function rejectVerification(userId) {
-      const reason = prompt(`Reject verification for ${userId}?\n\nPlease provide reason:`);
-      if (reason) {
-        alert(`❌ Verification rejected for ${userId}.\nReason: ${reason}\nUser will be notified.`);
-      }
+    function addAccessLog(user) {
+      accessLog.unshift({
+        name: ((user.first_name || '') + ' ' + (user.last_name || '')).trim(),
+        email: user.email,
+        role: user.role || 'Unknown',
+        time: new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
+      });
+      renderAccessLog();
     }
 
-    function viewTicket(ticketId) {
-      alert(`🎫 Viewing ticket ${ticketId}\n\nDetails:\n- User: Wanjiku K.\n- Subject: Payment issue\n- Status: Open\n- Priority: High`);
+    function renderAccessLog() {
+      var tbody = document.getElementById('access-log-body');
+      if (!accessLog.length) return;
+      tbody.innerHTML = accessLog.map(function(e) {
+        return '<tr><td><strong>' + esc(e.name) + '</strong></td><td>' + esc(e.email) + '</td><td>' + roleBadge(e.role) + '</td><td>' + e.time + '</td></tr>';
+      }).join('');
     }
 
-    function assignTicket(ticketId) {
-      if (confirm(`Assign ticket ${ticketId} to support team?`)) {
-        alert(`✅ Ticket ${ticketId} assigned to support team.`);
-      }
-    }
-
-    function resolveTicket(ticketId) {
-      if (confirm(`Mark ticket ${ticketId} as resolved?`)) {
-        alert(`✅ Ticket ${ticketId} marked as resolved.`);
-      }
-    }
+    document.getElementById('client-email').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); accessClientAccount(); }
+    });
 
     function logout() {
       if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('adminAuth');
         window.location.href = 'index.html';
       }
     }

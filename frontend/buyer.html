@@ -440,6 +440,35 @@
 </head>
 <body>
 
+<!-- ── SUPER-USER BANNER (shown when admin accesses client account) ── -->
+<div id="superUserBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:10px 24px;font-family:'DM Sans',system-ui,sans-serif;font-size:.85rem;box-shadow:0 4px 20px rgba(124,58,237,.35);">
+  <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:100px;font-weight:700;font-size:.75rem;letter-spacing:.04em;">SUPER USER</span>
+      <span>You are viewing <strong id="suClientName">this client</strong>'s account as admin</span>
+    </div>
+    <button onclick="exitSuperUser()" style="padding:6px 16px;border-radius:100px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;">← Back to Admin</button>
+  </div>
+</div>
+<script>
+(function() {
+  if (sessionStorage.getItem('superUser') === 'true') {
+    var banner = document.getElementById('superUserBanner');
+    banner.style.display = 'block';
+    document.body.style.paddingTop = '44px';
+    var user = JSON.parse(localStorage.getItem('user') || '{}');
+    var name = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || user.email || 'this client';
+    document.getElementById('suClientName').textContent = name;
+  }
+})();
+function exitSuperUser() {
+  sessionStorage.removeItem('superUser');
+  sessionStorage.removeItem('superUserAdmin');
+  window.close();
+  setTimeout(function() { window.location.href = 'admin-support.html'; }, 200);
+}
+</script>
+
 <!-- ════════════════════════════
      TOPBAR
 ════════════════════════════ -->
@@ -950,8 +979,7 @@
   <div class="footer-bottom">
     <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
     <div class="footer-badges">
-      <span class="footer-badge">🇰🇪 Made in Kenya</span>
-      <span class="footer-badge">🔒 Secure Platform</span>
+      <span class="footer-badge">Powered by TaiStat Firm</span>
     </div>
   </div>
 </footer>
@@ -1053,17 +1081,34 @@
   async function loadProducts() {
     const container = document.getElementById('products-container');
     if (!container) return;
-    container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:52px 20px;gap:14px;"><div class="spinner"></div><p style="color:var(--muted);font-weight:600;">Loading available products…</p></div>';
 
+    // Instant render from cache
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('productsCache'));
+      if (cached && cached.length) {
+        allProducts = cached;
+        lastProductCount = cached.length;
+        renderProducts(cached);
+      }
+    } catch(e) {}
+
+    if (!allProducts.length) {
+      container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:52px 20px;gap:14px;"><div class="spinner"></div><p style="color:var(--muted);font-weight:600;">Loading available products…</p></div>';
+    }
+
+    // Fetch fresh data in background
     try {
       const res = await fetch(`${API_BASE_URL}/products?status=active`);
       if (!res.ok) throw new Error('Failed');
       const products = await res.json();
       allProducts = products;
       lastProductCount = products.length;
+      try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
       renderProducts(products);
     } catch {
-      container.innerHTML = '<div class="empty-state"><div class="icon">🌱</div><h4>No products found</h4><p style="font-size:.82rem;">Check back soon as farmers add fresh produce.</p></div>';
+      if (!allProducts.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🌱</div><h4>No products found</h4><p style="font-size:.82rem;">Check back soon as farmers add fresh produce.</p></div>';
+      }
     }
   }
 
@@ -1186,7 +1231,14 @@
   }
 
   /* ── Product detail ── */
-  function viewProductDetails(id) { alert(`👁 Product details for ID: ${id}`); }
+  function viewProductDetails(id) {
+    var p = allProducts.find(x => x.id === id);
+    try {
+      if (p) sessionStorage.setItem('productCache_' + id, JSON.stringify(p));
+      sessionStorage.setItem('productsCache', JSON.stringify(allProducts));
+    } catch(e) {}
+    location.href = 'product-detail.html?id=' + id;
+  }
 
   /* ── Cart / Tender / Order actions ── */
   function removeFromCart(id)   { if(confirm('Remove this item from cart?')) alert('🗑️ Item removed.'); }

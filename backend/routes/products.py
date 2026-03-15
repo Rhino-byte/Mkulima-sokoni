@@ -196,6 +196,71 @@ def get_product(product_id):
         logger.error(f"Error getting product: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@products_bp.route('/<product_id>/detail', methods=['GET'])
+def get_product_detail(product_id):
+    """
+    Get product with seller details (profile + user info) for the public detail page.
+    Increments view count. Returns product + seller object.
+    """
+    try:
+        product = Product.get_product_by_id(product_id)
+        if not product:
+            return jsonify({'error': 'Product not found'}), 404
+
+        Product.increment_views(product_id)
+
+        product_dict = dict(product)
+        product_dict['id'] = str(product_dict['id'])
+        farmer_profile_id = str(product_dict['farmer_profile_id'])
+        product_dict['farmer_profile_id'] = farmer_profile_id
+
+        seller = {}
+        try:
+            from database import execute_query
+            q = """
+                SELECT fp.id AS profile_id, fp.farm_name, fp.location AS seller_location,
+                       fp.county AS seller_county, fp.bio, fp.profile_image_url,
+                       fp.certification_status, fp.farming_experience_years,
+                       u.email, u.phone_number, u.first_name, u.last_name,
+                       u.firebase_uid, u.created_at AS member_since
+                FROM farmer_profiles fp
+                INNER JOIN users u ON fp.user_id = u.id
+                WHERE fp.id = %s::uuid
+            """
+            result = execute_query(q, (farmer_profile_id,), fetch_one=True)
+            if result:
+                seller = dict(result)
+                seller['profile_id'] = str(seller['profile_id'])
+        except Exception as e:
+            logger.warning(f"Could not fetch seller info: {e}")
+
+        similar = []
+        try:
+            sims = Product.get_all_products(
+                status='active', category=product_dict.get('category'), limit=8
+            )
+            for s in sims:
+                sd = dict(s)
+                if str(sd['id']) == product_id:
+                    continue
+                sd['id'] = str(sd['id'])
+                sd['farmer_profile_id'] = str(sd['farmer_profile_id'])
+                similar.append(sd)
+            similar = similar[:6]
+        except Exception as e:
+            logger.warning(f"Could not fetch similar products: {e}")
+
+        return jsonify({
+            'success': True,
+            'product': product_dict,
+            'seller': seller,
+            'similar': similar
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error getting product detail: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @products_bp.route('/farmer/<firebase_uid>', methods=['GET'])
 def get_farmer_products(firebase_uid):
     """

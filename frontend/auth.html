@@ -4,275 +4,279 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="api-base-url" content="" id="api-base-url-meta">
-  <title>Sign In | Mkulima-Bora</title>
+  <title>Sign In | Soko Safi</title>
+  <meta name="application-name" content="Soko Safi" />
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --forest:    #1B4332;
+      --leaf:      #40916C;
+      --lime:      #74C69D;
+      --gold:      #E9C46A;
+      --amber:     #F4A261;
+      --cream:     #FAF6EF;
+      --ink:       #1A1A18;
+      --muted:     #6B705C;
+      --border:    #DDD8CE;
+      --shadow-sm: 0 2px 12px rgba(27,67,50,.08);
+      --shadow-md: 0 8px 32px rgba(27,67,50,.13);
     }
-    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #e0f7ef 0%, #f5f7fa 100%);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--forest);
+      color: var(--ink);
+      line-height: 1.6;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
-    }
-    
-    .auth-container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 450px;
-    }
-    
-    .logo {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .logo h1 {
-      color: #27AE60;
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .logo p {
-      color: #6b7280;
-      font-size: 0.9rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #374151;
-      font-weight: 500;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-    
-    .form-group input:focus {
-      outline: none;
-      border-color: #27AE60;
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 1rem;
-    }
-    
-    .btn-primary {
-      background: #27AE60;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #229954;
-    }
-    
-    .btn-google {
-      background: white;
-      color: #374151;
-      border: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
-    .btn-google:hover {
-      background: #f9fafb;
-    }
-    
-    .divider {
-      text-align: center;
-      margin: 1.5rem 0;
-      color: #9ca3af;
+      padding: 1.5rem;
       position: relative;
+      overflow-x: hidden;
     }
-    
-    .divider::before,
-    .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 45%;
-      height: 1px;
-      background: #e5e7eb;
+    body::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 80% at 20% 100%, rgba(116,198,157,.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 70% at 80% 20%, rgba(233,196,106,.08) 0%, transparent 55%);
     }
-    
-    .divider::before {
-      left: 0;
+    body::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 28px 28px;
     }
-    
-    .divider::after {
-      right: 0;
+    a { color: inherit; text-decoration: none; }
+
+    .auth-wrapper { position: relative; z-index: 1; width: 100%; max-width: 480px; }
+
+    .auth-logo { text-align: center; margin-bottom: 28px; }
+    .auth-logo-mark {
+      width: 80px; height: 80px; border-radius: 20px; overflow: hidden;
+      display: inline-grid; place-items: center; background: #fff;
+      box-shadow: 0 8px 32px rgba(116,198,157,.45);
+      margin-bottom: 14px;
     }
-    
+    .auth-logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .auth-logo-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: #fff; }
+    .auth-logo-tag { font-size: .82rem; color: var(--lime); font-weight: 300; }
+
+    .auth-card {
+      background: #fff; border-radius: 20px; padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .auth-card h2 {
+      font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700;
+      color: var(--forest); margin-bottom: 4px; text-align: center;
+    }
+    .auth-card .subtitle { font-size: .85rem; color: var(--muted); text-align: center; margin-bottom: 22px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: .82rem; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: .9rem; font-family: 'DM Sans', sans-serif; color: var(--ink);
+      background: var(--cream); outline: none; transition: all .2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--leaf); background: #fff;
+      box-shadow: 0 0 0 3px rgba(64,145,108,.12);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Role selector tabs */
+    .role-selector { display: flex; gap: 8px; margin-bottom: 18px; }
+    .role-tab {
+      flex: 1; padding: 12px 8px; border-radius: 12px;
+      border: 2px solid var(--border); background: var(--cream);
+      cursor: pointer; text-align: center; transition: all .2s;
+    }
+    .role-tab:hover { border-color: var(--lime); }
+    .role-tab.active { border-color: var(--forest); background: var(--forest); }
+    .role-tab.active .role-tab-icon { background: rgba(255,255,255,.2); }
+    .role-tab.active .role-tab-label { color: #fff; }
+    .role-tab.active .role-tab-desc { color: rgba(255,255,255,.7); }
+    .role-tab-icon { width: 36px; height: 36px; border-radius: 9px; display: inline-grid; place-items: center; font-size: 18px; background: rgba(27,67,50,.08); margin-bottom: 6px; }
+    .role-tab-label { font-size: .82rem; font-weight: 700; color: var(--ink); display: block; }
+    .role-tab-desc { font-size: .68rem; color: var(--muted); display: block; margin-top: 2px; }
+    .role-tab input[type="radio"] { display: none; }
+
+    .btn {
+      width: 100%; padding: 12px; border-radius: 10px; border: none;
+      font-size: .92rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all .2s; margin-bottom: 10px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--forest), var(--leaf));
+      color: #fff; box-shadow: 0 4px 14px rgba(27,67,50,.25);
+    }
+    .btn-primary:hover { opacity: .92; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(27,67,50,.3); }
+    .btn-google {
+      background: #fff; color: var(--ink); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-google:hover { background: var(--cream); border-color: var(--leaf); }
+    .btn-google svg { flex-shrink: 0; }
+
+    .divider { text-align: center; margin: 16px 0; color: var(--muted); font-size: .82rem; position: relative; }
+    .divider::before, .divider::after {
+      content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .toggle-form { text-align: center; margin-top: 18px; font-size: .85rem; color: var(--muted); }
+    .toggle-form a { color: var(--leaf); font-weight: 600; }
+    .toggle-form a:hover { color: var(--forest); text-decoration: underline; }
+
     .error-message {
-      background: #fee2e2;
-      color: #991b1b;
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      display: none;
+      background: #fef2f2; color: #991b1b; padding: 10px 14px; border-radius: 10px;
+      margin-bottom: 14px; font-size: .85rem; display: none; border: 1px solid #fecaca;
     }
-    
     .success-message {
-      background: #d1fae5;
-      color: #065f46;
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      display: none;
+      background: #ecfdf5; color: #065f46; padding: 10px 14px; border-radius: 10px;
+      margin-bottom: 14px; font-size: .85rem; display: none; border: 1px solid #a7f3d0;
     }
-    
-    .toggle-form {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: #6b7280;
+
+    .back-link {
+      display: block; text-align: center; margin-top: 20px; font-size: .82rem; color: rgba(255,255,255,.5);
     }
-    
-    .toggle-form a {
-      color: #27AE60;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    
-    .toggle-form a:hover {
-      text-decoration: underline;
+    .back-link a { color: var(--lime); font-weight: 500; }
+    .back-link a:hover { text-decoration: underline; color: #fff; }
+
+    @media (max-width: 520px) {
+      body { padding: 1rem; }
+      .auth-card { padding: 24px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .role-selector { flex-direction: column; }
+      .role-tab { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 14px; }
+      .role-tab-icon { margin-bottom: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="logo">
-      <h1>🌾 Mkulima-Bora</h1>
-      <p>Connecting Farmers and Buyers</p>
-    </div>
-    
-    <div id="error-message" class="error-message"></div>
-    <div id="success-message" class="success-message"></div>
-    
-    <!-- Login Form -->
-    <div id="login-form">
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" required>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Sign In</button>
-      </form>
-      
-      <div class="divider">or</div>
-      
-      <button class="btn btn-google" id="google-signin-btn">
-        <span>🔍</span>
-        Sign in with Google
-      </button>
-      
-      <div class="toggle-form">
-        Don't have an account? <a href="#" id="show-register">Sign up</a>
+  <div class="auth-wrapper">
+
+    <div class="auth-logo">
+      <div class="auth-logo-mark">
+        <img src="assets/img/sokosafi_logo.png" alt="Soko Safi logo" />
       </div>
+      <div class="auth-logo-name">Soko Safi</div>
+      <div class="auth-logo-tag">From farm to market, fairly.</div>
     </div>
-    
-    <!-- Register Form -->
-    <div id="register-form" style="display: none;">
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="register-first-name">First Name</label>
-          <input type="text" id="register-first-name" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="register-last-name">Last Name</label>
-          <input type="text" id="register-last-name" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="register-email">Email</label>
-          <input type="email" id="register-email" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="register-password">Password</label>
-          <input type="password" id="register-password" required minlength="6">
-        </div>
-        
-        <div class="form-group">
-          <label for="register-phone">Phone Number (Optional)</label>
-          <input type="tel" id="register-phone" placeholder="+254 700 000 000">
-        </div>
-        
-        <div class="form-group">
-          <label>Role</label>
-          <div style="display: flex; gap: 1rem;">
-            <label style="display: flex; align-items: center;">
-              <input type="checkbox" name="role" value="farmer" style="margin-right: 0.5rem;">
-              Farmer
-            </label>
-            <label style="display: flex; align-items: center;">
-              <input type="checkbox" name="role" value="buyer" style="margin-right: 0.5rem;">
-              Buyer
-            </label>
+
+    <div class="auth-card">
+      <div id="error-message" class="error-message"></div>
+      <div id="success-message" class="success-message"></div>
+
+      <!-- ── LOGIN FORM ── -->
+      <div id="login-form">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to your Soko Safi account</p>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" required />
           </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+        <div class="divider">or</div>
+        <button class="btn btn-google" id="google-signin-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 010-9.18l-7.98-6.19a24.01 24.01 0 000 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Sign in with Google
+        </button>
+        <div class="toggle-form">
+          Don't have an account? <a href="#" id="show-register">Sign up</a>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Sign Up</button>
-      </form>
-      
-      <div class="divider">or</div>
-      
-      <button class="btn btn-google" id="google-signup-btn">
-        <span>🔍</span>
-        Sign up with Google
-      </button>
-      
-      <div class="toggle-form">
-        Already have an account? <a href="#" id="show-login">Sign in</a>
       </div>
+
+      <!-- ── REGISTER FORM ── -->
+      <div id="register-form" style="display: none;">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join Soko Safi — select your role</p>
+
+        <div class="role-selector" id="role-selector">
+          <label class="role-tab active" data-role="farmer">
+            <input type="radio" name="role" value="farmer" checked />
+            <span class="role-tab-icon">🌾</span>
+            <span>
+              <span class="role-tab-label">Farmer</span>
+              <span class="role-tab-desc">Sell your produce</span>
+            </span>
+          </label>
+          <label class="role-tab" data-role="buyer">
+            <input type="radio" name="role" value="buyer" />
+            <span class="role-tab-icon">🛒</span>
+            <span>
+              <span class="role-tab-label">Buyer</span>
+              <span class="role-tab-desc">Purchase produce</span>
+            </span>
+          </label>
+          <label class="role-tab" data-role="agro-dealer">
+            <input type="radio" name="role" value="agro-dealer" />
+            <span class="role-tab-icon">🏪</span>
+            <span>
+              <span class="role-tab-label">Agro-Dealer</span>
+              <span class="role-tab-desc">Supply farm inputs</span>
+            </span>
+          </label>
+        </div>
+
+        <form id="registerForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="register-first-name">First Name</label>
+              <input type="text" id="register-first-name" placeholder="John" required />
+            </div>
+            <div class="form-group">
+              <label for="register-last-name">Last Name</label>
+              <input type="text" id="register-last-name" placeholder="Mwangi" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="register-email">Email</label>
+            <input type="email" id="register-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" placeholder="Min 6 characters" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label for="register-phone">Phone Number (Optional)</label>
+            <input type="tel" id="register-phone" placeholder="+254 700 000 000" />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+        <div class="divider">or</div>
+        <button class="btn btn-google" id="google-signup-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 010-9.18l-7.98-6.19a24.01 24.01 0 000 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Sign up with Google
+        </button>
+        <div class="toggle-form">
+          Already have an account? <a href="#" id="show-login">Sign in</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-link">
+      <a href="index.html">← Back to Soko Safi Home</a>
     </div>
   </div>
-  
+
   <!-- Firebase SDK -->
   <script type="module">
-    // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
              signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    
-    // Firebase configuration
+
     const firebaseConfig = {
       apiKey: "AIzaSyDEX2PIAw5ZhSp84OiZgRK35WfGhTeT-0E",
       authDomain: "agriculture-43eaf.firebaseapp.com",
@@ -282,160 +286,114 @@
       appId: "1:340310533875:web:54c8b2d5e28bf32d437986",
       measurementId: "G-9W1C0JWRYN"
     };
-    
-    // Initialize Firebase
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
-    
-    // API base URL - environment-aware
-    // Check for meta tag first (can be set in HTML for custom backend URL)
+
     const apiMetaTag = document.querySelector('meta[name="api-base-url"]');
     let API_BASE_URL;
-    
     if (apiMetaTag && apiMetaTag.content) {
-      // Use meta tag value if set
       API_BASE_URL = apiMetaTag.content;
     } else {
-      // Auto-detect based on environment
       const hostname = window.location.hostname;
-      const isProduction = hostname !== 'localhost' && 
+      const isProduction = hostname !== 'localhost' &&
                           hostname !== '127.0.0.1' &&
                           !hostname.startsWith('192.168.') &&
                           !hostname.startsWith('10.') &&
                           hostname !== '';
-      
-      if (isProduction) {
-        // In production, use relative URL (same domain) or set your Vercel backend URL here
-        // If backend is on same Vercel project, use '/api'
-        // If backend is on different domain, uncomment and set:
-        // API_BASE_URL = 'https://your-backend.vercel.app/api';
-        API_BASE_URL = '/api';
-      } else {
-        // Development - use localhost
-        API_BASE_URL = 'http://localhost:5000/api';
-      }
+      API_BASE_URL = isProduction ? '/api' : 'http://localhost:5000/api';
     }
-    
-    console.log('API Base URL:', API_BASE_URL);
-    
-    // Authentication functions
+
+    /* ── Role selector tabs ── */
+    document.querySelectorAll('.role-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        tab.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+
+    /* ── Auth functions ── */
     async function registerWithEmail(email, password, phoneNumber, role, firstName, lastName) {
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firebase_uid: user.uid,
-            email: user.email,
-            phone_number: phoneNumber,
-            role: role,
-            first_name: firstName,
-            last_name: lastName
+            firebase_uid: user.uid, email: user.email,
+            phone_number: phoneNumber, role: role,
+            first_name: firstName, last_name: lastName
           })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Registration failed');
-        
         const dashboardResponse = await getDashboardRoute(user.uid);
         return { success: true, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) {
-        console.error('Registration error:', error);
-        throw error;
-      }
+      } catch (error) { console.error('Registration error:', error); throw error; }
     }
-    
+
     async function loginWithEmail(email, password) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const idToken = await user.getIdToken();
-        
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id_token: idToken })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Login failed');
-        
         if (data.new_user) {
-          return { 
-            success: true, 
-            newUser: true, 
-            firebaseUid: data.firebase_uid, 
-            email: data.email,
-            firstName: data.first_name,
-            lastName: data.last_name
-          };
+          return { success: true, newUser: true, firebaseUid: data.firebase_uid,
+                   email: data.email, firstName: data.first_name, lastName: data.last_name };
         }
-        
         const dashboardResponse = await getDashboardRoute(user.uid);
         return { success: true, newUser: false, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) {
-        console.error('Login error:', error);
-        throw error;
-      }
+      } catch (error) { console.error('Login error:', error); throw error; }
     }
-    
+
     async function signInWithGoogle() {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
         const idToken = await user.getIdToken();
-        
         const response = await fetch(`${API_BASE_URL}/auth/google-signin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id_token: idToken })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Google sign-in failed');
-        
         if (data.new_user) {
           return { success: true, newUser: true, firebaseUid: data.firebase_uid, email: data.email };
         }
-        
         const dashboardResponse = await getDashboardRoute(user.uid);
         return { success: true, newUser: false, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) {
-        console.error('Google sign-in error:', error);
-        throw error;
-      }
+      } catch (error) { console.error('Google sign-in error:', error); throw error; }
     }
-    
+
     async function completeRegistration(firebaseUid, email, phoneNumber, role, firstName, lastName) {
       try {
         const response = await fetch(`${API_BASE_URL}/auth/complete-registration`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firebase_uid: firebaseUid,
-            email: email,
-            phone_number: phoneNumber,
-            role: role,
-            first_name: firstName,
-            last_name: lastName
+            firebase_uid: firebaseUid, email: email,
+            phone_number: phoneNumber, role: role,
+            first_name: firstName, last_name: lastName
           })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Registration completion failed');
-        
         const dashboardResponse = await getDashboardRoute(firebaseUid);
         return { success: true, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) {
-        console.error('Complete registration error:', error);
-        throw error;
-      }
+      } catch (error) { console.error('Complete registration error:', error); throw error; }
     }
-    
+
     async function getDashboardRoute(firebaseUid) {
       try {
         const response = await fetch(`${API_BASE_URL}/auth/dashboard-route`, {
@@ -443,131 +401,108 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ firebase_uid: firebaseUid })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to get dashboard route');
         return data;
-      } catch (error) {
-        console.error('Get dashboard route error:', error);
-        throw error;
-      }
+      } catch (error) { console.error('Get dashboard route error:', error); throw error; }
     }
-    
+
     function redirectToDashboard(dashboard) {
       if (dashboard) {
-        // Ensure dashboard path is absolute and doesn't have double frontend/ prefix
         let path = dashboard;
-        if (!path.startsWith('/')) {
-          path = '/' + path;
-        }
-        // Remove any double frontend/ prefix
+        if (!path.startsWith('/')) path = '/' + path;
         path = path.replace(/^\/frontend\/frontend\//, '/frontend/');
-        // Remove single frontend/ prefix since Flask serves from frontend directory
         path = path.replace(/^\/frontend\//, '/');
         window.location.href = path;
       } else {
         window.location.href = '/index.html';
       }
     }
-    
+
     function showRoleSelectionForm(firebaseUid, email, firstName = null, lastName = null) {
       const overlay = document.createElement('div');
       overlay.id = 'role-selection-overlay';
       overlay.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center;
-        align-items: center; z-index: 10000;
+        background: rgba(27,67,50,.7); backdrop-filter: blur(8px);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 10000; padding: 1rem;
       `;
-      
       const modal = document.createElement('div');
       modal.style.cssText = `
-        background: white; padding: 2rem; border-radius: 12px;
-        max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        background: #fff; padding: 2rem; border-radius: 20px;
+        max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3);
       `;
-      
       modal.innerHTML = `
-        <h2 style="margin-bottom: 1rem; color: #27AE60;">Welcome to Mkulima-Bora!</h2>
-        <p style="margin-bottom: 1.5rem; color: #6b7280;">
-          Please select your role to get started. You can select multiple roles if applicable.
-        </p>
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="width:60px;height:60px;border-radius:14px;overflow:hidden;display:inline-grid;place-items:center;background:#fff;box-shadow:0 4px 16px rgba(116,198,157,.4);margin-bottom:12px;">
+            <img src="assets/img/sokosafi_logo.png" alt="" style="width:100%;height:100%;object-fit:contain;" />
+          </div>
+          <h2 style="font-family:'Playfair Display',serif;color:#1B4332;font-size:1.25rem;">Welcome to Soko Safi!</h2>
+          <p style="color:#6B705C;font-size:.88rem;">Select your role to get started</p>
+        </div>
         <form id="role-selection-form">
           ${!firstName || !lastName ? `
-          <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-              First Name
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+              <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">First Name</label>
+              <input type="text" name="first_name" id="first-name" value="${firstName || ''}" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
+            </div>
+            <div>
+              <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">Last Name</label>
+              <input type="text" name="last_name" id="last-name" value="${lastName || ''}" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
+            </div>
+          </div>` : ''}
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+              <input type="radio" name="role" value="farmer" style="accent-color:#1B4332;" checked />
+              <span style="font-size:18px;">🌾</span>
+              <span><strong style="font-size:.88rem;">Farmer</strong><br><span style="font-size:.78rem;color:#6B705C;">Sell your produce directly</span></span>
             </label>
-            <input type="text" name="first_name" id="first-name" value="${firstName || ''}" required
-              style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 6px;">
-          </div>
-          <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-              Last Name
+            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+              <input type="radio" name="role" value="buyer" style="accent-color:#1B4332;" />
+              <span style="font-size:18px;">🛒</span>
+              <span><strong style="font-size:.88rem;">Buyer</strong><br><span style="font-size:.78rem;color:#6B705C;">Purchase fresh produce</span></span>
             </label>
-            <input type="text" name="last_name" id="last-name" value="${lastName || ''}" required
-              style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 6px;">
-          </div>
-          ` : ''}
-          <div style="margin-bottom: 1rem;">
-            <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
-              <input type="checkbox" name="role" value="farmer" id="role-farmer" style="margin-right: 0.5rem;">
-              <span style="font-weight: 500;">🌾 Farmer</span>
+            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+              <input type="radio" name="role" value="agro-dealer" style="accent-color:#1B4332;" />
+              <span style="font-size:18px;">🏪</span>
+              <span><strong style="font-size:.88rem;">Agro-Dealer</strong><br><span style="font-size:.78rem;color:#6B705C;">Supply farm inputs</span></span>
             </label>
-            <p style="margin-left: 1.5rem; color: #6b7280; font-size: 0.9rem;">
-              Sell your produce directly to buyers
-            </p>
           </div>
-          <div style="margin-bottom: 1.5rem;">
-            <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
-              <input type="checkbox" name="role" value="buyer" id="role-buyer" style="margin-right: 0.5rem;">
-              <span style="font-weight: 500;">🛒 Buyer</span>
-            </label>
-            <p style="margin-left: 1.5rem; color: #6b7280; font-size: 0.9rem;">
-              Purchase fresh produce from farmers
-            </p>
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">Phone Number (Optional)</label>
+            <input type="tel" name="phone_number" id="phone-number" placeholder="+254 700 000 000"
+              style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
           </div>
-          <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
-              Phone Number (Optional)
-            </label>
-            <input type="tel" name="phone_number" id="phone-number"
-              placeholder="+254 700 000 000"
-              style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 6px;">
-          </div>
-          <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button type="submit" id="submit-role"
-              style="flex: 1; padding: 0.75rem; background: #27AE60; color: white;
-              border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
-              Continue
-            </button>
-          </div>
+          <button type="submit" id="submit-role"
+            style="width:100%;padding:12px;background:linear-gradient(135deg,#1B4332,#40916C);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(27,67,50,.25);">
+            Continue
+          </button>
         </form>
       `;
-      
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
-      
+
       const form = modal.querySelector('#role-selection-form');
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const selectedRoles = Array.from(form.querySelectorAll('input[name="role"]:checked'))
-          .map(checkbox => checkbox.value);
-        if (selectedRoles.length === 0) {
-          alert('Please select at least one role');
-          return;
-        }
+        const selectedRole = form.querySelector('input[name="role"]:checked')?.value;
+        if (!selectedRole) { alert('Please select a role'); return; }
         const phoneNumber = form.querySelector('#phone-number').value;
-        const role = selectedRoles.join(',');
         const submitBtn = form.querySelector('#submit-role');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Processing...';
         try {
           const firstNameInput = form.querySelector('#first-name');
           const lastNameInput = form.querySelector('#last-name');
-          const finalFirstName = firstNameInput ? firstNameInput.value : null;
-          const finalLastName = lastNameInput ? lastNameInput.value : null;
-          const result = await completeRegistration(firebaseUid, email, phoneNumber, role, finalFirstName, finalLastName);
+          const finalFirstName = firstNameInput ? firstNameInput.value : firstName;
+          const finalLastName = lastNameInput ? lastNameInput.value : lastName;
+          const result = await completeRegistration(firebaseUid, email, phoneNumber, selectedRole, finalFirstName, finalLastName);
           localStorage.setItem('user', JSON.stringify(result.user));
-          localStorage.setItem('userRole', role);
+          localStorage.setItem('userRole', selectedRole);
           document.body.removeChild(overlay);
           redirectToDashboard(result.dashboard);
         } catch (error) {
@@ -578,7 +513,7 @@
         }
       });
     }
-    
+
     function handleColdStart(authResult) {
       if (authResult.newUser) {
         showRoleSelectionForm(authResult.firebaseUid, authResult.email, authResult.firstName, authResult.lastName);
@@ -590,33 +525,31 @@
         }
       }
     }
-    
+
     function showError(message) {
       const errorDiv = document.getElementById('error-message');
       errorDiv.textContent = message;
       errorDiv.style.display = 'block';
       setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
     }
-    
-    // Form toggle
+
+    /* ── Form toggles ── */
     document.getElementById('show-register').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('register-form').style.display = 'block';
     });
-    
     document.getElementById('show-login').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('register-form').style.display = 'none';
       document.getElementById('login-form').style.display = 'block';
     });
-    
-    // Login form
+
+    /* ── Login ── */
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-      
       try {
         const result = await loginWithEmail(email, password);
         if (result.newUser) {
@@ -624,12 +557,10 @@
         } else {
           redirectToDashboard(result.dashboard);
         }
-      } catch (error) {
-        showError(error.message);
-      }
+      } catch (error) { showError(error.message); }
     });
-    
-    // Register form
+
+    /* ── Register ── */
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const firstName = document.getElementById('register-first-name').value;
@@ -637,41 +568,22 @@
       const email = document.getElementById('register-email').value;
       const password = document.getElementById('register-password').value;
       const phone = document.getElementById('register-phone').value;
-      const roles = Array.from(document.querySelectorAll('input[name="role"]:checked'))
-        .map(cb => cb.value);
-      
-      if (roles.length === 0) {
-        showError('Please select at least one role');
-        return;
-      }
-      
+      const role = document.querySelector('#role-selector input[name="role"]:checked')?.value || 'farmer';
       try {
-        const result = await registerWithEmail(email, password, phone, roles.join(','), firstName, lastName);
+        const result = await registerWithEmail(email, password, phone, role, firstName, lastName);
         window.location.href = result.dashboard;
-      } catch (error) {
-        showError(error.message);
-      }
+      } catch (error) { showError(error.message); }
     });
-    
-    // Google sign-in buttons
+
+    /* ── Google ── */
     document.getElementById('google-signin-btn').addEventListener('click', async () => {
-      try {
-        const result = await signInWithGoogle();
-        handleColdStart(result);
-      } catch (error) {
-        showError(error.message);
-      }
+      try { const result = await signInWithGoogle(); handleColdStart(result); }
+      catch (error) { showError(error.message); }
     });
-    
     document.getElementById('google-signup-btn').addEventListener('click', async () => {
-      try {
-        const result = await signInWithGoogle();
-        handleColdStart(result);
-      } catch (error) {
-        showError(error.message);
-      }
+      try { const result = await signInWithGoogle(); handleColdStart(result); }
+      catch (error) { showError(error.message); }
     });
   </script>
 </body>
 </html>
-
