@@ -262,8 +262,7 @@
     <input id="productSearch" type="text" placeholder="Search products, counties…" />
   </div>
   <div class="topbar-actions">
-    <button class="topbar-btn" onclick="location.href='auth.html'">Sign In</button>
-    <button class="topbar-btn solid" onclick="location.href='auth.html'">Get Started</button>
+    <button class="topbar-btn" onclick="location.href='index.html'">Home</button>
   </div>
 </header>
 
@@ -306,14 +305,14 @@
         </div>
         <span class="hnc-arrow">→</span>
       </a>
-      <button class="hero-nav-card hnc-support" onclick="showPage('support')" style="width:100%;text-align:left;font-family:inherit;">
-        <div class="hnc-icon">💬</div>
+      <a href="auth.html" class="hero-nav-card hnc-support">
+        <div class="hnc-icon">🏪</div>
         <div class="hnc-text">
-          <div class="hnc-label">Help Center</div>
-          <div class="hnc-title">Support</div>
+          <div class="hnc-label">For Agro-Dealers</div>
+          <div class="hnc-title">Agro-Dealer Dashboard</div>
         </div>
         <span class="hnc-arrow">→</span>
-      </button>
+      </a>
     </div>
   </div>
 </section>
@@ -446,38 +445,35 @@
     <div class="footer-col">
       <h5>About Us</h5>
       <ul>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Mission &amp; Vision</a></li>
-        <li><a href="#">Team</a></li>
+        <li><a href="about.html#story">Our Story</a></li>
+        <li><a href="about.html#mission">Mission &amp; Vision</a></li>
+        <li><a href="about.html#team">Team</a></li>
       </ul>
     </div>
 
-    <!-- Help Center -->
     <div class="footer-col">
       <h5>Help Center</h5>
       <ul>
-        <li><a href="#" onclick="showPage('support');return false;">Support</a></li>
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#" onclick="showPage('support');return false;">Contact Us</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="faq.html#contact">Contact Us</a></li>
       </ul>
     </div>
 
-    <!-- Legal -->
     <div class="footer-col">
       <h5>Legal</h5>
       <ul>
-        <li><a href="#">Terms of Service</a></li>
-        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
       </ul>
     </div>
 
-    <!-- Resources -->
     <div class="footer-col">
       <h5>Resources</h5>
       <ul>
-        <li><a href="#">How It Works</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Guides</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="market.html">Marketplace</a></li>
+        <li><a href="auth.html">Get Started</a></li>
       </ul>
     </div>
 
@@ -720,6 +716,18 @@
     loadProducts();
     startPolling();
   });
+
+  (function(){
+    try {
+      var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+      if(u&&role){
+        var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+        document.querySelectorAll('footer a').forEach(function(a){
+          if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+        });
+      }
+    }catch(e){}
+  })();
 </script>
 </body>
 </html>

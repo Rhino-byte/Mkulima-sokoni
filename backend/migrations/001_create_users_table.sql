@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_phone_number ON users(phone_number);
 -- This allows a user to have multiple roles (e.g., farmer AND buyer)
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'buyer', 'admin')),
+    role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'buyer', 'admin', 'agro-dealer')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, role)
 );

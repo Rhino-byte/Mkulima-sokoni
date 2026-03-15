@@ -105,7 +105,7 @@ def register():
         
         # Automatically create empty profiles based on roles
         try:
-            if 'farmer' in roles_list:
+            if 'farmer' in roles_list or 'agro-dealer' in roles_list:
                 if not FarmerProfile.profile_exists(user_id):
                     FarmerProfile.create_profile(
                         user_id,
@@ -124,7 +124,6 @@ def register():
                     )
         except Exception as e:
             logger.warning(f"Could not auto-create profiles: {str(e)}")
-            # Don't fail registration if profile creation fails
         
         return jsonify({
             'success': True,
@@ -309,7 +308,7 @@ def complete_registration():
         
         # Automatically create empty profiles based on roles
         try:
-            if 'farmer' in roles_list:
+            if 'farmer' in roles_list or 'agro-dealer' in roles_list:
                 if not FarmerProfile.profile_exists(user_id):
                     FarmerProfile.create_profile(
                         user_id,
@@ -328,7 +327,6 @@ def complete_registration():
                     )
         except Exception as e:
             logger.warning(f"Could not auto-create profiles: {str(e)}")
-            # Don't fail registration if profile creation fails
         
         # Get all roles
         user_roles = User.get_user_roles(user_id)
@@ -500,6 +498,8 @@ def get_dashboard_route():
             dashboard = '/admin-support.html'
         elif 'farmer' in roles_list:
             dashboard = '/farmer.html'
+        elif 'agro-dealer' in roles_list:
+            dashboard = '/agro-dealer.html'
         elif 'buyer' in roles_list:
             dashboard = '/buyer.html'
         else:

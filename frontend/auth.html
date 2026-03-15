@@ -275,7 +275,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-             signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+             signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDEX2PIAw5ZhSp84OiZgRK35WfGhTeT-0E",
@@ -291,18 +291,81 @@
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
-    const apiMetaTag = document.querySelector('meta[name="api-base-url"]');
-    let API_BASE_URL;
-    if (apiMetaTag && apiMetaTag.content) {
-      API_BASE_URL = apiMetaTag.content;
-    } else {
-      const hostname = window.location.hostname;
-      const isProduction = hostname !== 'localhost' &&
-                          hostname !== '127.0.0.1' &&
-                          !hostname.startsWith('192.168.') &&
-                          !hostname.startsWith('10.') &&
-                          hostname !== '';
-      API_BASE_URL = isProduction ? '/api' : 'http://localhost:5000/api';
+    const hostname = window.location.hostname;
+    const isProd = hostname !== 'localhost' && hostname !== '127.0.0.1' &&
+                   !hostname.startsWith('192.168.') && !hostname.startsWith('10.') && hostname !== '';
+    const API = isProd ? '/api' : 'http://localhost:5000/api';
+
+    const ROLE_DASHBOARDS = {
+      'farmer': 'farmer.html',
+      'buyer': 'buyer.html',
+      'agro-dealer': 'agro-dealer.html',
+      'admin': 'admin-support.html'
+    };
+
+    function getDashboard(role) {
+      if (!role) return 'index.html';
+      const roles = role.includes(',') ? role.split(',').map(r => r.trim()) : [role];
+      for (const r of ['admin','farmer','agro-dealer','buyer']) {
+        if (roles.includes(r)) return ROLE_DASHBOARDS[r];
+      }
+      return 'index.html';
+    }
+
+    function saveAndRedirect(user, role) {
+      try { localStorage.setItem('user', JSON.stringify(user)); } catch(e) {}
+      localStorage.setItem('userRole', role || user?.role || '');
+      window.location.href = getDashboard(role || user?.role);
+    }
+
+    function friendlyError(err) {
+      const msg = err?.message || String(err);
+      if (msg.includes('auth/email-already-in-use')) return 'This email is already registered. Please sign in instead.';
+      if (msg.includes('auth/wrong-password') || msg.includes('auth/invalid-credential')) return 'Incorrect email or password.';
+      if (msg.includes('auth/user-not-found')) return 'No account found with this email. Please sign up first.';
+      if (msg.includes('auth/weak-password')) return 'Password is too weak. Use at least 6 characters.';
+      if (msg.includes('auth/invalid-email')) return 'Please enter a valid email address.';
+      if (msg.includes('auth/too-many-requests')) return 'Too many attempts. Please wait a moment and try again.';
+      if (msg.includes('auth/popup-closed-by-user')) return 'Google sign-in was cancelled.';
+      if (msg.includes('auth/network-request-failed')) return 'Network error. Please check your connection.';
+      if (msg.includes('User already exists')) return 'This account already exists. Please sign in instead.';
+      return msg;
+    }
+
+    function showError(message) {
+      const el = document.getElementById('error-message');
+      el.textContent = friendlyError({message});
+      el.style.display = 'block';
+      document.getElementById('success-message').style.display = 'none';
+      setTimeout(() => el.style.display = 'none', 6000);
+    }
+
+    function showSuccess(message) {
+      const el = document.getElementById('success-message');
+      el.textContent = message;
+      el.style.display = 'block';
+      document.getElementById('error-message').style.display = 'none';
+    }
+
+    function setLoading(btn, loading, originalText) {
+      if (loading) {
+        btn.dataset.origText = btn.textContent || btn.innerText;
+        btn.disabled = true;
+        btn.style.opacity = '.7';
+        btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span class="spinner" style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite;display:inline-block;"></span> ' + (originalText || 'Processing...') + '</span>';
+      } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.innerHTML = btn.dataset.origText || originalText || 'Submit';
+      }
+    }
+
+    /* spinner animation */
+    if (!document.getElementById('auth-spinner-style')) {
+      const s = document.createElement('style');
+      s.id = 'auth-spinner-style';
+      s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(s);
     }
 
     /* ── Role selector tabs ── */
@@ -314,125 +377,132 @@
       });
     });
 
-    /* ── Auth functions ── */
-    async function registerWithEmail(email, password, phoneNumber, role, firstName, lastName) {
+    /* ── Form toggles ── */
+    document.getElementById('show-register').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('register-form').style.display = 'block';
+      document.getElementById('error-message').style.display = 'none';
+    });
+    document.getElementById('show-login').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('error-message').style.display = 'none';
+    });
+
+    /* ── SIGN IN (Email + Password) ── */
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      setLoading(btn, true, 'Signing in...');
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        showSuccess('Signed in! Redirecting...');
+
+        const idToken = await cred.user.getIdToken();
+        const res = await fetch(`${API}/auth/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({id_token: idToken})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+
+        if (data.new_user) {
+          setLoading(btn, false, 'Sign In');
+          showRoleSelectionForm(data.firebase_uid, data.email, data.first_name, data.last_name);
+        } else {
+          saveAndRedirect(data.user, data.user?.role);
+        }
+      } catch (err) {
+        setLoading(btn, false, 'Sign In');
+        showError(friendlyError(err));
+      }
+    });
+
+    /* ── SIGN UP (Email + Password) ── */
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const firstName = document.getElementById('register-first-name').value.trim();
+      const lastName = document.getElementById('register-last-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value;
+      const phone = document.getElementById('register-phone').value.trim();
+      const role = document.querySelector('#role-selector input[name="role"]:checked')?.value || 'farmer';
+
+      setLoading(btn, true, 'Creating account...');
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        showSuccess('Account created! Setting up...');
+
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
           body: JSON.stringify({
-            firebase_uid: user.uid, email: user.email,
-            phone_number: phoneNumber, role: role,
-            first_name: firstName, last_name: lastName
+            firebase_uid: cred.user.uid, email: cred.user.email,
+            phone_number: phone || null, role, first_name: firstName, last_name: lastName
           })
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Registration failed');
-        const dashboardResponse = await getDashboardRoute(user.uid);
-        return { success: true, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) { console.error('Registration error:', error); throw error; }
-    }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-    async function loginWithEmail(email, password) {
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const idToken = await user.getIdToken();
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: idToken })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Login failed');
-        if (data.new_user) {
-          return { success: true, newUser: true, firebaseUid: data.firebase_uid,
-                   email: data.email, firstName: data.first_name, lastName: data.last_name };
-        }
-        const dashboardResponse = await getDashboardRoute(user.uid);
-        return { success: true, newUser: false, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) { console.error('Login error:', error); throw error; }
-    }
+        showSuccess('Welcome to Soko Safi! Redirecting...');
+        saveAndRedirect(data.user, role);
+      } catch (err) {
+        setLoading(btn, false, 'Create Account');
+        showError(friendlyError(err));
+      }
+    });
 
-    async function signInWithGoogle() {
+    /* ── GOOGLE SIGN-IN ── */
+    async function handleGoogle(btn) {
+      setLoading(btn, true, 'Connecting Google...');
       try {
         const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        const idToken = await user.getIdToken();
-        const response = await fetch(`${API_BASE_URL}/auth/google-signin`, {
+        showSuccess('Connected! Checking account...');
+
+        const idToken = await result.user.getIdToken();
+        const res = await fetch(`${API}/auth/google-signin`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: idToken })
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({id_token: idToken})
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Google sign-in failed');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+
         if (data.new_user) {
-          return { success: true, newUser: true, firebaseUid: data.firebase_uid, email: data.email };
+          setLoading(btn, false);
+          showRoleSelectionForm(data.firebase_uid, data.email, data.first_name, data.last_name);
+        } else {
+          showSuccess('Welcome back! Redirecting...');
+          saveAndRedirect(data.user, data.user?.role);
         }
-        const dashboardResponse = await getDashboardRoute(user.uid);
-        return { success: true, newUser: false, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) { console.error('Google sign-in error:', error); throw error; }
-    }
-
-    async function completeRegistration(firebaseUid, email, phoneNumber, role, firstName, lastName) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/complete-registration`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            firebase_uid: firebaseUid, email: email,
-            phone_number: phoneNumber, role: role,
-            first_name: firstName, last_name: lastName
-          })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Registration completion failed');
-        const dashboardResponse = await getDashboardRoute(firebaseUid);
-        return { success: true, user: data.user, dashboard: dashboardResponse.dashboard };
-      } catch (error) { console.error('Complete registration error:', error); throw error; }
-    }
-
-    async function getDashboardRoute(firebaseUid) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/dashboard-route`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ firebase_uid: firebaseUid })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to get dashboard route');
-        return data;
-      } catch (error) { console.error('Get dashboard route error:', error); throw error; }
-    }
-
-    function redirectToDashboard(dashboard) {
-      if (dashboard) {
-        let path = dashboard;
-        if (!path.startsWith('/')) path = '/' + path;
-        path = path.replace(/^\/frontend\/frontend\//, '/frontend/');
-        path = path.replace(/^\/frontend\//, '/');
-        window.location.href = path;
-      } else {
-        window.location.href = '/index.html';
+      } catch (err) {
+        setLoading(btn, false);
+        const msg = friendlyError(err);
+        if (!msg.includes('cancelled')) showError(msg);
       }
     }
 
-    function showRoleSelectionForm(firebaseUid, email, firstName = null, lastName = null) {
+    document.getElementById('google-signin-btn').addEventListener('click', function() { handleGoogle(this); });
+    document.getElementById('google-signup-btn').addEventListener('click', function() { handleGoogle(this); });
+
+    /* ── Role selection modal (for Google new users) ── */
+    function showRoleSelectionForm(firebaseUid, email, firstName, lastName) {
+      const existing = document.getElementById('role-selection-overlay');
+      if (existing) existing.remove();
+
       const overlay = document.createElement('div');
       overlay.id = 'role-selection-overlay';
-      overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(27,67,50,.7); backdrop-filter: blur(8px);
-        display: flex; justify-content: center; align-items: center;
-        z-index: 10000; padding: 1rem;
-      `;
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(27,67,50,.7);backdrop-filter:blur(8px);display:flex;justify-content:center;align-items:center;z-index:10000;padding:1rem;';
       const modal = document.createElement('div');
-      modal.style.cssText = `
-        background: #fff; padding: 2rem; border-radius: 20px;
-        max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3);
-      `;
+      modal.style.cssText = 'background:#fff;padding:2rem;border-radius:20px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;';
+      const needsName = !firstName || !lastName;
       modal.innerHTML = `
         <div style="text-align:center;margin-bottom:20px;">
           <div style="width:60px;height:60px;border-radius:14px;overflow:hidden;display:inline-grid;place-items:center;background:#fff;box-shadow:0 4px 16px rgba(116,198,157,.4);margin-bottom:12px;">
@@ -441,32 +511,32 @@
           <h2 style="font-family:'Playfair Display',serif;color:#1B4332;font-size:1.25rem;">Welcome to Soko Safi!</h2>
           <p style="color:#6B705C;font-size:.88rem;">Select your role to get started</p>
         </div>
+        <div id="role-modal-error" style="background:#fef2f2;color:#991b1b;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:.85rem;display:none;border:1px solid #fecaca;"></div>
         <form id="role-selection-form">
-          ${!firstName || !lastName ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          ${needsName ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
             <div>
               <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">First Name</label>
-              <input type="text" name="first_name" id="first-name" value="${firstName || ''}" required
+              <input type="text" id="rs-first-name" value="${firstName || ''}" required
                 style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
             </div>
             <div>
               <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">Last Name</label>
-              <input type="text" name="last_name" id="last-name" value="${lastName || ''}" required
+              <input type="text" id="rs-last-name" value="${lastName || ''}" required
                 style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
             </div>
           </div>` : ''}
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+            <label class="role-opt" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="farmer" style="accent-color:#1B4332;" checked />
               <span style="font-size:18px;">🌾</span>
               <span><strong style="font-size:.88rem;">Farmer</strong><br><span style="font-size:.78rem;color:#6B705C;">Sell your produce directly</span></span>
             </label>
-            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+            <label class="role-opt" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="buyer" style="accent-color:#1B4332;" />
               <span style="font-size:18px;">🛒</span>
               <span><strong style="font-size:.88rem;">Buyer</strong><br><span style="font-size:.78rem;color:#6B705C;">Purchase fresh produce</span></span>
             </label>
-            <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;" class="role-opt">
+            <label class="role-opt" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #DDD8CE;border-radius:12px;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="agro-dealer" style="accent-color:#1B4332;" />
               <span style="font-size:18px;">🏪</span>
               <span><strong style="font-size:.88rem;">Agro-Dealer</strong><br><span style="font-size:.78rem;color:#6B705C;">Supply farm inputs</span></span>
@@ -474,116 +544,59 @@
           </div>
           <div style="margin-bottom:16px;">
             <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;">Phone Number (Optional)</label>
-            <input type="tel" name="phone_number" id="phone-number" placeholder="+254 700 000 000"
+            <input type="tel" id="rs-phone" placeholder="+254 700 000 000"
               style="width:100%;padding:10px 12px;border:1.5px solid #DDD8CE;border-radius:10px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#FAF6EF;outline:none;">
           </div>
-          <button type="submit" id="submit-role"
+          <button type="submit" id="rs-submit"
             style="width:100%;padding:12px;background:linear-gradient(135deg,#1B4332,#40916C);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(27,67,50,.25);">
             Continue
           </button>
-        </form>
-      `;
+        </form>`;
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
 
-      const form = modal.querySelector('#role-selection-form');
-      form.addEventListener('submit', async (e) => {
+      modal.querySelectorAll('.role-opt').forEach(opt => {
+        opt.addEventListener('click', () => {
+          modal.querySelectorAll('.role-opt').forEach(o => o.style.borderColor = '#DDD8CE');
+          opt.style.borderColor = '#1B4332';
+        });
+      });
+
+      modal.querySelector('#role-selection-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const selectedRole = form.querySelector('input[name="role"]:checked')?.value;
-        if (!selectedRole) { alert('Please select a role'); return; }
-        const phoneNumber = form.querySelector('#phone-number').value;
-        const submitBtn = form.querySelector('#submit-role');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing...';
+        const role = modal.querySelector('input[name="role"]:checked')?.value;
+        if (!role) return;
+        const phone = modal.querySelector('#rs-phone').value.trim();
+        const fName = modal.querySelector('#rs-first-name')?.value.trim() || firstName || '';
+        const lName = modal.querySelector('#rs-last-name')?.value.trim() || lastName || '';
+        const btn = modal.querySelector('#rs-submit');
+        const errEl = modal.querySelector('#role-modal-error');
+
+        btn.disabled = true;
+        btn.textContent = 'Setting up your account...';
+        errEl.style.display = 'none';
+
         try {
-          const firstNameInput = form.querySelector('#first-name');
-          const lastNameInput = form.querySelector('#last-name');
-          const finalFirstName = firstNameInput ? firstNameInput.value : firstName;
-          const finalLastName = lastNameInput ? lastNameInput.value : lastName;
-          const result = await completeRegistration(firebaseUid, email, phoneNumber, selectedRole, finalFirstName, finalLastName);
-          localStorage.setItem('user', JSON.stringify(result.user));
-          localStorage.setItem('userRole', selectedRole);
-          document.body.removeChild(overlay);
-          redirectToDashboard(result.dashboard);
-        } catch (error) {
-          console.error('Error completing registration:', error);
-          alert('An error occurred. Please try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Continue';
+          const res = await fetch(`${API}/auth/complete-registration`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              firebase_uid: firebaseUid, email, phone_number: phone || null,
+              role, first_name: fName, last_name: lName
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+          saveAndRedirect(data.user, role);
+        } catch (err) {
+          errEl.textContent = friendlyError(err);
+          errEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Continue';
         }
       });
     }
-
-    function handleColdStart(authResult) {
-      if (authResult.newUser) {
-        showRoleSelectionForm(authResult.firebaseUid, authResult.email, authResult.firstName, authResult.lastName);
-      } else {
-        if (authResult.dashboard) {
-          localStorage.setItem('user', JSON.stringify(authResult.user));
-          localStorage.setItem('userRole', authResult.user.role);
-          redirectToDashboard(authResult.dashboard);
-        }
-      }
-    }
-
-    function showError(message) {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
-    }
-
-    /* ── Form toggles ── */
-    document.getElementById('show-register').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('register-form').style.display = 'block';
-    });
-    document.getElementById('show-login').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('register-form').style.display = 'none';
-      document.getElementById('login-form').style.display = 'block';
-    });
-
-    /* ── Login ── */
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      try {
-        const result = await loginWithEmail(email, password);
-        if (result.newUser) {
-          showRoleSelectionForm(result.firebaseUid, result.email);
-        } else {
-          redirectToDashboard(result.dashboard);
-        }
-      } catch (error) { showError(error.message); }
-    });
-
-    /* ── Register ── */
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const firstName = document.getElementById('register-first-name').value;
-      const lastName = document.getElementById('register-last-name').value;
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
-      const phone = document.getElementById('register-phone').value;
-      const role = document.querySelector('#role-selector input[name="role"]:checked')?.value || 'farmer';
-      try {
-        const result = await registerWithEmail(email, password, phone, role, firstName, lastName);
-        window.location.href = result.dashboard;
-      } catch (error) { showError(error.message); }
-    });
-
-    /* ── Google ── */
-    document.getElementById('google-signin-btn').addEventListener('click', async () => {
-      try { const result = await signInWithGoogle(); handleColdStart(result); }
-      catch (error) { showError(error.message); }
-    });
-    document.getElementById('google-signup-btn').addEventListener('click', async () => {
-      try { const result = await signInWithGoogle(); handleColdStart(result); }
-      catch (error) { showError(error.message); }
-    });
   </script>
 </body>
 </html>

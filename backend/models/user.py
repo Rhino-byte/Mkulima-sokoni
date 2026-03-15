@@ -24,17 +24,16 @@ class User:
             params = (firebase_uid, email, phone_number, role, first_name, last_name)
             result = execute_query(query, params, fetch_one=True)
             if result:
-                # Explicitly extract columns by name to avoid any column order issues
                 return {
-                    'id': result['id'],
+                    'id': str(result['id']),
                     'firebase_uid': result['firebase_uid'],
                     'email': result['email'],
                     'phone_number': result.get('phone_number'),
                     'role': result.get('role'),
                     'first_name': result.get('first_name'),
                     'last_name': result.get('last_name'),
-                    'created_at': result.get('created_at'),
-                    'latest_sign_in': result.get('latest_sign_in')
+                    'created_at': str(result['created_at']) if result.get('created_at') else None,
+                    'latest_sign_in': str(result['latest_sign_in']) if result.get('latest_sign_in') else None
                 }
             return None
         except Exception as e:
@@ -96,7 +95,8 @@ class User:
         try:
             # Explicitly select columns to ensure correct order and avoid any column name issues
             query = """
-                SELECT id, firebase_uid, email, phone_number, role, 
+                SELECT id, firebase_uid, email, phone_number, role,
+                       first_name, last_name,
                        created_at, latest_sign_in, email_verified, is_active
                 FROM users WHERE firebase_uid = %s
             """

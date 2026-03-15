@@ -130,6 +130,16 @@
     .page-section { display: none; }
     .page-section.active { display: block; animation: fadeUp .3s ease-out; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes liveTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    #liveTicker:hover #liveTickerTrack { animation-play-state: paused; }
+    .lt-item { flex-shrink:0; display:flex; align-items:center; gap:10px; padding:6px 20px; color:rgba(255,255,255,.95); font-size:.82rem; white-space:nowrap; border-right:1px solid rgba(255,255,255,.12); text-decoration:none; transition:background .2s; }
+    .lt-item:hover { background:rgba(255,255,255,.06); }
+    .lt-thumb { width:38px; height:38px; border-radius:9px; overflow:hidden; flex-shrink:0; background:rgba(255,255,255,.1); display:grid; place-items:center; font-size:18px; }
+    .lt-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .lt-info { display:flex; flex-direction:column; gap:1px; }
+    .lt-name { font-weight:600; color:#fff; font-size:.82rem; }
+    .lt-price { font-size:.75rem; color:var(--gold); font-weight:600; }
+    .lt-loc { font-size:.68rem; color:var(--lime); opacity:.85; }
 
     /* ── Welcome banner ── */
     .welcome-banner {
@@ -506,13 +516,17 @@ function exitSuperUser() {
           <div class="dd-role">🛒 Buyer</div>
         </div>
         <div class="dd-item" onclick="showPage('dashboard')"><span>🏠</span> Dashboard</div>
-        <div class="dd-item" onclick="showPage('profile')"><span>👤</span> Profile</div>
         <div class="dd-item" onclick="showPage('profile')"><span>⚙️</span> Settings</div>
         <div class="dd-item dd-logout" onclick="logout()"><span>🚪</span> Logout</div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Live Ticker (below topbar, visible across all tabs) -->
+<div id="liveTicker" style="background:var(--forest);padding:10px 0;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.1);display:none;">
+  <div id="liveTickerTrack" style="display:flex;gap:0;width:max-content;animation:liveTicker 40s linear infinite;"></div>
+</div>
 
 <!-- ════════════════════════════
      MAIN
@@ -556,6 +570,12 @@ function exitSuperUser() {
         <span class="filter-tag" onclick="filterCategory('Herbs',this)">Herbs</span>
         <span class="filter-tag" onclick="filterCategory('Potatoes',this)">Potatoes</span>
       </div>
+    </div>
+
+    <!-- View Marketplace -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--forest);">Available Products</div>
+      <a href="market.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:var(--forest);color:#fff;border-radius:100px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s;">View Marketplace →</a>
     </div>
 
     <!-- Products container -->
@@ -947,32 +967,31 @@ function exitSuperUser() {
     <div class="footer-col">
       <h5>About Us</h5>
       <ul>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Mission &amp; Vision</a></li>
-        <li><a href="#">Team</a></li>
+        <li><a href="about.html#story">Our Story</a></li>
+        <li><a href="about.html#mission">Mission &amp; Vision</a></li>
+        <li><a href="about.html#team">Team</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Help Center</h5>
       <ul>
-        <li><a href="#" onclick="showPage('support');return false;">Support</a></li>
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#" onclick="showPage('support');return false;">Contact Us</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="faq.html#contact">Contact Us</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Legal</h5>
       <ul>
-        <li><a href="#">Terms of Service</a></li>
-        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Resources</h5>
       <ul>
-        <li><a href="#">How It Works</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Guides</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="market.html">Marketplace</a></li>
       </ul>
     </div>
   </div>
@@ -1089,6 +1108,7 @@ function exitSuperUser() {
         allProducts = cached;
         lastProductCount = cached.length;
         renderProducts(cached);
+        renderLiveTicker(cached);
       }
     } catch(e) {}
 
@@ -1105,6 +1125,7 @@ function exitSuperUser() {
       lastProductCount = products.length;
       try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
       renderProducts(products);
+      renderLiveTicker(products);
     } catch {
       if (!allProducts.length) {
         container.innerHTML = '<div class="empty-state"><div class="icon">🌱</div><h4>No products found</h4><p style="font-size:.82rem;">Check back soon as farmers add fresh produce.</p></div>';
@@ -1223,11 +1244,42 @@ function exitSuperUser() {
       if (products.length !== lastProductCount && lastProductCount > 0) {
         allProducts = products; lastProductCount = products.length;
         renderProducts(products);
+        renderLiveTicker(products);
+        try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
         const n = document.getElementById('productUpdateNotification');
         n.style.display = 'flex';
         setTimeout(() => { n.style.display = 'none'; }, 3000);
       } else { lastProductCount = products.length; }
     } catch {}
+  }
+
+  /* ── Live Ticker ── */
+  const tickerEmoji = { Vegetables:'🥬', Fruits:'🍋', Cereals:'🌾', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Seeds:'🌱', Fertilizers:'🧪', Other:'📦' };
+
+  function renderLiveTicker(products) {
+    const ticker = document.getElementById('liveTicker');
+    const track = document.getElementById('liveTickerTrack');
+    if (!products || !products.length) { ticker.style.display = 'none'; return; }
+    const priceStr = (p) => {
+      if (p.product_type === 'livestock' && p.price_min != null && p.price_max != null)
+        return 'KSh ' + Number(p.price_min).toLocaleString() + '–' + Number(p.price_max).toLocaleString();
+      if (p.price) return 'KSh ' + Number(p.price).toLocaleString();
+      return '';
+    };
+    const chunk = products.map(p => {
+      const thumb = p.image_url
+        ? '<img src="' + p.image_url + '" alt="" loading="lazy" />'
+        : (tickerEmoji[p.category] || '🌿');
+      return '<a href="product-detail.html?id=' + p.id + '" onclick="viewProductDetails(\'' + p.id + '\');return false;" class="lt-item">' +
+        '<span class="lt-thumb">' + thumb + '</span>' +
+        '<span class="lt-info">' +
+          '<span class="lt-name">' + (p.name||'').replace(/</g,'&lt;') + '</span>' +
+          (priceStr(p) ? '<span class="lt-price">' + priceStr(p) + '</span>' : '') +
+          '<span class="lt-loc">📍 ' + (p.county||p.location||'Kenya').replace(/</g,'&lt;') + '</span>' +
+        '</span></a>';
+    }).join('');
+    track.innerHTML = chunk + chunk;
+    ticker.style.display = '';
   }
 
   /* ── Product detail ── */
@@ -1415,6 +1467,18 @@ function exitSuperUser() {
       showPage('support');
     }
   });
+
+  (function(){
+    try {
+      var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+      if(u&&role){
+        var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+        document.querySelectorAll('footer a').forEach(function(a){
+          if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+        });
+      }
+    }catch(e){}
+  })();
 </script>
 </body>
 </html>

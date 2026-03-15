@@ -631,13 +631,17 @@ function exitSuperUser() {
           <div class="dd-role">🌾 Farmer</div>
         </div>
         <div class="dd-item" onclick="showPage('dashboard')"><span>🏠</span> Dashboard</div>
-        <div class="dd-item" onclick="showPage('profile')"><span>👤</span> Profile</div>
         <div class="dd-item" onclick="showPage('profile')"><span>⚙️</span> Settings</div>
         <div class="dd-item dd-logout" onclick="logout()"><span>🚪</span> Logout</div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Live Ticker (below topbar) -->
+<div id="agroDealerTicker" style="background:var(--forest);padding:10px 0;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.1);display:none;">
+  <div id="agroDealerTickerTrack" style="display:flex;gap:0;width:max-content;animation:agTicker 40s linear infinite;"></div>
+</div>
 
 <!-- ════════════════════════════
      MAIN
@@ -674,27 +678,28 @@ function exitSuperUser() {
       </div>
     </div>
 
-    <!-- Agro-Dealers -->
+    <!-- Agro-Dealer Listings -->
     <div class="section-header" style="margin-top:8px;">
       <div class="section-header-text">
         <div class="section-title">Agro-Dealers 🏪</div>
-        <div class="section-subtitle">Trusted agro-dealers with farming supplies and products</div>
+        <div class="section-subtitle">Farm inputs, seeds, fertilizers and supplies from agro-dealers</div>
       </div>
       <a href="market.html" class="btn btn-white" style="text-decoration:none;">View Marketplace →</a>
     </div>
-
-    <!-- Agro-Dealer Ticker -->
-    <div id="agroDealerTicker" style="background:var(--forest);padding:10px 0;overflow:hidden;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,.1);">
-      <div id="agroDealerTickerTrack" style="display:flex;gap:0;width:max-content;animation:agTicker 40s linear infinite;"></div>
+    <div id="agroDealerGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px;">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);"><div style="font-size:32px;margin-bottom:8px;">🏪</div><p style="font-weight:600;">Loading agro-dealer products…</p></div>
     </div>
 
-    <!-- Marketplace Product Listings -->
+    <!-- Other Farmer Listings -->
+    <div class="section-header">
+      <div class="section-header-text">
+        <div class="section-title">Farmer Listings 🌾</div>
+        <div class="section-subtitle">Fresh produce from other farmers across Kenya</div>
+      </div>
+    </div>
     <div id="marketplaceListings" style="margin-bottom:30px;">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" id="marketGrid">
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
-          <div style="font-size:32px;margin-bottom:8px;">🌱</div>
-          <p style="font-weight:600;">Loading marketplace listings…</p>
-        </div>
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);"><div style="font-size:32px;margin-bottom:8px;">🌱</div><p style="font-weight:600;">Loading farmer listings…</p></div>
       </div>
       <div id="marketPagination" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;"></div>
     </div>
@@ -1111,32 +1116,31 @@ function exitSuperUser() {
     <div class="footer-col">
       <h5>About Us</h5>
       <ul>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Mission &amp; Vision</a></li>
-        <li><a href="#">Team</a></li>
+        <li><a href="about.html#story">Our Story</a></li>
+        <li><a href="about.html#mission">Mission &amp; Vision</a></li>
+        <li><a href="about.html#team">Team</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Help Center</h5>
       <ul>
-        <li><a href="#" onclick="showPage('support');return false;">Support</a></li>
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#" onclick="showPage('support');return false;">Contact Us</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="faq.html#contact">Contact Us</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Legal</h5>
       <ul>
-        <li><a href="#">Terms of Service</a></li>
-        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>Resources</h5>
       <ul>
-        <li><a href="#">How It Works</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Guides</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="market.html">Marketplace</a></li>
       </ul>
     </div>
   </div>
@@ -1765,66 +1769,86 @@ function exitSuperUser() {
     location.href = 'product-detail.html?id=' + pid;
   }
 
-  /* ── Marketplace Listings (agro-dealers first, then products) ── */
-  const EMOJI_MK = { Vegetables:'🥬', Fruits:'🍊', Cereals:'🌽', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Other:'📦' };
+  /* ── Marketplace Listings (agro-dealers first, then farmer products) ── */
+  const EMOJI_MK = { Vegetables:'🥬', Fruits:'🍊', Cereals:'🌽', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Seeds:'🌱', Fertilizers:'🧪', Pesticides:'💊', Equipment:'🔧', 'Animal Feed':'🐄', Veterinary:'💉', Irrigation:'💧', Other:'📦' };
   let allMarketProducts = [];
+  let farmerProducts = [];
+  let agroDealerProducts = [];
   let mkPage = 0;
   const MK_PER_PAGE = 12;
 
+  function splitProducts(products) {
+    agroDealerProducts = products.filter(p => p.seller_role === 'agro-dealer');
+    farmerProducts = products.filter(p => p.seller_role !== 'agro-dealer');
+  }
+
   async function loadMarketplaceListings() {
-    // Instant render from cache
     try {
       const cached = JSON.parse(sessionStorage.getItem('productsCache'));
       if (cached && cached.length) {
         allMarketProducts = cached;
+        splitProducts(cached);
         mkPage = 0;
+        renderAgroDealerGrid();
         renderMarketplacePage();
-        renderAgroDealerTicker(cached);
+        renderAgroDealerTicker(allMarketProducts);
       }
     } catch(e) {}
 
-    // Fetch fresh data in background
     try {
       const res = await fetch(`${API_BASE_URL}/products?status=active`);
       if (!res.ok) return;
       const products = await res.json();
       allMarketProducts = products;
+      splitProducts(products);
       try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
       mkPage = 0;
+      renderAgroDealerGrid();
       renderMarketplacePage();
-      renderAgroDealerTicker(products);
+      renderAgroDealerTicker(allMarketProducts);
     } catch(e) { console.warn('Could not load marketplace listings', e); }
+  }
+
+  function mkCardHTML(p) {
+    const imgInner = p.image_url ? `<img src="${p.image_url}" alt="" />` : (EMOJI_MK[p.category]||'🌿');
+    const price = (p.product_type==='livestock' && p.price_min && p.price_max)
+      ? `KSh ${Number(p.price_min).toLocaleString()}–${Number(p.price_max).toLocaleString()}`
+      : p.price ? `KSh ${Number(p.price).toLocaleString()}` : 'Price on request';
+    return `<article class="mk-card" onclick="goToMkProduct('${p.id}')">
+      <div class="mk-card-img">${imgInner}<span class="mk-card-loc">📍 ${p.county||p.location||'Kenya'}</span></div>
+      <div class="mk-card-body">
+        <div class="mk-card-name">${p.name||'Unnamed'}</div>
+        <div class="mk-card-price">${price} <sub>/ ${p.measurement_metric||'unit'}</sub></div>
+      </div>
+      <div class="mk-card-footer">
+        <span class="mk-card-views">👁 ${p.views||0} views</span>
+        <button class="mk-card-btn">View Details</button>
+      </div>
+    </article>`;
+  }
+
+  function renderAgroDealerGrid() {
+    const grid = document.getElementById('agroDealerGrid');
+    if (!agroDealerProducts.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);"><p>No agro-dealer products available yet.</p></div>';
+      return;
+    }
+    grid.innerHTML = agroDealerProducts.slice(0, 12).map(mkCardHTML).join('');
   }
 
   function renderMarketplacePage() {
     const grid = document.getElementById('marketGrid');
     const pag = document.getElementById('marketPagination');
-    if (!allMarketProducts.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);"><p>No listings available yet.</p></div>';
+    if (!farmerProducts.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);"><p>No farmer listings available yet.</p></div>';
       pag.innerHTML = '';
       return;
     }
     const start = mkPage * MK_PER_PAGE;
-    const slice = allMarketProducts.slice(start, start + MK_PER_PAGE);
-    const totalPages = Math.ceil(allMarketProducts.length / MK_PER_PAGE);
+    const slice = farmerProducts.slice(start, start + MK_PER_PAGE);
+    const totalPages = Math.ceil(farmerProducts.length / MK_PER_PAGE);
 
-    grid.innerHTML = slice.map(p => {
-      const imgInner = p.image_url ? `<img src="${p.image_url}" alt="" />` : (EMOJI_MK[p.category]||'🌿');
-      const price = (p.product_type==='livestock' && p.price_min && p.price_max)
-        ? `KSh ${Number(p.price_min).toLocaleString()}–${Number(p.price_max).toLocaleString()}`
-        : p.price ? `KSh ${Number(p.price).toLocaleString()}` : 'Price on request';
-      return `<article class="mk-card" onclick="goToMkProduct('${p.id}')">
-        <div class="mk-card-img">${imgInner}<span class="mk-card-loc">📍 ${p.county||p.location||'Kenya'}</span></div>
-        <div class="mk-card-body">
-          <div class="mk-card-name">${p.name||'Unnamed'}</div>
-          <div class="mk-card-price">${price} <sub>/ ${p.measurement_metric||'unit'}</sub></div>
-        </div>
-        <div class="mk-card-footer">
-          <span class="mk-card-views">👁 ${p.views||0} views</span>
-          <button class="mk-card-btn">View Details</button>
-        </div>
-      </article>`;
-    }).join('');
+    grid.innerHTML = slice.map(mkCardHTML).join('');
 
     let pagHTML = '';
     if (totalPages > 1) {
@@ -1869,6 +1893,18 @@ function exitSuperUser() {
     loadProducts();
     loadMarketplaceListings();
   });
+
+  (function(){
+    try {
+      var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+      if(u&&role){
+        var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+        document.querySelectorAll('footer a').forEach(function(a){
+          if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+        });
+      }
+    }catch(e){}
+  })();
 </script>
 </body>
 </html>

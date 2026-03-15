@@ -136,8 +136,7 @@
     <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
   </a>
   <div class="topbar-actions">
-    <button class="topbar-btn" onclick="location.href='market.html'">Marketplace</button>
-    <button class="topbar-btn" onclick="location.href='auth.html'" id="authBtn">Sign In</button>
+    <button class="topbar-btn" id="navHomeBtn" onclick="location.href='index.html'">Home</button>
   </div>
 </header>
 
@@ -207,7 +206,13 @@
 </div>
 
 <footer>
-  <div class="footer-bottom">
+  <div style="max-width:1140px;margin:0 auto;padding:0 0 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:24px;">
+    <div><p style="font-size:.82rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:8px;">About Us</p><a href="about.html#story" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Our Story</a><a href="about.html#mission" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Mission &amp; Vision</a></div>
+    <div><p style="font-size:.82rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:8px;">Help Center</p><a href="faq.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">FAQs</a><a href="faq.html#contact" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Contact Us</a></div>
+    <div><p style="font-size:.82rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:8px;">Legal</p><a href="terms.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Terms of Service</a><a href="privacy.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Privacy Policy</a></div>
+    <div><p style="font-size:.82rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:8px;">Resources</p><a href="how-it-works.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">How It Works</a><a href="market.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Marketplace</a></div>
+  </div>
+  <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,.1);padding-top:16px;">
     <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
     <span class="footer-badge">Powered by TaiStat Firm</span>
   </div>
@@ -365,8 +370,13 @@ function shareProfile(platform) {
 }
 
 if (isSignedIn()) {
-  var u = JSON.parse(localStorage.getItem('user')||'{}');
-  document.getElementById('authBtn').textContent = (u.first_name||'Account');
+  var role = localStorage.getItem('userRole')||'';
+  var dmap = {farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+  var btn = document.getElementById('navHomeBtn');
+  if(btn){ btn.textContent = 'Dashboard'; btn.onclick = function(){ location.href = dmap[role]||'index.html'; }; }
+  document.querySelectorAll('footer a').forEach(function(a){
+    if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=dmap[role]||'index.html'; a.textContent='Dashboard'; }
+  });
 }
 
 window.addEventListener('DOMContentLoaded', loadProfile);

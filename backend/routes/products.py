@@ -44,10 +44,21 @@ def create_product():
         if not firebase_uid:
             return jsonify({'error': 'firebase_uid is required'}), 400
         
-        # Get farmer_profile_id
+        # Get farmer_profile_id (also auto-creates for agro-dealers)
         farmer_profile_id = get_farmer_profile_id(firebase_uid)
         if not farmer_profile_id:
-            return jsonify({'error': 'Farmer profile not found'}), 404
+            try:
+                from models.user import User
+                user = User.get_user_by_firebase_uid(firebase_uid)
+                if user:
+                    user_id = str(user.get('id'))
+                    if not FarmerProfile.profile_exists(user_id):
+                        FarmerProfile.create_profile(user_id, farm_name=None, location=None, county=None)
+                    farmer_profile_id = get_farmer_profile_id(firebase_uid)
+            except Exception as e:
+                logger.warning(f"Auto-create profile failed: {e}")
+        if not farmer_profile_id:
+            return jsonify({'error': 'Profile not found. Please update your profile first.'}), 404
         
         # Extract product data
         name = data.get('name')
@@ -130,6 +141,27 @@ def create_product():
         logger.error(f"Error creating product: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@products_bp.route('/<product_id>/status', methods=['PUT'])
+def update_product_status(product_id):
+    """Update a product's status (draft -> active, etc.)"""
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        if new_status not in ('active', 'draft', 'sold', 'paused'):
+            return jsonify({'error': 'Invalid status'}), 400
+
+        from database import execute_query
+        result = execute_query(
+            "UPDATE products SET status = %s WHERE id = %s RETURNING id, status",
+            (new_status, product_id), fetch_one=True
+        )
+        if result:
+            return jsonify({'success': True, 'id': str(result['id']), 'status': result['status']}), 200
+        return jsonify({'error': 'Product not found'}), 404
+    except Exception as e:
+        logger.error(f"Update product status error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @products_bp.route('', methods=['GET'])
 def get_products():
     """
@@ -151,12 +183,13 @@ def get_products():
             offset=offset
         )
         
-        # Convert UUIDs to strings for JSON serialization
         products_list = []
         for product in products:
             product_dict = dict(product)
             product_dict['id'] = str(product_dict['id'])
             product_dict['farmer_profile_id'] = str(product_dict['farmer_profile_id'])
+            if 'seller_role' not in product_dict:
+                product_dict['seller_role'] = 'farmer'
             products_list.append(product_dict)
         
         return jsonify(products_list), 200
@@ -166,7 +199,6 @@ def get_products():
         return jsonify({'error': f'Invalid request: {str(e)}'}), 400
     except Exception as e:
         logger.error(f"Error getting products: {str(e)}", exc_info=True)
-        # Return a user-friendly error message
         error_msg = str(e)
         if 'DATABASE_URL' in error_msg or 'connection' in error_msg.lower():
             error_msg = 'Database connection error. Please check configuration.'

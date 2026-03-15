@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | Soko Safi</title>
+  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--forest:#1B4332;--leaf:#40916C;--lime:#74C69D;--gold:#E9C46A;--cream:#FAF6EF;--ink:#1A1A18;--muted:#6B705C;--border:#DDD8CE;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.7;}
+    a{color:var(--leaf);text-decoration:none;font-weight:500;}a:hover{text-decoration:underline;}
+    .topbar{position:sticky;top:0;z-index:100;background:var(--forest);display:flex;align-items:center;padding:0 28px;height:60px;gap:20px;box-shadow:0 2px 16px rgba(0,0,0,.22);}
+    .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;color:#fff;}.logo-mark{width:36px;height:36px;border-radius:9px;overflow:hidden;display:grid;place-items:center;background:#fff;box-shadow:0 3px 12px rgba(116,198,157,.4);}.logo-mark img{width:100%;height:100%;object-fit:contain;}
+    .logo-label strong{display:block;font-size:.9rem;font-weight:600;color:#fff;line-height:1.2;}.logo-label span{font-size:.67rem;color:var(--lime);font-weight:300;}
+    .topbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto;}
+    .topbar-btn{height:33px;padding:0 15px;border-radius:100px;border:1.5px solid rgba(255,255,255,.25);background:transparent;color:#fff;font-size:.78rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}.topbar-btn:hover{background:rgba(255,255,255,.1);}
+    .hero{background:var(--forest);padding:60px 28px 50px;text-align:center;}
+    .hero h1{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:800;color:#fff;margin-bottom:8px;}
+    .hero p{font-size:.92rem;color:rgba(255,255,255,.5);}
+    .content{max-width:800px;margin:0 auto;padding:48px 28px 60px;}
+    .content h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--forest);margin:32px 0 10px;padding-top:16px;border-top:1px solid var(--border);}
+    .content h2:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+    .content p,.content li{font-size:.9rem;color:var(--muted);margin-bottom:10px;}
+    .content ul{padding-left:20px;margin-bottom:14px;}
+    .content li{margin-bottom:6px;}
+
+    footer{background:var(--forest);padding:52px 28px 0;margin-top:20px;}
+    .footer-grid{max-width:800px;margin:0 auto;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .footer-flogo{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:20px;}.footer-flogo-mark{width:80px;height:80px;border-radius:18px;overflow:hidden;display:grid;place-items:center;background:#fff;box-shadow:0 6px 28px rgba(116,198,157,.45);}.footer-flogo-mark img{width:100%;height:100%;object-fit:contain;}.footer-flogo-label strong{display:block;font-size:1rem;font-weight:700;color:#fff;}.footer-flogo-label span{display:block;font-size:.78rem;color:var(--lime);font-weight:300;}
+    .footer-social{display:flex;gap:8px;}.footer-social a{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;transition:all .2s;}.footer-social a:hover{background:rgba(116,198,157,.2);border-color:var(--lime);color:#fff;}
+    .footer-col h5{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-bottom:16px;}.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}.footer-col ul li a{font-size:.82rem;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:7px;transition:all .2s;text-decoration:none;}.footer-col ul li a::before{content:'';width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}.footer-col ul li a:hover{color:var(--lime);padding-left:4px;}.footer-col ul li a:hover::before{background:var(--lime);}
+    .footer-bottom{max-width:800px;margin:0 auto;padding:20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}.footer-copy{font-size:.76rem;color:rgba(255,255,255,.35);}.footer-copy strong{color:var(--lime);font-weight:600;}.footer-badge{font-size:.68rem;color:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:3px 10px;}
+    @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:24px;}.footer-grid>div:first-child{grid-column:1/-1;}}
+    @media(max-width:640px){.topbar{padding:0 14px;}.content{padding:32px 16px 40px;}.hero h1{font-size:1.7rem;}.footer-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
+    <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+  </a>
+  <div class="topbar-actions">
+    <button class="topbar-btn" id="navHomeBtn" onclick="location.href='index.html'">Home</button>
+  </div>
+</header>
+<script>
+(function(){
+  try {
+    var u = JSON.parse(localStorage.getItem('user')||'null');
+    var role = localStorage.getItem('userRole')||'';
+    if(u && role){
+      var map = {farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+      var btn = document.getElementById('navHomeBtn');
+      if(btn){ btn.textContent='Dashboard'; btn.onclick=function(){ location.href=map[role]||'index.html'; }; }
+    }
+  }catch(e){}
+})();
+</script>
+
+<section class="hero">
+  <h1>Privacy Policy</h1>
+  <p>Last updated: March 2026</p>
+</section>
+
+<div class="content">
+
+  <h2>1. Introduction</h2>
+  <p>Soko Safi ("we", "our", "the Platform"), operated by TaiStat Firm, is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share your personal information when you use our services.</p>
+
+  <h2>2. Information We Collect</h2>
+  <p><strong>Account Information:</strong> When you register, we collect your name, email address, phone number, and role (Farmer, Buyer, or Agro-Dealer).</p>
+  <p><strong>Profile Information:</strong> Farm name, location, county, bio, profile photo, farming experience, and certification documents (for verification).</p>
+  <p><strong>Product Data:</strong> Product listings including names, descriptions, images, prices, quantities, and locations.</p>
+  <p><strong>Usage Data:</strong> Pages visited, product views, search queries, and interaction patterns to improve the platform experience.</p>
+  <p><strong>Device Data:</strong> Browser type, IP address, and device information for security and analytics.</p>
+
+  <h2>3. How We Use Your Information</h2>
+  <ul>
+    <li>To create and manage your account</li>
+    <li>To display your product listings to potential buyers</li>
+    <li>To facilitate communication between buyers and sellers</li>
+    <li>To verify user identities and build platform trust</li>
+    <li>To improve platform performance, features, and user experience</li>
+    <li>To send important notifications about your account or transactions</li>
+    <li>To prevent fraud and maintain platform security</li>
+  </ul>
+
+  <h2>4. Information Sharing</h2>
+  <p>We do <strong>not</strong> sell your personal data. We may share information in the following limited cases:</p>
+  <ul>
+    <li><strong>Public Profile:</strong> Your name, farm name, location, and listed products are visible to other users</li>
+    <li><strong>Contact Info:</strong> Phone number and email are shown to signed-in users who click "Contact Farmer" on your listings</li>
+    <li><strong>Service Providers:</strong> We use Firebase (authentication), Cloudinary (image storage), and Neon (database) — these providers process data on our behalf under strict confidentiality</li>
+    <li><strong>Legal Requirements:</strong> We may disclose information if required by Kenyan law or valid legal process</li>
+  </ul>
+
+  <h2>5. Data Storage & Security</h2>
+  <p>Your data is stored in secure cloud databases with encryption in transit (SSL/TLS). We use Firebase Authentication for secure login management. While we implement industry-standard security measures, no system is completely immune to breaches. We encourage you to use strong passwords and keep your credentials private.</p>
+
+  <h2>6. Cookies & Local Storage</h2>
+  <p>Soko Safi uses browser local storage and session storage to maintain your login session, cache product data for faster loading, and remember your preferences. We do not use third-party tracking cookies.</p>
+
+  <h2>7. Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li><strong>Access</strong> your personal data through your dashboard profile</li>
+    <li><strong>Update</strong> your information at any time in your profile settings</li>
+    <li><strong>Delete</strong> your account by contacting support at <a href="mailto:support@sokosafi.com">support@sokosafi.com</a></li>
+    <li><strong>Withdraw consent</strong> for optional data processing</li>
+  </ul>
+
+  <h2>8. Data Retention</h2>
+  <p>We retain your data for as long as your account is active. If you delete your account, we will remove your personal data within 30 days, except where we are required by law to retain it.</p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>Soko Safi is not intended for users under 18 years of age. We do not knowingly collect personal data from minors.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date. Continued use of the Platform constitutes acceptance of the revised policy.</p>
+
+  <h2>11. Contact Us</h2>
+  <p>For privacy-related questions, contact us at <a href="mailto:support@sokosafi.com">support@sokosafi.com</a>.</p>
+
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-flogo">
+        <div class="footer-flogo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
+        <div class="footer-flogo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+      </div>
+      <div class="footer-social"><a href="#" title="Facebook">f</a><a href="#" title="X / Twitter">𝕏</a><a href="#" title="WhatsApp">💬</a><a href="#" title="Instagram">📷</a></div>
+    </div>
+    <div class="footer-col"><h5>About Us</h5><ul><li><a href="about.html#story">Our Story</a></li><li><a href="about.html#mission">Mission &amp; Vision</a></li><li><a href="about.html#team">Team</a></li></ul></div>
+    <div class="footer-col"><h5>Help Center</h5><ul><li><a href="index.html">Home</a></li><li><a href="faq.html">FAQs</a></li><li><a href="faq.html#contact">Contact Us</a></li></ul></div>
+    <div class="footer-col"><h5>Legal</h5><ul><li><a href="terms.html">Terms of Service</a></li><li><a href="privacy.html">Privacy Policy</a></li></ul></div>
+    <div class="footer-col"><h5>Resources</h5><ul><li><a href="how-it-works.html">How It Works</a></li><li><a href="market.html">Marketplace</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+    <span class="footer-badge">Powered by TaiStat Firm</span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+(function(){
+  try {
+    var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+    if(u&&role){
+      var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+      document.querySelectorAll('footer a').forEach(function(a){
+        if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+      });
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

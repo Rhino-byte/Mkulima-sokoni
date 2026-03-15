@@ -176,14 +176,22 @@
     <input id="productSearch" type="text" placeholder="Search products, counties…" />
   </div>
   <div class="topbar-actions">
-    <a href="index.html" class="home-btn" style="font-size:.82rem;padding:7px 15px;">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
-      Home
-    </a>
-    <button class="topbar-btn" onclick="location.href='auth.html'">Sign In</button>
-    <button class="topbar-btn solid" onclick="location.href='auth.html'">Get Started</button>
+    <button class="topbar-btn" id="navHomeBtn" onclick="location.href='index.html'">Home</button>
   </div>
 </header>
+<script>
+(function(){
+  try {
+    var u = JSON.parse(localStorage.getItem('user')||'null');
+    var role = localStorage.getItem('userRole')||'';
+    if(u && role){
+      var map = {farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+      var btn = document.getElementById('navHomeBtn');
+      if(btn){ btn.textContent='Dashboard'; btn.onclick=function(){ location.href=map[role]||'index.html'; }; }
+    }
+  }catch(e){}
+})();
+</script>
 
 <!-- ── PRODUCT TICKER (same as index.html) ── -->
 <div class="product-ticker" id="productTicker" aria-hidden="true">
@@ -259,9 +267,9 @@
     <div class="footer-col">
       <h5>About Us</h5>
       <ul>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Mission &amp; Vision</a></li>
-        <li><a href="#">Team</a></li>
+        <li><a href="about.html#story">Our Story</a></li>
+        <li><a href="about.html#mission">Mission &amp; Vision</a></li>
+        <li><a href="about.html#team">Team</a></li>
       </ul>
     </div>
 
@@ -269,25 +277,24 @@
       <h5>Help Center</h5>
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#">Contact Us</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <li><a href="faq.html#contact">Contact Us</a></li>
       </ul>
     </div>
 
     <div class="footer-col">
       <h5>Legal</h5>
       <ul>
-        <li><a href="#">Terms of Service</a></li>
-        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
       </ul>
     </div>
 
     <div class="footer-col">
       <h5>Resources</h5>
       <ul>
-        <li><a href="#">How It Works</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Guides</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="market.html">Marketplace</a></li>
       </ul>
     </div>
 
@@ -467,6 +474,18 @@
   document.getElementById('productSearch').addEventListener('input', applyFilters);
 
   window.addEventListener('DOMContentLoaded', loadProducts);
+
+  (function(){
+    try {
+      var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+      if(u&&role){
+        var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+        document.querySelectorAll('footer a').forEach(function(a){
+          if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+        });
+      }
+    }catch(e){}
+  })();
 </script>
 </body>
 </html>

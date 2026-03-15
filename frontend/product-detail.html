@@ -169,8 +169,7 @@
     <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
   </a>
   <div class="topbar-actions">
-    <button class="topbar-btn" onclick="location.href='market.html'">Marketplace</button>
-    <button class="topbar-btn" onclick="location.href='auth.html'" id="authBtn">Sign In</button>
+    <button class="topbar-btn" id="dashBtn" onclick="goToDashboard()">Dashboard</button>
   </div>
 </header>
 
@@ -236,10 +235,10 @@
       </div>
       <div class="footer-social"><a href="#">f</a><a href="#">𝕏</a><a href="#">💬</a><a href="#">📷</a></div>
     </div>
-    <div class="footer-col"><h5>About Us</h5><ul><li><a href="index.html">Our Story</a></li><li><a href="index.html">Mission &amp; Vision</a></li></ul></div>
-    <div class="footer-col"><h5>Help Center</h5><ul><li><a href="index.html">Support</a></li><li><a href="index.html">FAQs</a></li></ul></div>
-    <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Terms of Service</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
-    <div class="footer-col"><h5>Resources</h5><ul><li><a href="index.html">How It Works</a></li><li><a href="market.html">Marketplace</a></li></ul></div>
+    <div class="footer-col"><h5>About Us</h5><ul><li><a href="about.html#story">Our Story</a></li><li><a href="about.html#mission">Mission &amp; Vision</a></li><li><a href="about.html#team">Team</a></li></ul></div>
+    <div class="footer-col"><h5>Help Center</h5><ul><li><a href="index.html">Home</a></li><li><a href="faq.html">FAQs</a></li><li><a href="faq.html#contact">Contact Us</a></li></ul></div>
+    <div class="footer-col"><h5>Legal</h5><ul><li><a href="terms.html">Terms of Service</a></li><li><a href="privacy.html">Privacy Policy</a></li></ul></div>
+    <div class="footer-col"><h5>Resources</h5><ul><li><a href="how-it-works.html">How It Works</a></li><li><a href="market.html">Marketplace</a></li></ul></div>
   </div>
   <div class="footer-bottom">
     <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
@@ -501,12 +500,30 @@ function shareProduct(platform) {
   }
 }
 
-if (isSignedIn()) {
-  var u = JSON.parse(localStorage.getItem('user')||'{}');
-  document.getElementById('authBtn').textContent = (u.first_name||'Account');
+if (!isSignedIn()) {
+  document.getElementById('dashBtn').textContent = 'Sign In';
+  document.getElementById('dashBtn').onclick = function(){ location.href='auth.html'; };
+}
+
+function goToDashboard() {
+  var role = localStorage.getItem('userRole') || '';
+  var map = {'farmer':'farmer.html','buyer':'buyer.html','agro-dealer':'agro-dealer.html','admin':'admin-support.html'};
+  location.href = map[role] || 'index.html';
 }
 
 window.addEventListener('DOMContentLoaded', init);
+
+(function(){
+  try {
+    var u=JSON.parse(localStorage.getItem('user')||'null'), role=localStorage.getItem('userRole')||'';
+    if(u&&role){
+      var map={farmer:'farmer.html',buyer:'buyer.html','agro-dealer':'agro-dealer.html',admin:'admin-support.html'};
+      document.querySelectorAll('footer a').forEach(function(a){
+        if(a.getAttribute('href')==='index.html'&&a.textContent.trim()==='Home'){ a.href=map[role]||'index.html'; a.textContent='Dashboard'; }
+      });
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>

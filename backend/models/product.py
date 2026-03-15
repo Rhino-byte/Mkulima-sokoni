@@ -161,9 +161,17 @@ class Product:
             params.extend([limit, offset])
             
             query = f"""
-                SELECT * FROM products 
+                SELECT p.*,
+                       COALESCE(
+                         (SELECT ur.role FROM user_roles ur
+                          JOIN farmer_profiles fp ON fp.user_id = ur.user_id
+                          WHERE fp.id = p.farmer_profile_id
+                          LIMIT 1),
+                         'farmer'
+                       ) AS seller_role
+                FROM products p
                 WHERE {where_clause}
-                ORDER BY created_at DESC
+                ORDER BY p.created_at DESC
                 LIMIT %s OFFSET %s
             """
             result = execute_query(query, params, fetch_all=True)
