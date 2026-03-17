@@ -1,4 +1,4 @@
-# Soko Safi
+# Mkulima Sokoni
 
 **From Farm to Market, Fairly.**
 
