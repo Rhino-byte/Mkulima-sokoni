@@ -17,6 +17,7 @@ from routes.auth import auth_bp
 from routes.profiles import profiles_bp
 from routes.uploads import uploads_bp
 from routes.products import products_bp
+from routes.support import support_bp
 from asgiref.wsgi import WsgiToAsgi
 import logging
 import os
@@ -38,6 +39,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(profiles_bp)
 app.register_blueprint(uploads_bp)
 app.register_blueprint(products_bp)
+app.register_blueprint(support_bp)
 
 @app.route('/api/health')
 def health():

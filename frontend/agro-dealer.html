@@ -206,6 +206,7 @@ function exitSuperUser(){sessionStorage.removeItem('superUser');sessionStorage.r
     <button class="topbar-nav-link" onclick="showPage('inventory',this)">📦 My Products</button>
     <button class="topbar-nav-link" onclick="showPage('add-product',this)">➕ Add Product</button>
     <button class="topbar-nav-link" onclick="showPage('marketplace',this)">🛒 Marketplace</button>
+    <button class="topbar-nav-link" onclick="showPage('support',this)">💬 Support</button>
   </nav>
   <div class="topbar-right">
     <div class="user-menu" id="userMenu">
@@ -371,6 +372,35 @@ function exitSuperUser(){sessionStorage.removeItem('superUser');sessionStorage.r
 </div>
 
 <!-- ── PROFILE ── -->
+<div id="support" class="page-section">
+  <div class="wrap">
+    <div class="section-card">
+      <h2>💬 Support Center</h2>
+      <p class="sub">Raise issues, follow progress, and chat with admin-support using the shared ticket workflow.</p>
+      <div id="agroDealerSupportCenterRoot"></div>
+    </div>
+    <div class="section-card">
+      <h2>📞 Contact Channels</h2>
+      <p class="sub">Use these direct channels if you need urgent business support outside the ticket workflow.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+        <div style="padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);">
+          <strong style="display:block;margin-bottom:4px;">Email</strong>
+          <span style="font-size:.82rem;color:var(--muted);">support@sokosafi.ke</span>
+        </div>
+        <div style="padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);">
+          <strong style="display:block;margin-bottom:4px;">Phone</strong>
+          <span style="font-size:.82rem;color:var(--muted);">+254 700 000 000</span>
+        </div>
+        <div style="padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);">
+          <strong style="display:block;margin-bottom:4px;">Support Hours</strong>
+          <span style="font-size:.82rem;color:var(--muted);">Mon-Fri, 8AM - 6PM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROFILE ── -->
 <div id="profile" class="page-section">
   <div class="wrap">
     <div class="section-card">
@@ -446,6 +476,7 @@ function exitSuperUser(){sessionStorage.removeItem('superUser');sessionStorage.r
   </div>
 </footer>
 
+<script src="js/support-center.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -512,6 +543,12 @@ async function init() {
   loadMyProducts();
   loadMarketplace();
   loadProfile();
+  if (window.SokoSupportCenter) {
+    window.SokoSupportCenter.initUserSupport({
+      rootId: 'agroDealerSupportCenterRoot',
+      roleLabel: 'Agro-Dealer'
+    });
+  }
 }
 
 /* ── Load my products ── */

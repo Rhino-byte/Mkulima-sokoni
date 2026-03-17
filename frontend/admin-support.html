@@ -279,38 +279,8 @@
         <div id="tickets" class="tab-content">
           <div class="section-card">
             <h2 class="section-title">Support Tickets 🎫</h2>
-            <p style="color:var(--muted);margin-bottom:18px;">Manage and resolve support tickets from users</p>
-            <div style="overflow-x:auto;">
-              <table>
-                <thead><tr><th>Ticket ID</th><th>User</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-                <tbody>
-                  <tr>
-                    <td>#TKT-2024-001</td><td><strong>Wanjiku K.</strong></td><td>Payment issue with order</td><td>Payment</td>
-                    <td><span class="badge" style="background:rgba(239,68,68,.15);color:var(--danger);">High</span></td>
-                    <td><span class="badge open">Open</span></td><td>2024-03-15</td>
-                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-001')">View</button><button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-001')">Assign</button></div></td>
-                  </tr>
-                  <tr>
-                    <td>#TKT-2024-002</td><td><strong>Nairobi Market Ltd</strong></td><td>Product quality concern</td><td>Quality</td>
-                    <td><span class="badge" style="background:rgba(245,158,11,.15);color:var(--warning);">Medium</span></td>
-                    <td><span class="badge in-progress">In Progress</span></td><td>2024-03-14</td>
-                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-002')">View</button><button class="btn btn-success btn-sm" onclick="resolveTicket('#TKT-2024-002')">Resolve</button></div></td>
-                  </tr>
-                  <tr>
-                    <td>#TKT-2024-003</td><td><strong>John Mutiso</strong></td><td>Account verification question</td><td>Account</td>
-                    <td><span class="badge" style="background:rgba(16,185,129,.15);color:var(--success);">Low</span></td>
-                    <td><span class="badge resolved">Resolved</span></td><td>2024-03-13</td>
-                    <td><div class="action-buttons"><button class="btn btn-outline btn-sm" onclick="viewTicket('#TKT-2024-003')">View</button></div></td>
-                  </tr>
-                  <tr>
-                    <td>#TKT-2024-004</td><td><strong>Export Co. Kenya</strong></td><td>Delivery delay inquiry</td><td>Delivery</td>
-                    <td><span class="badge" style="background:rgba(245,158,11,.15);color:var(--warning);">Medium</span></td>
-                    <td><span class="badge open">Open</span></td><td>2024-03-15</td>
-                    <td><div class="action-buttons"><button class="btn btn-primary btn-sm" onclick="viewTicket('#TKT-2024-004')">View</button><button class="btn btn-success btn-sm" onclick="assignTicket('#TKT-2024-004')">Assign</button></div></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <p style="color:var(--muted);margin-bottom:18px;">Manage the live support queue, respond to users, assign tickets, and resolve issues.</p>
+            <div id="adminSupportCenterRoot"></div>
           </div>
         </div>
 
@@ -400,6 +370,7 @@
     </footer>
   </div>
 
+  <script src="js/support-center.js"></script>
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -415,6 +386,13 @@
       document.getElementById('adminPage').style.display = '';
       loadAdminStats();
       loadAdminUsers();
+      if (window.SokoSupportCenter && !window.__adminSupportCenterInitialized) {
+        window.SokoSupportCenter.initAdminSupport({
+          rootId: 'adminSupportCenterRoot',
+          adminEmail: ADMIN_USER
+        });
+        window.__adminSupportCenterInitialized = true;
+      }
     }
 
     (function checkSession() {

@@ -736,27 +736,12 @@ function exitSuperUser() {
   <div id="support" class="page-section">
     <div class="section-header">
       <div>
-        <div class="section-title">Support & Contact 💬</div>
-        <div class="section-subtitle">We're here to help — Mon–Fri 8AM–6PM</div>
+        <div class="section-title">Support Center 💬</div>
+        <div class="section-subtitle">Raise issues, track updates, and reply to admin-support in one place.</div>
       </div>
     </div>
 
-    <div class="panel" style="margin-bottom:20px;">
-      <div class="panel-title">Send Us a Message</div>
-      <div class="panel-sub">Can't find what you're looking for? We'll get back to you shortly.</div>
-      <form id="contactForm" class="form-grid" onsubmit="submitContact(event)">
-        <div class="form-group"><label>Your Name</label><input type="text" placeholder="Full name" required /></div>
-        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+254 700 000 000" /></div>
-        <div class="form-group"><label>Email Address</label><input type="email" placeholder="your@email.com" required /></div>
-        <div class="form-group">
-          <label>I am a…</label>
-          <select><option>Buyer</option><option>Farmer</option><option>Other</option></select>
-        </div>
-        <div class="form-group form-full"><label>Subject</label><input type="text" placeholder="What's your question about?" required /></div>
-        <div class="form-group form-full"><label>Message</label><textarea placeholder="Tell us more about your issue…" required rows="5"></textarea></div>
-        <div class="form-full"><button type="submit" class="btn btn-primary">Send Message ✉️</button></div>
-      </form>
-    </div>
+    <div id="buyerSupportCenterRoot"></div>
 
     <div class="panel">
       <div class="panel-title">Get in Touch</div>
@@ -1003,6 +988,7 @@ function exitSuperUser() {
   </div>
 </footer>
 
+<script src="js/support-center.js"></script>
 <script>
   /* ── Init ── */
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1462,6 +1448,12 @@ function exitSuperUser() {
     loadUserProfile();
     loadProducts();
     startProductPolling();
+    if (window.SokoSupportCenter) {
+      window.SokoSupportCenter.initUserSupport({
+        rootId: 'buyerSupportCenterRoot',
+        roleLabel: 'Buyer'
+      });
+    }
     if (sessionStorage.getItem('showSupport') === 'true') {
       sessionStorage.removeItem('showSupport');
       showPage('support');
