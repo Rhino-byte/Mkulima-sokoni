@@ -482,6 +482,7 @@ function exitSuperUser(){sessionStorage.removeItem('superUser');sessionStorage.r
 </footer>
 
 <script src="js/support-center.js"></script>
+<script src="js/marketplace-sync.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -548,6 +549,7 @@ async function init() {
 
   loadMyProducts();
   loadMarketplace();
+  startMarketplacePolling();
   loadProfile();
   if (window.SokoSupportCenter) {
     window.SokoSupportCenter.initUserSupport({
@@ -615,8 +617,17 @@ async function loadMyProducts() {
 
 async function activateProduct(pid) {
   try {
-    const res = await fetch(`${API}/products/${pid}/status`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'active'})});
-    if (res.ok) { alert('Product published!'); loadMyProducts(); }
+    const res = await fetch(`${API}/products/${pid}/status`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ firebase_uid: firebaseUid, status:'active' })
+    });
+    if (res.ok) {
+      alert('Product published!');
+      loadMyProducts();
+      loadMarketplace();
+      if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.invalidate();
+    }
     else alert('Failed to publish. Try again.');
   } catch(e) { alert('Error: ' + e.message); }
 }
@@ -678,6 +689,7 @@ async function submitProduct(status) {
     document.getElementById('ap-preview').style.display = 'none';
     loadMyProducts();
     loadMarketplace();
+    if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.invalidate();
     showPage('inventory', document.querySelector('.topbar-nav-link:nth-child(2)'));
   } catch(e) {
     alert('Error: ' + e.message);
@@ -711,6 +723,29 @@ async function loadMarketplace() {
   } catch(e) {
     if (!allMarketProducts.length) grid.innerHTML = '<div style="grid-column:1/-1;" class="empty-state"><div class="icon">😕</div><h4>Could not load marketplace</h4></div>';
   }
+}
+
+function applyMarketplaceProducts(products) {
+  allMarketProducts = products;
+  try {
+    sessionStorage.setItem('productsCache', JSON.stringify(products));
+  } catch (e) {}
+  const stat = document.getElementById('stat-market');
+  if (stat) stat.textContent = products.length;
+  renderMkPage();
+  renderDashMk();
+  renderTicker(products);
+}
+
+function startMarketplacePolling() {
+  if (!window.SokoMarketplaceSync) return;
+  window.SokoMarketplaceSync.stop();
+  window.SokoMarketplaceSync.start(API, {
+    intervalMs: 12000,
+    onRefresh: function (products) {
+      applyMarketplaceProducts(products);
+    },
+  });
 }
 
 function renderDashMk() {

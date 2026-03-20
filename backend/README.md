@@ -48,6 +48,12 @@ backend/
 
 See [API Routes Documentation](../docs/API_ROUTES.md) for detailed endpoint documentation.
 
+### Marketplace (products)
+
+- `GET /api/products/meta` — lightweight aggregate for polling: `{ "count": number, "latest_updated_at": string | null }`. Query params: `status` (default `active`), optional `category`, `product_type` (same filters as the listing query).
+- `GET /api/products` — full active (or filtered) listings as a JSON array (unchanged).
+- `PUT /api/products/<id>/status` — update listing status; requires JSON body `{ "firebase_uid": "...", "status": "active" | "draft" | "sold_out" | "archived" }` (seller must own the product). Aliases: `sold` → `sold_out`, `paused` → `archived`.
+
 ### Authentication Endpoints
 
 - `POST /api/auth/register` - Register new user
@@ -63,7 +69,7 @@ See [API Routes Documentation](../docs/API_ROUTES.md) for detailed endpoint docu
 
 ## Environment Variables
 
-- `DATABASE_URL` - Neon database connection string (required)
+- `DATABASE_URL` - Neon database connection string (required). Prefer the **pooler** endpoint (hostname contains `-pooler`) for serverless hosts like Vercel so connections are multiplexed; the app also uses a small in-process `ThreadedConnectionPool` when possible.
 - `SECRET_KEY` - Flask secret key
 - `DEBUG` - Debug mode (True/False)
 - `CORS_ORIGINS` - Allowed CORS origins (comma-separated)

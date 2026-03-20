@@ -488,6 +488,7 @@
 
 <div id="newProductsNotif">🔄 New listings just arrived!</div>
 
+<script src="js/marketplace-sync.js"></script>
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -676,32 +677,40 @@
 
   document.getElementById('productSearch').addEventListener('input', applyFilters);
 
-  /* ── Polling ── */
-  let pollingTimer = null;
+  /* ── Polling (meta + full list when marketplace changes) ── */
   let lastCount = 0;
+  let lastMarketMetaTs = null;
 
   function startPolling() {
-    stopPolling();
-    pollingTimer = setInterval(async () => {
-      try {
-        const res = await fetch(`${API}/products?status=active`);
-        if (!res.ok) return;
-        const data = await res.json();
-        try { sessionStorage.setItem('productsCache', JSON.stringify(data)); } catch(e) {}
-        if (lastCount > 0 && data.length !== lastCount) {
-          allProducts = data;
-          applyFilters();
+    if (!window.SokoMarketplaceSync) return;
+    window.SokoMarketplaceSync.stop();
+    window.SokoMarketplaceSync.start(API, {
+      intervalMs: 12000,
+      onRefresh: function (products, meta) {
+        const prev = lastCount;
+        const ts = meta && meta.latest_updated_at ? meta.latest_updated_at : '';
+        const metaChanged = lastMarketMetaTs !== null && ts && ts !== lastMarketMetaTs;
+        if (ts) lastMarketMetaTs = ts;
+        allProducts = products;
+        lastCount = products.length;
+        try {
+          sessionStorage.setItem('productsCache', JSON.stringify(products));
+        } catch (e) {}
+        applyFilters();
+        renderProductTicker(products);
+        if (prev > 0 && (products.length !== prev || metaChanged)) {
           const n = document.getElementById('newProductsNotif');
           n.style.display = 'flex';
-          setTimeout(() => { n.style.display = 'none'; }, 3500);
+          setTimeout(() => {
+            n.style.display = 'none';
+          }, 3500);
         }
-        lastCount = data.length;
-      } catch {}
-    }, 10000);
+      },
+    });
   }
 
   function stopPolling() {
-    if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+    if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.stop();
   }
 
   /* ── Support form ── */

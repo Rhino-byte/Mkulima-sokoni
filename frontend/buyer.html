@@ -986,6 +986,7 @@ function exitSuperUser() {
 </footer>
 
 <script src="js/support-center.js"></script>
+<script src="js/marketplace-sync.js"></script>
 <script>
   /* ── Init ── */
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1075,7 +1076,6 @@ function exitSuperUser() {
   let allProducts = [];
   let lastProductCount = 0;
   let lastProductUpdateTime = null;
-  let productPollingInterval = null;
 
   const categoryOrder = ['Vegetables','Fruits','Cereals','Livestock','Dairy','Tea','Nuts','Legumes','Herbs','Potatoes','Other'];
   const categoryEmoji = { Vegetables:'🥬', Fruits:'🍋', Cereals:'🌾', Livestock:'🐄', Dairy:'🥛', Tea:'🍵', Nuts:'🥜', Legumes:'🫘', Herbs:'🌿', Potatoes:'🥔', Other:'📦' };
@@ -1208,32 +1208,46 @@ function exitSuperUser() {
     }
   });
 
-  /* ── Polling ── */
+  /* ── Polling (meta + full list when marketplace changes) ── */
   function startProductPolling() {
-    if (productPollingInterval) clearInterval(productPollingInterval);
-    productPollingInterval = setInterval(async () => {
-      const dash = document.getElementById('dashboard');
-      if (dash && dash.classList.contains('active')) await pollForNewProducts();
-    }, 10000);
+    if (!window.SokoMarketplaceSync) return;
+    window.SokoMarketplaceSync.stop();
+    window.SokoMarketplaceSync.start(API_BASE_URL, {
+      intervalMs: 12000,
+      onRefresh: function (products, meta) {
+        const dash = document.getElementById('dashboard');
+        if (!dash || !dash.classList.contains('active')) return;
+        const ts = meta && meta.latest_updated_at ? meta.latest_updated_at : '';
+        const metaChanged =
+          lastProductUpdateTime !== null && ts && ts !== lastProductUpdateTime;
+        if (ts) lastProductUpdateTime = ts;
+        allProducts = products;
+        lastProductCount = products.length;
+        try {
+          sessionStorage.setItem('productsCache', JSON.stringify(products));
+        } catch (e) {}
+        const activeTag = document.querySelector('.filter-tag.active');
+        const match =
+          activeTag &&
+          activeTag.getAttribute('onclick') &&
+          activeTag.getAttribute('onclick').match(/filterCategory\(['"]([^'"]+)['"]/);
+        const cat = match && match[1] ? match[1] : 'all';
+        filterCategory(cat, activeTag);
+        renderLiveTicker(products);
+        if (metaChanged) {
+          const n = document.getElementById('productUpdateNotification');
+          if (n) {
+            n.style.display = 'flex';
+            setTimeout(() => {
+              n.style.display = 'none';
+            }, 3000);
+          }
+        }
+      },
+    });
   }
   function stopProductPolling() {
-    if (productPollingInterval) { clearInterval(productPollingInterval); productPollingInterval = null; }
-  }
-  async function pollForNewProducts() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/products?status=active`);
-      if (!res.ok) return;
-      const products = await res.json();
-      if (products.length !== lastProductCount && lastProductCount > 0) {
-        allProducts = products; lastProductCount = products.length;
-        renderProducts(products);
-        renderLiveTicker(products);
-        try { sessionStorage.setItem('productsCache', JSON.stringify(products)); } catch(e) {}
-        const n = document.getElementById('productUpdateNotification');
-        n.style.display = 'flex';
-        setTimeout(() => { n.style.display = 'none'; }, 3000);
-      } else { lastProductCount = products.length; }
-    } catch {}
+    if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.stop();
   }
 
   /* ── Live Ticker ── */

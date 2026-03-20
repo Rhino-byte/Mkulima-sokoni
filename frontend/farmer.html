@@ -1137,6 +1137,7 @@ function exitSuperUser() {
 </footer>
 
 <script src="js/support-center.js"></script>
+<script src="js/marketplace-sync.js"></script>
 <script>
   /* ── Init ── */
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1302,6 +1303,8 @@ function exitSuperUser() {
 
         showLoading('Refreshing…', 'Loading your updated product list');
         await loadProducts();
+        await loadMarketplaceListings();
+        if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.invalidate();
         setSaveLoading(false); hideLoading(); closeProductModal();
         alert('✅ Product added successfully!');
       } catch (err) {
@@ -1421,6 +1424,8 @@ function exitSuperUser() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Failed');
       await loadProducts();
+      await loadMarketplaceListings();
+      if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.invalidate();
       hideLoading();
       alert('✅ Product published! Now visible to buyers.');
     } catch(err) { hideLoading(); alert('❌ '+err.message); }
@@ -1439,7 +1444,10 @@ function exitSuperUser() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error||'Failed');
-      await loadProducts(); hideLoading();
+      await loadProducts();
+      await loadMarketplaceListings();
+      if (window.SokoMarketplaceSync) window.SokoMarketplaceSync.invalidate();
+      hideLoading();
       alert(`✅ Status updated to ${status}!`);
     } catch(err) { hideLoading(); alert('❌ '+err.message); }
   }
@@ -1875,11 +1883,31 @@ function exitSuperUser() {
     ticker.style.display = '';
   }
 
+  function startMarketplacePolling() {
+    if (!window.SokoMarketplaceSync) return;
+    window.SokoMarketplaceSync.stop();
+    window.SokoMarketplaceSync.start(API_BASE_URL, {
+      intervalMs: 12000,
+      onRefresh: function (products) {
+        allMarketProducts = products;
+        splitProducts(products);
+        mkPage = 0;
+        try {
+          sessionStorage.setItem('productsCache', JSON.stringify(products));
+        } catch (e) {}
+        renderAgroDealerGrid();
+        renderMarketplacePage();
+        renderAgroDealerTicker(allMarketProducts);
+      },
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     showPage('dashboard');
     loadUserProfile();
     loadProducts();
     loadMarketplaceListings();
+    startMarketplacePolling();
     if (window.SokoSupportCenter) {
       window.SokoSupportCenter.initUserSupport({
         rootId: 'farmerSupportCenterRoot',

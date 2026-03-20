@@ -333,6 +333,38 @@ const dashboardResponse = await fetch('/api/auth/dashboard-route', {
 window.location.href = dashboardResponse.dashboard;
 ```
 
+## Products / marketplace
+
+### Marketplace meta (polling)
+
+**Endpoint:** `GET /api/products/meta`
+
+**Query params:** `status` (default `active`), optional `category`, `product_type` — same filter semantics as `GET /api/products`.
+
+**Response (200):**
+```json
+{
+  "count": 42,
+  "latest_updated_at": "2025-03-20T12:34:56.789012+00:00"
+}
+```
+
+Used by `frontend/js/marketplace-sync.js` to detect listing changes without downloading the full catalog every interval.
+
+### Listing status update (seller only)
+
+**Endpoint:** `PUT /api/products/<product_id>/status`
+
+**Body (JSON):**
+```json
+{
+  "firebase_uid": "string (required)",
+  "status": "active | draft | sold_out | archived"
+}
+```
+
+Aliases accepted: `sold` → `sold_out`, `paused` → `archived`. The authenticated seller must own the product (`farmer_profile_id` match).
+
 ## Error Handling
 
 All endpoints return errors in the following format:

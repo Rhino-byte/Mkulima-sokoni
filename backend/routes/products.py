@@ -4,7 +4,6 @@ Product routes for Phase 3
 from flask import Blueprint, request, jsonify
 from models.product import Product
 from models.farmer_profile import FarmerProfile
-from auth.firebase_auth import verify_firebase_token
 from utils.cloudinary_service import upload_base64_image
 import logging
 
@@ -141,23 +140,72 @@ def create_product():
         logger.error(f"Error creating product: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+
+def _normalize_product_status(raw):
+    """Map API aliases to DB check constraint: draft, active, sold_out, archived."""
+    if not raw:
+        return None
+    s = str(raw).strip().lower()
+    aliases = {
+        'sold': 'sold_out',
+        'paused': 'archived',
+    }
+    s = aliases.get(s, s)
+    if s not in ('draft', 'active', 'sold_out', 'archived'):
+        return None
+    return s
+
+
+@products_bp.route('/meta', methods=['GET'])
+def get_products_meta():
+    """Aggregate count + max(updated_at) for marketplace polling (no full listing body)."""
+    try:
+        status = request.args.get('status', 'active')
+        category = request.args.get('category')
+        product_type = request.args.get('product_type')
+        meta = Product.get_marketplace_meta(
+            status=status, category=category, product_type=product_type
+        )
+        return jsonify(meta), 200
+    except Exception as e:
+        logger.error(f'get_products_meta: {str(e)}', exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
 @products_bp.route('/<product_id>/status', methods=['PUT'])
 def update_product_status(product_id):
-    """Update a product's status (draft -> active, etc.)"""
+    """Update a product's status; requires firebase_uid and seller ownership."""
     try:
-        data = request.get_json()
-        new_status = data.get('status')
-        if new_status not in ('active', 'draft', 'sold', 'paused'):
-            return jsonify({'error': 'Invalid status'}), 400
+        data = request.get_json() or {}
+        firebase_uid = data.get('firebase_uid')
+        if not firebase_uid:
+            return jsonify({'error': 'firebase_uid is required'}), 400
 
-        from database import execute_query
-        result = execute_query(
-            "UPDATE products SET status = %s WHERE id = %s RETURNING id, status",
-            (new_status, product_id), fetch_one=True
-        )
-        if result:
-            return jsonify({'success': True, 'id': str(result['id']), 'status': result['status']}), 200
-        return jsonify({'error': 'Product not found'}), 404
+        new_status = _normalize_product_status(data.get('status'))
+        if not new_status:
+            return jsonify({
+                'error': 'Invalid status. Use draft, active, sold_out, archived '
+                         '(aliases: sold -> sold_out, paused -> archived)',
+            }), 400
+
+        farmer_profile_id = get_farmer_profile_id(firebase_uid)
+        if not farmer_profile_id:
+            return jsonify({'error': 'Farmer profile not found'}), 404
+
+        product = Product.get_product_by_id(product_id)
+        if not product:
+            return jsonify({'error': 'Product not found'}), 404
+        if str(product['farmer_profile_id']) != str(farmer_profile_id):
+            return jsonify({'error': 'Unauthorized'}), 403
+
+        updated = Product.update_product(product_id, status=new_status)
+        if updated:
+            return jsonify({
+                'success': True,
+                'id': str(updated['id']),
+                'status': updated['status'],
+            }), 200
+        return jsonify({'error': 'Failed to update status'}), 500
     except Exception as e:
         logger.error(f"Update product status error: {str(e)}")
         return jsonify({'error': str(e)}), 500

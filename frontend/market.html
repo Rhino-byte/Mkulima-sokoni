@@ -307,6 +307,7 @@
   </div>
 </footer>
 
+<script src="js/marketplace-sync.js"></script>
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -473,7 +474,26 @@
 
   document.getElementById('productSearch').addEventListener('input', applyFilters);
 
-  window.addEventListener('DOMContentLoaded', loadProducts);
+  function startMarketplacePolling() {
+    if (!window.SokoMarketplaceSync) return;
+    window.SokoMarketplaceSync.stop();
+    window.SokoMarketplaceSync.start(API, {
+      intervalMs: 12000,
+      onRefresh: function (products) {
+        allProducts = products;
+        try {
+          sessionStorage.setItem('productsCache', JSON.stringify(products));
+        } catch (e) {}
+        applyFilters();
+        renderProductTicker(products);
+      },
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadProducts();
+    startMarketplacePolling();
+  });
 
   (function(){
     try {

@@ -179,6 +179,39 @@ class Product:
         except Exception as e:
             logger.error(f"Error getting all products: {str(e)}")
             raise
+
+    @staticmethod
+    def get_marketplace_meta(status='active', category=None, product_type=None):
+        """
+        Cheap aggregate for polling: active listing count and latest updated_at.
+        Filters mirror get_all_products (same WHERE, no pagination).
+        """
+        try:
+            conditions = ['status = %s']
+            params = [status]
+            if category:
+                conditions.append('category = %s')
+                params.append(category)
+            if product_type:
+                conditions.append('product_type = %s')
+                params.append(product_type)
+            where_clause = ' AND '.join(conditions)
+            query = f"""
+                SELECT COUNT(*)::int AS count, MAX(updated_at) AS latest_updated_at
+                FROM products
+                WHERE {where_clause}
+            """
+            row = execute_query(query, tuple(params), fetch_one=True)
+            if not row:
+                return {'count': 0, 'latest_updated_at': None}
+            d = dict(row)
+            lu = d.get('latest_updated_at')
+            if lu is not None:
+                d['latest_updated_at'] = lu.isoformat() if hasattr(lu, 'isoformat') else str(lu)
+            return d
+        except Exception as e:
+            logger.error(f'Error getting marketplace meta: {str(e)}')
+            raise
     
     @staticmethod
     def update_product(product_id, **kwargs):
