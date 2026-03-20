@@ -1,18 +1,23 @@
-# Environment variables
+# --- Secrets & local environment (never commit) ---
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+**/credentials.json
 
-# Firebase service account (contains sensitive credentials)
+# Firebase service account JSON
 firebase_service_account.json
 **/firebase_service_account.json
 backend/firebase_service_account.json
 
-# Virtual Environment
+# Virtual environments
 mku_env/
 venv/
 env/
 ENV/
 .venv/
 env
-.env
 
 # Python
 __pycache__/
@@ -93,4 +98,3 @@ node_modules/
 .upload_cache/
 
 .vercel
-.env*.local

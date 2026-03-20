@@ -13,11 +13,12 @@ try:
     project_root = os.path.dirname(current_dir)
     env_path = os.path.join(project_root, '.env')
     
-    # Load .env if it exists, otherwise use environment variables directly
     if os.path.exists(env_path):
         load_dotenv(env_path)
-    else:
-        # Try loading from current directory as fallback
+    backend_env = os.path.join(current_dir, '.env')
+    if os.path.exists(backend_env):
+        load_dotenv(backend_env, override=True)
+    elif not os.path.exists(env_path):
         load_dotenv()
 except Exception:
     # If .env loading fails, continue - environment variables will be used

@@ -11,46 +11,92 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
+def _strip_env_quotes(value):
+    if not value:
+        return ''
+    s = value.strip()
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in ('"', "'"):
+        return s[1:-1].strip()
+    return s
+
+
+def _credentials_from_env():
+    """
+    Option B: FIREBASE_PRIVATE_KEY + FIREBASE_CLIENT_EMAIL (+ FIREBASE_PROJECT_ID).
+    Private key may use literal \\n in .env.
+    """
+    pk = _strip_env_quotes(os.getenv('FIREBASE_PRIVATE_KEY', ''))
+    pk = pk.replace('\\n', '\n')
+    email = _strip_env_quotes(os.getenv('FIREBASE_CLIENT_EMAIL', ''))
+    pid = _strip_env_quotes(os.getenv('FIREBASE_PROJECT_ID', '')) or Config.FIREBASE_PROJECT_ID
+    if not pk or not email:
+        return None
+    info = {
+        'type': 'service_account',
+        'project_id': pid,
+        'private_key': pk,
+        'client_email': email,
+        'token_uri': 'https://oauth2.googleapis.com/token',
+        'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+    }
+    kid = _strip_env_quotes(os.getenv('FIREBASE_PRIVATE_KEY_ID', ''))
+    cid = _strip_env_quotes(os.getenv('FIREBASE_CLIENT_ID', ''))
+    if kid:
+        info['private_key_id'] = kid
+    if cid:
+        info['client_id'] = cid
+    return credentials.Certificate(info)
+
+
 # Initialize Firebase Admin SDK
 _firebase_admin_available = False
 try:
     if not firebase_admin._apps:
-        # Option 1: Try to use service account file if available
-        # Check environment variable first
-        service_account_path = os.getenv('FIREBASE_SERVICE_ACCOUNT_PATH')
-        
-        # If not in env, check for default location in backend directory
-        if not service_account_path:
-            # Get the directory where this file is located (backend/auth/)
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            # Go up one level to backend/ and check for service account file
-            backend_dir = os.path.dirname(current_dir)
-            default_path = os.path.join(backend_dir, 'firebase_service_account.json')
-            if os.path.exists(default_path):
-                service_account_path = default_path
-                logger.info(f"Found service account file at default location: {default_path}")
-        
-        if service_account_path and os.path.exists(service_account_path):
-            try:
-                cred = credentials.Certificate(service_account_path)
-                firebase_admin.initialize_app(cred)
+        try:
+            cred_env = _credentials_from_env()
+            if cred_env:
+                firebase_admin.initialize_app(cred_env)
                 _firebase_admin_available = True
-                logger.info(f"Firebase Admin SDK initialized with service account: {service_account_path}")
-            except Exception as init_error:
-                logger.error(f"Failed to initialize with service account: {init_error}")
-                _firebase_admin_available = False
-        else:
-            # Option 2: Initialize with project ID (fallback, may not work for verify_id_token)
-            logger.warning("Service account file not found. Attempting to initialize with project ID...")
+                logger.info(
+                    'Firebase Admin SDK initialized from FIREBASE_PRIVATE_KEY / FIREBASE_CLIENT_EMAIL'
+                )
+        except Exception as env_err:
+            logger.warning(f'Firebase env credentials failed: {env_err}')
+
+        if not _firebase_admin_available:
+            service_account_path = _strip_env_quotes(os.getenv('FIREBASE_SERVICE_ACCOUNT_PATH', ''))
+            if not service_account_path:
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                backend_dir = os.path.dirname(current_dir)
+                default_path = os.path.join(backend_dir, 'firebase_service_account.json')
+                if os.path.exists(default_path):
+                    service_account_path = default_path
+                    logger.info(f'Found service account file at default location: {default_path}')
+
+            if service_account_path and os.path.exists(service_account_path):
+                try:
+                    cred = credentials.Certificate(service_account_path)
+                    firebase_admin.initialize_app(cred)
+                    _firebase_admin_available = True
+                    logger.info(
+                        f'Firebase Admin SDK initialized with service account file: {service_account_path}'
+                    )
+                except Exception as init_error:
+                    logger.error(f'Failed to initialize with service account file: {init_error}')
+                    _firebase_admin_available = False
+
+        if not _firebase_admin_available and not firebase_admin._apps:
+            logger.warning(
+                'No service account credentials. Attempting initialize with project ID only...'
+            )
             try:
-                firebase_admin.initialize_app(options={
-                    'projectId': Config.FIREBASE_PROJECT_ID
-                })
+                firebase_admin.initialize_app(options={'projectId': Config.FIREBASE_PROJECT_ID})
                 _firebase_admin_available = True
-                logger.info(f"Firebase Admin SDK initialized with project ID: {Config.FIREBASE_PROJECT_ID}")
+                logger.info(f'Firebase Admin SDK initialized with project ID: {Config.FIREBASE_PROJECT_ID}')
             except Exception as init_error:
-                logger.warning(f"Could not initialize Firebase Admin SDK: {init_error}")
-                logger.info("Will use REST API for token verification")
+                logger.warning(f'Could not initialize Firebase Admin SDK: {init_error}')
+                logger.info('Will use REST API for token verification')
                 _firebase_admin_available = False
     else:
         _firebase_admin_available = True
