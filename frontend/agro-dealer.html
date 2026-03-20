@@ -444,6 +444,11 @@ function exitSuperUser(){sessionStorage.removeItem('superUser');sessionStorage.r
             <label>About Your Business</label>
             <textarea id="profile-about" placeholder="Tell farmers about what you offer…"></textarea>
           </div>
+          <div class="form-group form-full">
+            <label>Verification status</label>
+            <p id="profile-verification-status" style="font-weight:600;color:var(--forest);margin:0;">—</p>
+            <p style="font-size:.78rem;color:var(--muted);margin-top:4px;">Set by Soko Safi admins. Refreshes when you return to this page.</p>
+          </div>
           <div class="form-full">
             <button type="submit" class="form-submit" id="profile-save-btn">Save Profile</button>
           </div>
@@ -497,6 +502,7 @@ function showPage(name, btn) {
   if (section) section.classList.add('active');
   if (btn && btn.classList) btn.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
+  if (name === 'profile' && firebaseUid) loadProfile();
 }
 
 function previewImg(input) {
@@ -550,6 +556,12 @@ async function init() {
     });
   }
 }
+
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) return;
+  var sec = document.getElementById('profile');
+  if (sec && sec.classList.contains('active') && firebaseUid) loadProfile();
+});
 
 /* ── Load my products ── */
 async function loadMyProducts() {
@@ -789,6 +801,9 @@ async function loadProfile() {
     if (prof.location) document.getElementById('profile-location').value = prof.location;
     if (prof.county) document.getElementById('profile-location').value = prof.county;
     if (prof.bio) document.getElementById('profile-about').value = prof.bio;
+    var st = (prof.certification_status || 'pending').toString();
+    var stEl = document.getElementById('profile-verification-status');
+    if (stEl) stEl.textContent = st.charAt(0).toUpperCase() + st.slice(1).toLowerCase();
   } catch(e) {}
 }
 
@@ -811,7 +826,7 @@ async function saveProfile(e) {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(body)
     });
-    if (res.ok) alert('✅ Profile saved successfully!');
+    if (res.ok) { alert('✅ Profile saved successfully!'); loadProfile(); }
     else { const d = await res.json(); alert('Error: ' + (d.error || 'Save failed')); }
   } catch(e) { alert('Error: ' + e.message); }
   finally { btn.disabled = false; btn.textContent = 'Save Profile'; }

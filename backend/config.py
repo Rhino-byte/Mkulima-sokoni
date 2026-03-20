@@ -38,6 +38,11 @@ class Config:
     FIREBASE_MESSAGING_SENDER_ID = os.getenv('FIREBASE_MESSAGING_SENDER_ID', '340310533875')
     FIREBASE_APP_ID = os.getenv('FIREBASE_APP_ID', '1:340310533875:web:54c8b2d5e28bf32d437986')
     
+    # Comma-separated Firebase UIDs allowed to call /api/auth/admin/* (set in .env for production)
+    ADMIN_FIREBASE_UIDS = os.getenv('ADMIN_FIREBASE_UIDS', '')
+    # Local only: if true, any valid Firebase ID token may call admin APIs (never use in production)
+    ADMIN_ALLOW_ANY_FIREBASE_USER = os.getenv('ADMIN_ALLOW_ANY_FIREBASE_USER', '').lower() == 'true'
+
     # Application Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'

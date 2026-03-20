@@ -180,6 +180,37 @@ class User:
             raise
     
     @staticmethod
+    def get_user_by_id(user_id):
+        """Get user row by UUID primary key."""
+        try:
+            query = """
+                SELECT id, firebase_uid, email, phone_number, role,
+                       first_name, last_name,
+                       created_at, latest_sign_in, email_verified, is_active
+                FROM users WHERE id = %s::uuid
+            """
+            result = execute_query(query, (user_id,), fetch_one=True)
+            return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Error get_user_by_id: {str(e)}")
+            raise
+
+    @staticmethod
+    def update_email_verified(firebase_uid, email_verified):
+        """Sync email_verified from Firebase token into Neon."""
+        try:
+            query = """
+                UPDATE users
+                SET email_verified = %s
+                WHERE firebase_uid = %s
+                RETURNING id, firebase_uid, email, email_verified
+            """
+            return execute_query(query, (bool(email_verified), firebase_uid), fetch_one=True)
+        except Exception as e:
+            logger.error(f"Error update_email_verified: {str(e)}")
+            raise
+
+    @staticmethod
     def get_user_by_email(email):
         """
         Get user by email

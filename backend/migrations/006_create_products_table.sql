@@ -53,7 +53,8 @@ CREATE INDEX IF NOT EXISTS idx_products_county ON products(county);
 CREATE INDEX IF NOT EXISTS idx_products_location ON products(location);
 CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
 
--- Create trigger to automatically update updated_at timestamp
+-- Create trigger to automatically update updated_at timestamp (idempotent re-runs)
+DROP TRIGGER IF EXISTS trigger_update_products_updated_at ON products;
 CREATE TRIGGER trigger_update_products_updated_at
     BEFORE UPDATE ON products
     FOR EACH ROW

@@ -184,6 +184,19 @@
     return payload;
   }
 
+  function runWithButtonLoading(button, loadingLabel, fn) {
+    if (!button || button.disabled) {
+      return Promise.resolve();
+    }
+    var idle = button.textContent;
+    button.disabled = true;
+    button.textContent = loadingLabel;
+    return Promise.resolve(fn()).finally(function () {
+      button.disabled = false;
+      button.textContent = idle;
+    });
+  }
+
   function setAlert(container, kind, message) {
     if (!container) {
       return;
@@ -397,38 +410,47 @@
       }
       event.preventDefault();
 
+      var submitBtn =
+        (event.submitter && event.submitter.matches('button[type="submit"]') && event.submitter) ||
+        (createForm && createForm.querySelector('button[type="submit"]')) ||
+        (replyForm && replyForm.querySelector('button[type="submit"]'));
+
       try {
         if (createForm) {
-          setAlert(state.root.querySelector('[data-ssc-alert]'), null, '');
-          var formData = new FormData(createForm);
-          await requestJson(SUPPORT_API_BASE + '/tickets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              firebase_uid: state.firebaseUid,
-              category: formData.get('category'),
-              priority: formData.get('priority'),
-              subject: formData.get('subject'),
-              description: formData.get('description')
-            })
+          await runWithButtonLoading(submitBtn, 'Submitting…', async function () {
+            setAlert(state.root.querySelector('[data-ssc-alert]'), null, '');
+            var formData = new FormData(createForm);
+            await requestJson(SUPPORT_API_BASE + '/tickets', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                firebase_uid: state.firebaseUid,
+                category: formData.get('category'),
+                priority: formData.get('priority'),
+                subject: formData.get('subject'),
+                description: formData.get('description')
+              })
+            });
+            createForm.reset();
+            createForm.querySelector('select[name="priority"]').value = 'medium';
+            createForm.querySelector('select[name="category"]').value = 'account';
+            setAlert(state.root.querySelector('[data-ssc-alert]'), 'success', 'Ticket submitted successfully. Admin-support can now respond.');
+            await loadUserTickets(state);
           });
-          createForm.reset();
-          createForm.querySelector('select[name="priority"]').value = 'medium';
-          createForm.querySelector('select[name="category"]').value = 'account';
-          setAlert(state.root.querySelector('[data-ssc-alert]'), 'success', 'Ticket submitted successfully. Admin-support can now respond.');
-          await loadUserTickets(state);
         } else if (replyForm && state.activeTicketId) {
-          var replyData = new FormData(replyForm);
-          await requestJson(SUPPORT_API_BASE + '/tickets/' + encodeURIComponent(state.activeTicketId) + '/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              firebase_uid: state.firebaseUid,
-              message: replyData.get('message')
-            })
+          await runWithButtonLoading(submitBtn, 'Sending…', async function () {
+            var replyData = new FormData(replyForm);
+            await requestJson(SUPPORT_API_BASE + '/tickets/' + encodeURIComponent(state.activeTicketId) + '/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                firebase_uid: state.firebaseUid,
+                message: replyData.get('message')
+              })
+            });
+            await openUserTicket(state, state.activeTicketId);
+            await loadUserTickets(state);
           });
-          await openUserTicket(state, state.activeTicketId);
-          await loadUserTickets(state);
         }
       } catch (err) {
         setAlert(state.root.querySelector('[data-ssc-alert]'), 'error', err.message || 'Something went wrong.');
@@ -441,11 +463,13 @@
       var modal = state.root.querySelector('[data-ssc-modal]');
 
       if (viewButton) {
-        try {
-          await openUserTicket(state, viewButton.getAttribute('data-ssc-view-ticket'));
-        } catch (err) {
-          setAlert(state.root.querySelector('[data-ssc-alert]'), 'error', err.message || 'Could not load ticket.');
-        }
+        await runWithButtonLoading(viewButton, 'Loading…', async function () {
+          try {
+            await openUserTicket(state, viewButton.getAttribute('data-ssc-view-ticket'));
+          } catch (err) {
+            setAlert(state.root.querySelector('[data-ssc-alert]'), 'error', err.message || 'Could not load ticket.');
+          }
+        });
       }
 
       if (closeButton || event.target === modal) {
@@ -640,21 +664,27 @@
 
       try {
         if (refresh) {
-          await loadAdminStats(state);
-          await loadAdminTickets(state);
+          await runWithButtonLoading(refresh, 'Refreshing…', async function () {
+            await loadAdminStats(state);
+            await loadAdminTickets(state);
+          });
         }
         if (view) {
-          await openAdminTicket(state, view.getAttribute('data-ssc-admin-view'));
+          await runWithButtonLoading(view, 'Loading…', async function () {
+            await openAdminTicket(state, view.getAttribute('data-ssc-admin-view'));
+          });
         }
         if (assign && state.activeTicketId) {
-          await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/assign', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ admin_email: state.adminEmail })
+          await runWithButtonLoading(assign, 'Assigning…', async function () {
+            await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/assign', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ admin_email: state.adminEmail })
+            });
+            await openAdminTicket(state, state.activeTicketId);
+            await loadAdminStats(state);
+            await loadAdminTickets(state);
           });
-          await openAdminTicket(state, state.activeTicketId);
-          await loadAdminStats(state);
-          await loadAdminTickets(state);
         }
         if (close || event.target === modal) {
           modal.classList.remove('show');
@@ -692,38 +722,47 @@
       }
       event.preventDefault();
 
+      var adminSubmitBtn =
+        (event.submitter && event.submitter.matches('button[type="submit"]') && event.submitter) ||
+        (replyForm && replyForm.querySelector('button[type="submit"]')) ||
+        (statusForm && statusForm.querySelector('button[type="submit"]'));
+
       try {
         if (replyForm && state.activeTicketId) {
-          var replyData = new FormData(replyForm);
-          await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              admin_email: state.adminEmail,
-              admin_name: state.adminEmail,
-              message: replyData.get('message'),
-              is_internal_note: replyData.get('is_internal_note') === 'on'
-            })
+          await runWithButtonLoading(adminSubmitBtn, 'Posting…', async function () {
+            var replyData = new FormData(replyForm);
+            await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                admin_email: state.adminEmail,
+                admin_name: state.adminEmail,
+                message: replyData.get('message'),
+                is_internal_note: replyData.get('is_internal_note') === 'on'
+              })
+            });
+            await openAdminTicket(state, state.activeTicketId);
+            await loadAdminStats(state);
+            await loadAdminTickets(state);
+            setAlert(state.root.querySelector('[data-ssc-admin-alert]'), 'success', 'Message posted successfully.');
           });
-          await openAdminTicket(state, state.activeTicketId);
-          await loadAdminStats(state);
-          await loadAdminTickets(state);
-          setAlert(state.root.querySelector('[data-ssc-admin-alert]'), 'success', 'Message posted successfully.');
         } else if (statusForm && state.activeTicketId) {
-          var statusData = new FormData(statusForm);
-          await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/status', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              admin_email: state.adminEmail,
-              status: statusData.get('status'),
-              resolution_summary: statusData.get('resolution_summary')
-            })
+          await runWithButtonLoading(adminSubmitBtn, 'Updating…', async function () {
+            var statusData = new FormData(statusForm);
+            await requestJson(SUPPORT_API_BASE + '/admin/tickets/' + encodeURIComponent(state.activeTicketId) + '/status', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                admin_email: state.adminEmail,
+                status: statusData.get('status'),
+                resolution_summary: statusData.get('resolution_summary')
+              })
+            });
+            await openAdminTicket(state, state.activeTicketId);
+            await loadAdminStats(state);
+            await loadAdminTickets(state);
+            setAlert(state.root.querySelector('[data-ssc-admin-alert]'), 'success', 'Ticket status updated.');
           });
-          await openAdminTicket(state, state.activeTicketId);
-          await loadAdminStats(state);
-          await loadAdminTickets(state);
-          setAlert(state.root.querySelector('[data-ssc-admin-alert]'), 'success', 'Ticket status updated.');
         }
       } catch (err) {
         setAlert(state.root.querySelector('[data-ssc-admin-alert]'), 'error', err.message || 'Action failed.');

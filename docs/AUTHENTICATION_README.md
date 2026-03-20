@@ -435,6 +435,13 @@ async function getUserProfileFromDatabase(firebaseUid) {
    - Handle expired tokens gracefully
    - Redirect to login when needed
 
+## Tokens, Neon, and admin APIs
+
+- **Firebase ID tokens** are verified on the backend (`verify_firebase_token`) and must **not** be stored in Neon. They are short-lived credentials.
+- **Neon** stores durable auth-related fields on `users`: `latest_sign_in` (updated on login), `email_verified` (synced from the decoded ID token on `/login` and `/google-signin`), and optional rows in `auth_login_audit` (success/failure, IP — no token payload).
+- **Admin dashboard** (`admin-support.html`) calls `/api/auth/admin/*` with `Authorization: Bearer <Firebase ID token>`. Access is granted if the token’s UID is listed in `ADMIN_FIREBASE_UIDS`, or the token has custom claim `admin: true` / `role: admin`, or — **local development only** — `ADMIN_ALLOW_ANY_FIREBASE_USER=true`.
+- **Verification changes** are written to profile tables plus `verification_audit`; **impersonation** (support “open as user”) is logged in `admin_impersonation_log` when the admin UI posts to the corresponding API.
+
 ## Future Enhancements
 
 - [ ] Social login (Google, Facebook)

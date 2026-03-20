@@ -925,10 +925,9 @@ function exitSuperUser() {
               <input type="hidden" id="livestock" name="livestock" />
             </div>
             <div class="form-group form-full">
-              <label>Certification Status</label>
-              <select id="certification-status" name="certification_status">
-                <option value="pending">Pending</option><option value="verified">Verified</option><option value="rejected">Rejected</option>
-              </select>
+              <label>Certification status</label>
+              <p id="certification-status-display" style="font-weight:600;color:var(--forest);margin:0;">—</p>
+              <p class="form-hint" style="margin-top:6px;">Admins set Verified or Rejected after review. Status refreshes when you return to this tab.</p>
             </div>
           </div>
         </div>
@@ -1510,7 +1509,10 @@ function exitSuperUser() {
         set('farm-name', p.farm_name); set('location', p.location); set('county', p.county);
         set('national-id', p.national_id); set('ward', p.ward);
         set('farm-size', p.farm_size_acres); set('farming-experience', p.farming_experience_years);
-        set('certification-status', p.certification_status || 'pending'); set('bio', p.bio);
+        const csRaw = (p.certification_status || 'pending').toString();
+        const csDisp = document.getElementById('certification-status-display');
+        if (csDisp) csDisp.textContent = csRaw.charAt(0).toUpperCase() + csRaw.slice(1).toLowerCase();
+        set('bio', p.bio);
         if (p.referral_source) {
           set('referral-source', p.referral_source);
           if (p.referral_source === 'other') {
@@ -1584,7 +1586,6 @@ function exitSuperUser() {
         referral_other:  document.getElementById('referral-source').value === 'other' ? document.getElementById('referral-other').value : null,
         farm_size_acres: document.getElementById('farm-size').value ? parseFloat(document.getElementById('farm-size').value) : null,
         farming_experience_years: document.getElementById('farming-experience').value ? parseInt(document.getElementById('farming-experience').value) : null,
-        certification_status: document.getElementById('certification-status').value,
         bio: document.getElementById('bio').value,
         profile_image_url: document.getElementById('profile-image').value || currentImageUrl || ''
       };
@@ -1595,6 +1596,7 @@ function exitSuperUser() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || 'Failed');
       showAlert('✅ Profile saved successfully!','success');
+      loadFarmerProfile();
     } catch(err) {
       showAlert(err.message || 'Failed to save profile','error');
     } finally {
@@ -1884,6 +1886,12 @@ function exitSuperUser() {
         roleLabel: 'Farmer'
       });
     }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    const prof = document.getElementById('profile');
+    if (prof && prof.classList.contains('active')) loadFarmerProfile();
   });
 
   (function(){

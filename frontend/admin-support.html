@@ -64,6 +64,7 @@
       box-shadow: 0 4px 14px rgba(27,67,50,.25); transition: all .2s;
     }
     .login-card .login-btn:hover { opacity: .92; transform: translateY(-2px); }
+    .login-card .login-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
     .login-error { background: #fef2f2; color: #991b1b; padding: 8px 12px; border-radius: 8px; font-size: .82rem; margin-bottom: 12px; display: none; border: 1px solid #fecaca; text-align: center; }
 
     /* ── PAGE LAYOUT ── */
@@ -86,6 +87,8 @@
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.25); }
     .btn-outline:hover { background: rgba(255,255,255,.1); }
+    .btn:disabled, .btn[disabled] { opacity: 0.6; cursor: not-allowed; transform: none !important; pointer-events: none; }
+    .section-card .btn-sm:disabled { opacity: 0.65; cursor: not-allowed; pointer-events: none; }
 
     main { flex: 1; padding: 28px; }
     .container { max-width: 1400px; margin: 0 auto; }
@@ -163,7 +166,7 @@
       </div>
       <div class="login-card">
         <h3>Sign In to Continue</h3>
-        <p class="sub">Authorized personnel only</p>
+        <p class="sub">Firebase admin account — backend must allow your UID (<code style="font-size:.72rem;">ADMIN_FIREBASE_UIDS</code>) or set <code style="font-size:.72rem;">ADMIN_ALLOW_ANY_FIREBASE_USER=true</code> for local dev only</p>
         <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
         <form id="adminLoginForm">
           <div class="lg-group">
@@ -236,11 +239,11 @@
         </div>
 
         <div class="tabs">
-          <button class="tab active" onclick="switchTab('users')">👥 User Management</button>
-          <button class="tab" onclick="switchTab('verification')">✅ Verification</button>
-          <button class="tab" onclick="switchTab('tickets')">🎫 Support Tickets</button>
-          <button class="tab" onclick="switchTab('client-access')">🔑 Client Access</button>
-          <button class="tab" onclick="switchTab('analytics')">📊 Analytics</button>
+          <button type="button" class="tab active" onclick="switchTab(event, 'users')">👥 User Management</button>
+          <button type="button" class="tab" onclick="switchTab(event, 'verification')">✅ Verification</button>
+          <button type="button" class="tab" onclick="switchTab(event, 'tickets')">🎫 Support Tickets</button>
+          <button type="button" class="tab" onclick="switchTab(event, 'client-access')">🔑 Client Access</button>
+          <button type="button" class="tab" onclick="switchTab(event, 'analytics')">📊 Analytics</button>
         </div>
 
         <!-- Users Tab -->
@@ -320,7 +323,7 @@
                     <div style="font-weight:700;color:var(--forest);font-size:.92rem;" id="client-joined">--</div>
                   </div>
                 </div>
-                <button class="btn btn-primary" style="width:100%;padding:12px;font-size:.9rem;" onclick="openClientDashboard()">
+                <button type="button" class="btn btn-primary" id="open-client-dashboard-btn" style="width:100%;padding:12px;font-size:.9rem;" onclick="openClientDashboard()">
                   Open Client Dashboard →
                 </button>
                 <p style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:8px;">Opens in a new tab with super-user access. A banner will show you are viewing as admin.</p>
@@ -370,6 +373,7 @@
     </footer>
   </div>
 
+  <script type="module" src="js/admin-support-firebase.js"></script>
   <script src="js/support-center.js"></script>
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
@@ -377,46 +381,38 @@
     var API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5000/api' : '/api';
 
-    /* ── Admin Login Gate ── */
-    var ADMIN_USER = 'TaiStat@sokosafi.com';
-    var ADMIN_PASS = 'Soko_Safi@2026';
+    async function authFetch(url, options) {
+      options = options || {};
+      if (typeof window.__getAdminIdToken !== 'function') {
+        throw new Error('Admin auth not loaded');
+      }
+      var token = await window.__getAdminIdToken();
+      if (!token) throw new Error('Not signed in');
+      var headers = Object.assign({}, options.headers || {});
+      headers['Authorization'] = 'Bearer ' + token;
+      if (options.body && typeof options.body === 'string' && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      return fetch(url, Object.assign({}, options, { headers: headers }));
+    }
 
-    function showDashboard() {
-      document.getElementById('loginGate').classList.add('hidden');
-      document.getElementById('adminPage').style.display = '';
+    window.__bootstrapAdminDashboard = function () {
       loadAdminStats();
       loadAdminUsers();
+      loadImpersonationLogs();
       if (window.SokoSupportCenter && !window.__adminSupportCenterInitialized) {
         window.SokoSupportCenter.initAdminSupport({
           rootId: 'adminSupportCenterRoot',
-          adminEmail: ADMIN_USER
+          adminEmail: window.__adminUserEmail || 'admin@sokosafi.com'
         });
         window.__adminSupportCenterInitialized = true;
       }
-    }
-
-    (function checkSession() {
-      if (sessionStorage.getItem('adminAuth') === 'true') showDashboard();
-    })();
-
-    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var email = document.getElementById('admin-email').value.trim();
-      var pass = document.getElementById('admin-password').value;
-      if (email === ADMIN_USER && pass === ADMIN_PASS) {
-        sessionStorage.setItem('adminAuth', 'true');
-        showDashboard();
-      } else {
-        var err = document.getElementById('loginError');
-        err.style.display = 'block';
-        setTimeout(function() { err.style.display = 'none'; }, 4000);
-      }
-    });
+    };
 
     /* ── Live Stats ── */
     async function loadAdminStats() {
       try {
-        var res = await fetch(API_BASE + '/auth/admin/stats');
+        var res = await authFetch(API_BASE + '/auth/admin/stats');
         if (!res.ok) throw new Error();
         var s = await res.json();
 
@@ -446,15 +442,19 @@
     /* ── Live Users & Verification Tables ── */
     var allAdminUsers = [];
 
+    function isPendingVerification(u) {
+      var a = (u.certification_status || '').toLowerCase();
+      var b = (u.buyer_verification_status || '').toLowerCase();
+      return a === 'pending' || b === 'pending';
+    }
+
     async function loadAdminUsers() {
       try {
-        var res = await fetch(API_BASE + '/auth/admin/users');
+        var res = await authFetch(API_BASE + '/auth/admin/users');
         if (!res.ok) throw new Error();
         allAdminUsers = await res.json();
         renderUsersTable(allAdminUsers);
-        renderVerificationTable(allAdminUsers.filter(function(u) {
-          return (u.certification_status || '').toLowerCase() === 'pending';
-        }));
+        renderVerificationTable(allAdminUsers.filter(isPendingVerification));
       } catch (e) {
         document.getElementById('users-table-body').innerHTML =
           '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:28px;">Failed to load users</td></tr>';
@@ -474,9 +474,18 @@
     }
     function statusBadge(u) {
       var cs = (u.certification_status || '').toLowerCase();
-      if (cs === 'verified' || cs === 'approved') return '<span class="badge verified">Verified</span>';
-      if (cs === 'pending') return '<span class="badge pending">Pending</span>';
-      if (cs === 'rejected') return '<span class="badge rejected">Rejected</span>';
+      var bs = (u.buyer_verification_status || '').toLowerCase();
+      function rank(s) {
+        if (s === 'rejected') return 3;
+        if (s === 'pending') return 2;
+        if (s === 'verified' || s === 'approved') return 1;
+        return 0;
+      }
+      var best = cs;
+      if (rank(bs) > rank(cs)) best = bs;
+      if (best === 'verified' || best === 'approved') return '<span class="badge verified">Verified</span>';
+      if (best === 'pending') return '<span class="badge pending">Pending</span>';
+      if (best === 'rejected') return '<span class="badge rejected">Rejected</span>';
       return u.is_active !== false ? '<span class="badge verified">Active</span>' : '<span class="badge rejected">Inactive</span>';
     }
 
@@ -514,17 +523,18 @@
           '<td>' + fmtDate(u.created_at) + '</td>' +
           '<td><span class="badge pending">Pending Review</span></td>' +
           '<td><div class="action-buttons">' +
-            '<button class="btn btn-success btn-sm" onclick="approveVerification(\'' + esc(u.id) + '\')">Approve</button>' +
-            '<button class="btn btn-danger btn-sm" onclick="rejectVerification(\'' + esc(u.id) + '\')">Reject</button>' +
+            '<button type="button" class="btn btn-success btn-sm" data-verify-action="approve" data-user-id="' + esc(u.id) + '">Approve</button>' +
+            '<button type="button" class="btn btn-danger btn-sm" data-verify-action="reject" data-user-id="' + esc(u.id) + '">Reject</button>' +
           '</div></td></tr>';
       }).join('');
     }
 
     /* ── Tab Switching ── */
-    function switchTab(tabName) {
+    function switchTab(evt, tabName) {
+      var btn = evt && evt.target ? evt.target : null;
       document.querySelectorAll('.tab').forEach(function(tab) { tab.classList.remove('active'); });
       document.querySelectorAll('.tab-content').forEach(function(content) { content.classList.remove('active'); });
-      event.target.classList.add('active');
+      if (btn && btn.classList) btn.classList.add('active');
       document.getElementById(tabName).classList.add('active');
     }
 
@@ -532,13 +542,84 @@
     function viewUser(email) {
       document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
       document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
-      document.querySelector('.tab[onclick*="client-access"]').classList.add('active');
+      var tabBtn = document.querySelector('.tab[onclick*="client-access"]');
+      if (tabBtn) tabBtn.classList.add('active');
       document.getElementById('client-access').classList.add('active');
       document.getElementById('client-email').value = email;
       accessClientAccount();
     }
-    function approveVerification(userId) { if (confirm('Approve verification for this user?')) { alert('Verification approved! User will be notified.'); loadAdminUsers(); loadAdminStats(); } }
-    function rejectVerification(userId) { var reason = prompt('Reject verification?\n\nPlease provide reason:'); if (reason) { alert('Verification rejected.\nReason: ' + reason); loadAdminUsers(); loadAdminStats(); } }
+    function lockVerificationRow(tr, clickedBtn, loadingText) {
+      if (!tr) return;
+      tr.querySelectorAll('.action-buttons button').forEach(function(b) {
+        if (!b.getAttribute('data-idle-label')) b.setAttribute('data-idle-label', b.textContent);
+        b.disabled = true;
+      });
+      if (clickedBtn) clickedBtn.textContent = loadingText || 'Please wait…';
+    }
+    function unlockVerificationRow(tr) {
+      if (!tr) return;
+      tr.querySelectorAll('.action-buttons button').forEach(function(b) {
+        b.disabled = false;
+        var idle = b.getAttribute('data-idle-label');
+        if (idle) b.textContent = idle;
+      });
+    }
+
+    document.getElementById('verification-table-body').addEventListener('click', async function(ev) {
+      var btn = ev.target.closest('[data-verify-action]');
+      if (!btn || btn.disabled) return;
+      var userId = btn.getAttribute('data-user-id');
+      var action = btn.getAttribute('data-verify-action');
+      var tr = btn.closest('tr');
+      if (!userId) return;
+
+      if (action === 'approve') {
+        if (!confirm('Approve verification for this user?')) return;
+        lockVerificationRow(tr, btn, 'Please wait…');
+        try {
+          var res = await authFetch(API_BASE + '/auth/admin/users/' + encodeURIComponent(userId) + '/verification', {
+            method: 'PATCH',
+            body: JSON.stringify({
+              action: 'approve',
+              admin_email: window.__adminUserEmail || ''
+            })
+          });
+          var data = await res.json().catch(function() { return {}; });
+          if (!res.ok) throw new Error(data.error || 'Request failed');
+          await loadAdminUsers();
+          await loadAdminStats();
+          alert('Verification approved.');
+        } catch (e) {
+          unlockVerificationRow(tr);
+          alert(e.message || 'Failed to approve');
+        }
+        return;
+      }
+
+      if (action === 'reject') {
+        var reason = prompt('Reject verification?\n\nPlease provide reason:');
+        if (!reason || !reason.trim()) return;
+        lockVerificationRow(tr, btn, 'Please wait…');
+        try {
+          var res2 = await authFetch(API_BASE + '/auth/admin/users/' + encodeURIComponent(userId) + '/verification', {
+            method: 'PATCH',
+            body: JSON.stringify({
+              action: 'reject',
+              reason: reason.trim(),
+              admin_email: window.__adminUserEmail || ''
+            })
+          });
+          var data2 = await res2.json().catch(function() { return {}; });
+          if (!res2.ok) throw new Error(data2.error || 'Request failed');
+          await loadAdminUsers();
+          await loadAdminStats();
+          alert('Verification rejected.');
+        } catch (e) {
+          unlockVerificationRow(tr);
+          alert(e.message || 'Failed to reject');
+        }
+      }
+    });
     function viewTicket(ticketId) { alert('Viewing ticket ' + ticketId); }
     function assignTicket(ticketId) { if (confirm('Assign ticket ' + ticketId + ' to support team?')) alert('Ticket ' + ticketId + ' assigned.'); }
     function resolveTicket(ticketId) { if (confirm('Mark ticket ' + ticketId + ' as resolved?')) alert('Ticket ' + ticketId + ' resolved.'); }
@@ -566,7 +647,7 @@
       btn.textContent = 'Loading…';
 
       try {
-        var res = await fetch(API_BASE + '/auth/user-by-email?email=' + encodeURIComponent(email));
+        var res = await authFetch(API_BASE + '/auth/user-by-email?email=' + encodeURIComponent(email));
         if (!res.ok) {
           var errData = await res.json().catch(function() { return {}; });
           throw new Error(errData.error || 'User not found with that email.');
@@ -600,8 +681,15 @@
       }
     }
 
-    function openClientDashboard() {
+    async function openClientDashboard() {
       if (!currentClientData) return;
+      var dashBtn = document.getElementById('open-client-dashboard-btn');
+      var idleDash = 'Open Client Dashboard →';
+      if (dashBtn && dashBtn.disabled) return;
+      if (dashBtn) {
+        dashBtn.disabled = true;
+        dashBtn.textContent = 'Opening…';
+      }
 
       var role = (currentClientData.role || '').toLowerCase();
       var dashboardMap = { farmer: 'farmer.html', buyer: 'buyer.html', 'agro-dealer': 'agro-dealer.html', agrodealer: 'agro-dealer.html' };
@@ -618,17 +706,33 @@
       };
 
       addAccessLog(currentClientData);
+      try {
+        try {
+          await authFetch(API_BASE + '/auth/admin/impersonation-log', {
+            method: 'POST',
+            body: JSON.stringify({
+              target_user_id: currentClientData.id,
+              admin_email: window.__adminUserEmail || ''
+            })
+          });
+        } catch (logErr) { console.warn('impersonation log:', logErr); }
 
-      var w = window.open('', '_blank');
-      if (w) {
-        w.document.write('<html><head><title>Loading...</title></head><body><script>' +
-          'localStorage.setItem("user", ' + JSON.stringify(JSON.stringify(superUserPayload)) + ');' +
-          'localStorage.setItem("userRole", ' + JSON.stringify(currentClientData.role || '') + ');' +
-          'sessionStorage.setItem("superUser", "true");' +
-          'sessionStorage.setItem("superUserAdmin", "TaiStat@sokosafi.com");' +
-          'window.location.href = ' + JSON.stringify(target) + ';' +
-          '<\/script></body></html>');
-        w.document.close();
+        var w = window.open('', '_blank');
+        if (w) {
+          w.document.write('<html><head><title>Loading...</title></head><body><script>' +
+            'localStorage.setItem("user", ' + JSON.stringify(JSON.stringify(superUserPayload)) + ');' +
+            'localStorage.setItem("userRole", ' + JSON.stringify(currentClientData.role || '') + ');' +
+            'sessionStorage.setItem("superUser", "true");' +
+            'sessionStorage.setItem("superUserAdmin", "TaiStat@sokosafi.com");' +
+            'window.location.href = ' + JSON.stringify(target) + ';' +
+            '<\/script></body></html>');
+          w.document.close();
+        }
+      } finally {
+        if (dashBtn) {
+          dashBtn.disabled = false;
+          dashBtn.textContent = idleDash;
+        }
       }
     }
 
@@ -650,13 +754,30 @@
       }).join('');
     }
 
+    async function loadImpersonationLogs() {
+      try {
+        var res = await authFetch(API_BASE + '/auth/admin/impersonation-log?limit=30');
+        if (!res.ok) return;
+        var data = await res.json();
+        var logs = (data.logs || []);
+        if (!logs.length) return;
+        var tbody = document.getElementById('access-log-body');
+        tbody.innerHTML = logs.map(function(row) {
+          var name = esc(((row.first_name || '') + ' ' + (row.last_name || '')).trim() || row.target_email || '');
+          return '<tr><td><strong>' + name + '</strong></td><td>' + esc(row.target_email || '') + '</td><td>' + roleBadge(row.role) + '</td><td>' + esc(String(row.created_at || '')) + '</td></tr>';
+        }).join('');
+      } catch (e) { console.warn('impersonation logs', e); }
+    }
+
     document.getElementById('client-email').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') { e.preventDefault(); accessClientAccount(); }
     });
 
     function logout() {
-      if (confirm('Are you sure you want to logout?')) {
-        sessionStorage.removeItem('adminAuth');
+      if (!confirm('Are you sure you want to logout?')) return;
+      if (typeof window.__adminSignOut === 'function') {
+        window.__adminSignOut().then(function() { window.location.href = 'index.html'; }).catch(function() { window.location.href = 'index.html'; });
+      } else {
         window.location.href = 'index.html';
       }
     }

@@ -6,10 +6,21 @@ from models.user import User
 from models.farmer_profile import FarmerProfile
 from models.buyer_profile import BuyerProfile
 from auth.firebase_auth import verify_firebase_token, get_firebase_user
+from auth.admin_auth import decode_token_if_admin
+from models.verification_audit import VerificationAudit, AdminImpersonationLog, AuthLoginAudit
+from services.admin_verification_service import apply_verification_change
 import logging
 import uuid
 
 logger = logging.getLogger(__name__)
+
+
+def _client_ip():
+    xff = request.headers.get('X-Forwarded-For') or request.headers.get('x-forwarded-for')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.remote_addr
+
 
 def extract_user_id(user):
     """
@@ -151,10 +162,12 @@ def login():
         # Verify Firebase token
         decoded_token = verify_firebase_token(id_token)
         if not decoded_token:
+            AuthLoginAudit.log(success=False, client_ip=_client_ip())
             return jsonify({'error': 'Invalid or expired token'}), 401
         
         firebase_uid = decoded_token['uid']
         email = decoded_token.get('email')
+        User.update_email_verified(firebase_uid, decoded_token.get('email_verified', False))
         
         # Check if user exists in database
         user = User.get_user_by_firebase_uid(firebase_uid)
@@ -163,6 +176,7 @@ def login():
             # New user - return flag for role selection
             first_name = decoded_token.get('first_name')
             last_name = decoded_token.get('last_name')
+            AuthLoginAudit.log(firebase_uid=firebase_uid, email=email, success=True, client_ip=_client_ip())
             return jsonify({
                 'success': True,
                 'new_user': True,
@@ -175,6 +189,7 @@ def login():
         
         # Update latest_sign_in
         User.update_latest_sign_in(firebase_uid)
+        AuthLoginAudit.log(firebase_uid=firebase_uid, email=email, success=True, client_ip=_client_ip())
         
         # Extract and validate user_id
         user_id = extract_user_id(user)
@@ -215,18 +230,21 @@ def google_signin():
         # Verify Firebase token
         decoded_token = verify_firebase_token(id_token)
         if not decoded_token:
+            AuthLoginAudit.log(success=False, client_ip=_client_ip())
             return jsonify({'error': 'Invalid or expired token'}), 401
         
         firebase_uid = decoded_token['uid']
         email = decoded_token.get('email')
         first_name = decoded_token.get('first_name')
         last_name = decoded_token.get('last_name')
+        User.update_email_verified(firebase_uid, decoded_token.get('email_verified', False))
         
         # Check if user exists
         user = User.get_user_by_firebase_uid(firebase_uid)
         
         if not user:
             # New user - needs role selection (cold start)
+            AuthLoginAudit.log(firebase_uid=firebase_uid, email=email, success=True, client_ip=_client_ip())
             return jsonify({
                 'success': True,
                 'new_user': True,
@@ -239,6 +257,7 @@ def google_signin():
         
         # Existing user - update sign-in time
         User.update_latest_sign_in(firebase_uid)
+        AuthLoginAudit.log(firebase_uid=firebase_uid, email=email, success=True, client_ip=_client_ip())
         
         # Extract and validate user_id
         user_id = extract_user_id(user)
@@ -378,8 +397,14 @@ def get_user_by_email():
     """
     Get user by email (for admin/super-user client access).
     Query param: ?email=user@example.com
+    Requires admin Firebase token.
     """
     try:
+        _decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
         email = request.args.get('email', '').strip()
         if not email:
             return jsonify({'error': 'email query parameter is required'}), 400
@@ -406,6 +431,11 @@ def admin_stats():
     Return live platform stats for the admin dashboard.
     """
     try:
+        _decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
         from database import execute_query
 
         total_users = execute_query("SELECT COUNT(*) AS c FROM users", fetch_one=True)['c']
@@ -414,12 +444,54 @@ def admin_stats():
             fetch_one=True
         )['c']
         pending_verification = execute_query(
-            "SELECT COUNT(*) AS c FROM farmer_profiles WHERE certification_status = 'pending'",
-            fetch_one=True
+            """
+            SELECT COUNT(*) AS c FROM (
+                SELECT DISTINCT u.id
+                FROM users u
+                INNER JOIN farmer_profiles fp ON fp.user_id = u.id AND fp.certification_status = 'pending'
+                WHERE EXISTS (
+                    SELECT 1 FROM user_roles ur
+                    WHERE ur.user_id = u.id AND ur.role IN ('farmer', 'agro-dealer')
+                )
+                OR (COALESCE(u.role, '') ILIKE '%farmer%' OR COALESCE(u.role, '') ILIKE '%agro-dealer%'
+                    OR COALESCE(u.role, '') ILIKE '%agro%')
+                UNION
+                SELECT DISTINCT u.id
+                FROM users u
+                INNER JOIN buyer_profiles bp ON bp.user_id = u.id AND bp.verification_status = 'pending'
+                WHERE EXISTS (
+                    SELECT 1 FROM user_roles ur WHERE ur.user_id = u.id AND ur.role = 'buyer'
+                )
+                OR COALESCE(u.role, '') ILIKE '%buyer%'
+            ) pending_users
+            """,
+            fetch_one=True,
         )['c']
         verified_users = execute_query(
-            "SELECT COUNT(*) AS c FROM farmer_profiles WHERE certification_status IN ('verified','approved')",
-            fetch_one=True
+            """
+            SELECT COUNT(*) AS c FROM (
+                SELECT DISTINCT u.id
+                FROM users u
+                INNER JOIN farmer_profiles fp ON fp.user_id = u.id
+                    AND fp.certification_status IN ('verified', 'approved')
+                WHERE EXISTS (
+                    SELECT 1 FROM user_roles ur
+                    WHERE ur.user_id = u.id AND ur.role IN ('farmer', 'agro-dealer')
+                )
+                OR (COALESCE(u.role, '') ILIKE '%farmer%' OR COALESCE(u.role, '') ILIKE '%agro-dealer%'
+                    OR COALESCE(u.role, '') ILIKE '%agro%')
+                UNION
+                SELECT DISTINCT u.id
+                FROM users u
+                INNER JOIN buyer_profiles bp ON bp.user_id = u.id
+                    AND bp.verification_status IN ('verified', 'approved')
+                WHERE EXISTS (
+                    SELECT 1 FROM user_roles ur WHERE ur.user_id = u.id AND ur.role = 'buyer'
+                )
+                OR COALESCE(u.role, '') ILIKE '%buyer%'
+            ) verified_users
+            """,
+            fetch_one=True,
         )['c']
         total_products = execute_query("SELECT COUNT(*) AS c FROM products", fetch_one=True)['c']
         active_products = execute_query(
@@ -447,13 +519,20 @@ def admin_users():
     Return all users for the admin users table.
     """
     try:
+        _decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
         from database import execute_query
         rows = execute_query("""
             SELECT u.id, u.firebase_uid, u.email, u.first_name, u.last_name,
                    u.role, u.is_active, u.created_at,
-                   fp.certification_status
+                   fp.certification_status,
+                   bp.verification_status AS buyer_verification_status
             FROM users u
             LEFT JOIN farmer_profiles fp ON fp.user_id = u.id
+            LEFT JOIN buyer_profiles bp ON bp.user_id = u.id
             ORDER BY u.created_at DESC
         """, fetch_all=True)
 
@@ -467,6 +546,118 @@ def admin_users():
 
     except Exception as e:
         logger.error(f"Admin users error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_bp.route('/admin/users/<user_id>/verification', methods=['PATCH'])
+def admin_patch_verification(user_id):
+    """Approve or reject verification; writes Neon profile + verification_audit."""
+    try:
+        decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
+        data = request.get_json() or {}
+        action = data.get('action')
+        reason = data.get('reason')
+        admin_email = (data.get('admin_email') or decoded.get('email') or '').strip() or None
+
+        result = apply_verification_change(
+            user_id,
+            action=action,
+            reason=reason,
+            actor_decoded=decoded,
+            actor_email=admin_email,
+        )
+        return jsonify({'success': True, **result}), 200
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+    except Exception as e:
+        logger.error(f"admin_patch_verification: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_bp.route('/admin/users/<user_id>/verification-history', methods=['GET'])
+def admin_verification_history(user_id):
+    """Audit trail for a user's verification changes."""
+    try:
+        _decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
+        rows = VerificationAudit.list_for_user(user_id)
+        history = [dict(row) for row in rows]
+        for h in history:
+            if h.get('created_at'):
+                h['created_at'] = str(h['created_at'])
+            if h.get('id'):
+                h['id'] = str(h['id'])
+        return jsonify({'success': True, 'history': history}), 200
+    except Exception as e:
+        logger.error(f"admin_verification_history: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_bp.route('/admin/impersonation-log', methods=['POST'])
+def admin_impersonation_log_post():
+    """Record admin opening a client dashboard (impersonation / support view)."""
+    try:
+        decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
+        data = request.get_json() or {}
+        target_user_id = (data.get('target_user_id') or '').strip()
+        if not target_user_id:
+            return jsonify({'error': 'target_user_id is required'}), 400
+
+        admin_email = (data.get('admin_email') or decoded.get('email') or '').strip() or None
+        row = AdminImpersonationLog.log(
+            target_user_id,
+            admin_firebase_uid=decoded.get('uid'),
+            admin_email=admin_email,
+        )
+        out = dict(row) if row else {}
+        if out.get('id'):
+            out['id'] = str(out['id'])
+        if out.get('created_at'):
+            out['created_at'] = str(out['created_at'])
+        return jsonify({'success': True, 'log': out}), 201
+    except Exception as e:
+        logger.error(f"admin_impersonation_log_post: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_bp.route('/admin/impersonation-log', methods=['GET'])
+def admin_impersonation_log_list():
+    try:
+        _decoded, err = decode_token_if_admin()
+        if err:
+            resp, code = err
+            return resp, code
+
+        limit = request.args.get('limit', '50')
+        try:
+            lim = min(max(int(limit), 1), 200)
+        except ValueError:
+            lim = 50
+        rows = AdminImpersonationLog.list_recent(lim)
+        logs = []
+        for r in rows or []:
+            d = dict(r)
+            if d.get('id'):
+                d['id'] = str(d['id'])
+            if d.get('target_user_id'):
+                d['target_user_id'] = str(d['target_user_id'])
+            if d.get('created_at'):
+                d['created_at'] = str(d['created_at'])
+            logs.append(d)
+        return jsonify({'success': True, 'logs': logs}), 200
+    except Exception as e:
+        logger.error(f"admin_impersonation_log_list: {e}")
         return jsonify({'error': str(e)}), 500
 
 

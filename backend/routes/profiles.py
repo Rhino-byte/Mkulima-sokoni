@@ -12,6 +12,20 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+
+def _user_submitted_verification_status(raw):
+    """
+    Non-admin profile saves may only set status to 'pending' (submit for review).
+    Returns 'pending' or None (omit field — keep existing on update).
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().lower()
+    if s == 'pending':
+        return 'pending'
+    return None
+
+
 def extract_user_id(user):
     """
     Safely extract user_id from user object, ensuring it's a UUID not a timestamp
@@ -227,16 +241,15 @@ def create_farmer_profile():
                 profile_selfie_url = upload_result['secure_url']
                 logger.info(f"Uploaded profile selfie to Cloudinary: {profile_selfie_url}")
         
+        cert_status = _user_submitted_verification_status(data.get('certification_status'))
         if FarmerProfile.profile_exists(user_id):
-            # Update existing profile
-            profile = FarmerProfile.update_profile(
-                user_id,
+            # Update existing profile (omit certification_status unless submitting pending)
+            fp_kwargs = dict(
                 farm_name=data.get('farm_name'),
                 location=data.get('location'),
                 county=data.get('county'),
                 farm_size_acres=data.get('farm_size_acres'),
                 farming_experience_years=data.get('farming_experience_years'),
-                certification_status=data.get('certification_status'),
                 bio=data.get('bio'),
                 profile_image_url=profile_image_url,
                 national_id=data.get('national_id'),
@@ -244,11 +257,14 @@ def create_farmer_profile():
                 id_back_url=id_back_url,
                 profile_selfie_url=profile_selfie_url,
                 ward=data.get('ward'),
-                crops=data.get('crops'),  # JSON string from frontend
-                livestock=data.get('livestock'),  # JSON string from frontend
+                crops=data.get('crops'),
+                livestock=data.get('livestock'),
                 referral_source=data.get('referral_source'),
-                referral_other=data.get('referral_other')
+                referral_other=data.get('referral_other'),
             )
+            if cert_status is not None:
+                fp_kwargs['certification_status'] = cert_status
+            profile = FarmerProfile.update_profile(user_id, **fp_kwargs)
         else:
             # Create new profile
             profile = FarmerProfile.create_profile(
@@ -258,7 +274,7 @@ def create_farmer_profile():
                 county=data.get('county'),
                 farm_size_acres=data.get('farm_size_acres'),
                 farming_experience_years=data.get('farming_experience_years'),
-                certification_status=data.get('certification_status', 'pending'),
+                certification_status=cert_status or 'pending',
                 bio=data.get('bio'),
                 profile_image_url=profile_image_url,
                 national_id=data.get('national_id'),
@@ -395,25 +411,27 @@ def create_buyer_profile():
                 id_back_url = upload_result['secure_url']
                 logger.info(f"Uploaded ID back to Cloudinary: {id_back_url}")
         
+        buyer_vstatus = _user_submitted_verification_status(data.get('verification_status'))
         # Check if profile exists
         if BuyerProfile.profile_exists(user_id):
             # Update existing profile
-            profile = BuyerProfile.update_profile(
-                user_id,
+            bp_kwargs = dict(
                 company_name=data.get('company_name'),
                 location=data.get('location'),
                 county=data.get('county'),
                 business_type=data.get('business_type'),
                 business_registration_number=data.get('business_registration_number'),
-                verification_status=data.get('verification_status'),
                 bio=data.get('bio'),
                 profile_image_url=profile_image_url,
                 national_id=data.get('national_id'),
                 id_front_url=id_front_url,
                 id_back_url=id_back_url,
                 referral_source=data.get('referral_source'),
-                referral_other=data.get('referral_other')
+                referral_other=data.get('referral_other'),
             )
+            if buyer_vstatus is not None:
+                bp_kwargs['verification_status'] = buyer_vstatus
+            profile = BuyerProfile.update_profile(user_id, **bp_kwargs)
         else:
             # Create new profile
             profile = BuyerProfile.create_profile(
@@ -423,7 +441,7 @@ def create_buyer_profile():
                 county=data.get('county'),
                 business_type=data.get('business_type'),
                 business_registration_number=data.get('business_registration_number'),
-                verification_status=data.get('verification_status', 'pending'),
+                verification_status=buyer_vstatus or 'pending',
                 bio=data.get('bio'),
                 profile_image_url=profile_image_url,
                 national_id=data.get('national_id'),

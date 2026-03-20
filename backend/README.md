@@ -68,6 +68,8 @@ See [API Routes Documentation](../docs/API_ROUTES.md) for detailed endpoint docu
 - `DEBUG` - Debug mode (True/False)
 - `CORS_ORIGINS` - Allowed CORS origins (comma-separated)
 - `FIREBASE_SERVICE_ACCOUNT_PATH` - Path to Firebase service account JSON file (optional)
+- `ADMIN_FIREBASE_UIDS` - Comma-separated Firebase UIDs allowed to use `/api/auth/admin/*` (recommended in production)
+- `ADMIN_ALLOW_ANY_FIREBASE_USER` - Set to `true` only on local dev to allow any valid Firebase user to call admin APIs (never in production)
 
 ## Firebase Service Account
 

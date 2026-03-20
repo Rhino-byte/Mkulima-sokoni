@@ -32,6 +32,10 @@ def run_migration(phase='all'):
             migrations.append('005_add_profile_fields.sql')
         if phase == 'all' or phase == '6':
             migrations.append('006_create_products_table.sql')
+        if phase == 'all' or phase == '7':
+            migrations.append('007_verification_audit.sql')
+        if phase == 'all' or phase == '8':
+            migrations.append('008_create_support_tickets.sql')
         
         # Connect to database
         print("Connecting to Neon Database...")
@@ -52,12 +56,12 @@ def run_migration(phase='all'):
                 
                 # Execute migration
                 cursor.execute(migration_sql)
-                print(f"✅ {migration_file_name} completed")
+                print(f"[OK] {migration_file_name} completed")
             
             # Commit changes
             conn.commit()
             
-            print("\n✅ All migrations completed successfully!")
+            print("\n[OK] All migrations completed successfully!")
             
             return True
             
@@ -103,6 +107,10 @@ if __name__ == '__main__':
         print("Phase 5: Add Profile Fields (National ID, ID Uploads, etc.)")
     elif phase == '6':
         print("Phase 6: Create Products Table")
+    elif phase == '7':
+        print("Phase 7: Verification audit & admin logs")
+    elif phase == '8':
+        print("Phase 8: Support tickets tables")
     else:
         print("All Phases")
     print("=" * 50)

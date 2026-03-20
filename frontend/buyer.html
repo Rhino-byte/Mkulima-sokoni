@@ -845,12 +845,9 @@ function exitSuperUser() {
               <div class="form-hint">Optional — your official registration number</div>
             </div>
             <div class="form-group form-full">
-              <label>Verification Status</label>
-              <select id="verification-status" name="verification_status">
-                <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
-                <option value="rejected">Rejected</option>
-              </select>
+              <label>Verification status</label>
+              <p id="verification-status-display" style="font-weight:600;color:var(--forest);margin:0;">—</p>
+              <p class="form-hint" style="margin-top:6px;">Admins set Verified or Rejected after review. Status refreshes when you return to this tab.</p>
             </div>
             <div class="form-group form-full">
               <label>Business Description</label>
@@ -1329,7 +1326,9 @@ function exitSuperUser() {
         set('national-id', p.national_id);
         set('business-type', p.business_type);
         set('business-registration', p.business_registration_number);
-        set('verification-status', p.verification_status||'pending');
+        const vs = (p.verification_status || 'pending').toString();
+        const vsEl = document.getElementById('verification-status-display');
+        if (vsEl) vsEl.textContent = vs.charAt(0).toUpperCase() + vs.slice(1).toLowerCase();
         set('bio', p.bio);
         if (p.referral_source) {
           set('referral-source', p.referral_source);
@@ -1379,7 +1378,6 @@ function exitSuperUser() {
         id_back:   idBack  ? await toBase64(idBack)  : null,
         business_type: document.getElementById('business-type').value,
         business_registration_number: document.getElementById('business-registration').value,
-        verification_status: document.getElementById('verification-status').value,
         bio: document.getElementById('bio').value,
         referral_source: document.getElementById('referral-source').value || null,
         referral_other: document.getElementById('referral-source').value === 'other' ? document.getElementById('referral-other').value : null,
@@ -1392,6 +1390,7 @@ function exitSuperUser() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || 'Failed');
       showAlert('✅ Profile saved successfully!','success');
+      loadBuyerProfile();
     } catch(err) {
       showAlert(err.message || 'Failed to save profile','error');
     } finally {
@@ -1458,6 +1457,12 @@ function exitSuperUser() {
       sessionStorage.removeItem('showSupport');
       showPage('support');
     }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    const prof = document.getElementById('profile');
+    if (prof && prof.classList.contains('active')) loadBuyerProfile();
   });
 
   (function(){
