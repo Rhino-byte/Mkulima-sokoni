@@ -570,6 +570,19 @@ def admin_patch_verification(user_id):
             actor_decoded=decoded,
             actor_email=admin_email,
         )
+        try:
+            from utils.twilio_service import send_verification_status_sms
+
+            user_row = User.get_user_by_id(user_id)
+            if user_row:
+                send_verification_status_sms(
+                    user_row,
+                    result.get('new_status'),
+                    reason if (action or '').lower() == 'reject' else None,
+                )
+        except Exception as sms_exc:
+            logger.warning('Verification SMS notification failed (non-fatal): %s', sms_exc)
+
         return jsonify({'success': True, **result}), 200
     except ValueError as exc:
         return jsonify({'error': str(exc)}), 400

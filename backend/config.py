@@ -57,3 +57,34 @@ class Config:
     CLOUDINARY_API_SECRET = os.getenv('API_SECRET')
     CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 
+    # Twilio SMS (optional; feature flags default off in .env.example)
+    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
+    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
+    TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID', '')
+    TWILIO_FROM_NUMBER = os.getenv('TWILIO_FROM_NUMBER', '')
+    TWILIO_VERIFICATION_SMS_ENABLED = (
+        os.getenv('TWILIO_VERIFICATION_SMS_ENABLED', '').lower() == 'true'
+    )
+    TWILIO_SUPPORT_SMS_ENABLED = (
+        os.getenv('TWILIO_SUPPORT_SMS_ENABLED', '').lower() == 'true'
+    )
+    TWILIO_VERIFY_APPROVED_CONTENT_SID = os.getenv(
+        'TWILIO_VERIFY_APPROVED_CONTENT_SID', ''
+    )
+    TWILIO_VERIFY_REJECTED_CONTENT_SID = os.getenv(
+        'TWILIO_VERIFY_REJECTED_CONTENT_SID', ''
+    )
+    TWILIO_VERIFY_APPROVED_BODY = os.getenv(
+        'TWILIO_VERIFY_APPROVED_BODY',
+        'Soko Safi: Hi {name}, your account verification is approved. Thank you for joining.',
+    )
+    TWILIO_VERIFY_REJECTED_BODY = os.getenv(
+        'TWILIO_VERIFY_REJECTED_BODY',
+        'Soko Safi: Hi {name}, your verification could not be approved. Reason: {reason}. '
+        'Please update your profile and resubmit.',
+    )
+    PUBLIC_APP_URL = os.getenv('PUBLIC_APP_URL', '').rstrip('/')
+    SUPPORT_TICKET_DEEP_LINK_BASE = os.getenv('SUPPORT_TICKET_DEEP_LINK_BASE', '').rstrip(
+        '/'
+    )
+

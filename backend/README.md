@@ -77,6 +77,10 @@ See [API Routes Documentation](../docs/API_ROUTES.md) for detailed endpoint docu
 - `ADMIN_FIREBASE_UIDS` - Comma-separated Firebase UIDs allowed to use `/api/auth/admin/*` (recommended in production)
 - `ADMIN_ALLOW_ANY_FIREBASE_USER` - Set to `true` only on local dev to allow any valid Firebase user to call admin APIs (never in production)
 
+## Twilio SMS (optional)
+
+Verification and support-ticket SMS are documented in [docs/TWILIO.md](../docs/TWILIO.md). Enable with `TWILIO_VERIFICATION_SMS_ENABLED` / `TWILIO_SUPPORT_SMS_ENABLED` and set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, plus a Messaging Service or `TWILIO_FROM_NUMBER`. Set `PUBLIC_APP_URL` for support deep links.
+
 ## Firebase Service Account
 
 For full Firebase Admin SDK functionality, place `firebase_service_account.json` in the `backend/` directory. The code will automatically detect and use it.

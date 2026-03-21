@@ -365,6 +365,10 @@ Used by `frontend/js/marketplace-sync.js` to detect listing changes without down
 
 Aliases accepted: `sold` → `sold_out`, `paused` → `archived`. The authenticated seller must own the product (`farmer_profile_id` match).
 
+## Twilio (side effects)
+
+Admin verification and support admin messages can trigger outbound SMS when enabled via environment variables. See [TWILIO.md](TWILIO.md) — failures do not change HTTP status for those API calls.
+
 ## Error Handling
 
 All endpoints return errors in the following format:

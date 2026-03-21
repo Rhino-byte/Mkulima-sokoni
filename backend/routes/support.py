@@ -187,6 +187,17 @@ def admin_add_message(ticket_id):
             admin_name=admin_name,
             is_internal_note=is_internal_note
         )
+        # v1: SMS to ticket owner on public admin replies only (staff notify / inbound SMS deferred)
+        if not is_internal_note:
+            try:
+                from utils.twilio_service import send_support_ticket_sms_to_user
+
+                send_support_ticket_sms_to_user(ticket, message, is_new_ticket=False)
+            except Exception as sms_exc:
+                logger.warning(
+                    'Support ticket SMS to user failed (non-fatal): %s', sms_exc
+                )
+
         return jsonify({'success': True, 'ticket': ticket}), 200
     except ValueError as exc:
         return jsonify({'error': str(exc)}), 400

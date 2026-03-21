@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="api-base-url" content="" id="api-base-url-meta">
-  <title>Sign In | Soko Safi</title>
-  <meta name="application-name" content="Soko Safi" />
-  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <title>Sign In | Mkulima sokoni</title>
+  <meta name="application-name" content="Mkulima sokoni" />
+  <link rel="icon" type="image/jpeg" href="assets/img/logo.jpeg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -163,9 +163,9 @@
 
     <div class="auth-logo">
       <div class="auth-logo-mark">
-        <img src="assets/img/sokosafi_logo.png" alt="Soko Safi logo" />
+        <img src="assets/img/logo.jpeg" alt="Mkulima sokoni logo" />
       </div>
-      <div class="auth-logo-name">Soko Safi</div>
+      <div class="auth-logo-name">Mkulima sokoni</div>
       <div class="auth-logo-tag">From farm to market, fairly.</div>
     </div>
 
@@ -176,7 +176,7 @@
       <!-- ── LOGIN FORM ── -->
       <div id="login-form">
         <h2>Welcome Back</h2>
-        <p class="subtitle">Sign in to your Soko Safi account</p>
+        <p class="subtitle">Sign in to your Mkulima sokoni account</p>
         <form id="loginForm">
           <div class="form-group">
             <label for="login-email">Email</label>
@@ -201,7 +201,7 @@
       <!-- ── REGISTER FORM ── -->
       <div id="register-form" style="display: none;">
         <h2>Create Account</h2>
-        <p class="subtitle">Join Soko Safi — select your role</p>
+        <p class="subtitle">Join Mkulima sokoni — select your role</p>
 
         <div class="role-selector" id="role-selector">
           <label class="role-tab active" data-role="farmer">
@@ -267,7 +267,7 @@
     </div>
 
     <div class="back-link">
-      <a href="index.html">← Back to Soko Safi Home</a>
+      <a href="index.html">← Back to Mkulima sokoni Home</a>
     </div>
   </div>
 
@@ -451,7 +451,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-        showSuccess('Welcome to Soko Safi! Redirecting...');
+        showSuccess('Welcome to Mkulima sokoni! Redirecting...');
         saveAndRedirect(data.user, role);
       } catch (err) {
         setLoading(btn, false, 'Create Account');
@@ -506,9 +506,9 @@
       modal.innerHTML = `
         <div style="text-align:center;margin-bottom:20px;">
           <div style="width:60px;height:60px;border-radius:14px;overflow:hidden;display:inline-grid;place-items:center;background:#fff;box-shadow:0 4px 16px rgba(116,198,157,.4);margin-bottom:12px;">
-            <img src="assets/img/sokosafi_logo.png" alt="" style="width:100%;height:100%;object-fit:contain;" />
+            <img src="assets/img/logo.jpeg" alt="" style="width:100%;height:100%;object-fit:contain;" />
           </div>
-          <h2 style="font-family:'Playfair Display',serif;color:#1B4332;font-size:1.25rem;">Welcome to Soko Safi!</h2>
+          <h2 style="font-family:'Playfair Display',serif;color:#1B4332;font-size:1.25rem;">Welcome to Mkulima sokoni!</h2>
           <p style="color:#6B705C;font-size:.88rem;">Select your role to get started</p>
         </div>
         <div id="role-modal-error" style="background:#fef2f2;color:#991b1b;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:.85rem;display:none;border:1px solid #fecaca;"></div>

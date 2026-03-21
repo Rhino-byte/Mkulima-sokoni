@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Detail | Soko Safi</title>
-  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <title>Product Detail | Mkulima sokoni</title>
+  <link rel="icon" type="image/jpeg" href="assets/img/logo.jpeg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -165,8 +165,8 @@
 
 <header class="topbar">
   <a href="index.html" class="logo">
-    <div class="logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
-    <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+    <div class="logo-mark"><img src="assets/img/logo.jpeg" alt="Mkulima sokoni" /></div>
+    <div class="logo-label"><strong>Mkulima sokoni</strong><span>From farm to market, fairly.</span></div>
   </a>
   <div class="topbar-actions">
     <button class="topbar-btn" id="dashBtn" onclick="goToDashboard()">Dashboard</button>
@@ -230,8 +230,8 @@
   <div class="footer-grid">
     <div>
       <div class="footer-flogo">
-        <div class="footer-flogo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
-        <div class="footer-flogo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+        <div class="footer-flogo-mark"><img src="assets/img/logo.jpeg" alt="Mkulima sokoni" /></div>
+        <div class="footer-flogo-label"><strong>Mkulima sokoni</strong><span>From farm to market, fairly.</span></div>
       </div>
       <div class="footer-social"><a href="#">f</a><a href="#">𝕏</a><a href="#">💬</a><a href="#">📷</a></div>
     </div>
@@ -241,7 +241,7 @@
     <div class="footer-col"><h5>Resources</h5><ul><li><a href="how-it-works.html">How It Works</a></li><li><a href="market.html">Marketplace</a></li></ul></div>
   </div>
   <div class="footer-bottom">
-    <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+    <p class="footer-copy">© <span id="yr"></span> <strong>Mkulima sokoni</strong>. All rights reserved.</p>
     <span class="footer-badge">Powered by TaiStat Firm</span>
   </div>
 </footer>
@@ -274,7 +274,7 @@ function priceStr(p) {
 /* ── Render product column (instant from cache or API) ── */
 function renderProductCol(p) {
   currentProduct = p;
-  document.title = (p.name || 'Product') + ' | Soko Safi';
+  document.title = (p.name || 'Product') + ' | Mkulima sokoni';
 
   var imgInner = p.image_url
     ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" />'
@@ -477,7 +477,7 @@ function showContactSeller() {
   document.getElementById('contactPhone').innerHTML = '📞 ' + phone;
   if (phone && phone !== 'Not provided') {
     var clean = phone.replace(/\s/g,'');
-    var msg = encodeURIComponent('Hi ' + name + ', I am interested in your product "' + (currentProduct.name||'') + '" listed on Soko Safi. ' + window.location.href);
+    var msg = encodeURIComponent('Hi ' + name + ', I am interested in your product "' + (currentProduct.name||'') + '" listed on Mkulima sokoni. ' + window.location.href);
     document.getElementById('whatsappLink').href = 'https://wa.me/' + clean.replace('+','') + '?text=' + msg;
     document.getElementById('callLink').href = 'tel:' + clean;
   }
@@ -491,7 +491,7 @@ function requireAuthLink(e) {
 
 function shareProduct(platform) {
   var url = window.location.href;
-  var text = (currentProduct.name||'Product') + ' on Soko Safi - ' + priceStr(currentProduct);
+  var text = (currentProduct.name||'Product') + ' on Mkulima sokoni - ' + priceStr(currentProduct);
   switch (platform) {
     case 'whatsapp': window.open('https://wa.me/?text=' + encodeURIComponent(text+' '+url),'_blank'); break;
     case 'facebook': window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),'_blank'); break;

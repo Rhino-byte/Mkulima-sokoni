@@ -822,7 +822,7 @@
 
     var state = {
       root: root,
-      adminEmail: options.adminEmail || 'admin@sokosafi.com',
+      adminEmail: options.adminEmail || 'admin@mkulimasokoni.com',
       tickets: [],
       activeTicketId: null
     };

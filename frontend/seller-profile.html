@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Farmer Profile | Soko Safi</title>
-  <link rel="icon" type="image/png" href="assets/img/sokosafi_logo.png" />
+  <title>Farmer Profile | Mkulima sokoni</title>
+  <link rel="icon" type="image/jpeg" href="assets/img/logo.jpeg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -132,8 +132,8 @@
 
 <header class="topbar">
   <a href="index.html" class="logo">
-    <div class="logo-mark"><img src="assets/img/sokosafi_logo.png" alt="Soko Safi" /></div>
-    <div class="logo-label"><strong>Soko Safi</strong><span>From farm to market, fairly.</span></div>
+    <div class="logo-mark"><img src="assets/img/logo.jpeg" alt="Mkulima sokoni" /></div>
+    <div class="logo-label"><strong>Mkulima sokoni</strong><span>From farm to market, fairly.</span></div>
   </a>
   <div class="topbar-actions">
     <button class="topbar-btn" id="navHomeBtn" onclick="location.href='index.html'">Home</button>
@@ -213,7 +213,7 @@
     <div><p style="font-size:.82rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:8px;">Resources</p><a href="how-it-works.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">How It Works</a><a href="market.html" style="display:block;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:5px;">Marketplace</a></div>
   </div>
   <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,.1);padding-top:16px;">
-    <p class="footer-copy">© <span id="yr"></span> <strong>Soko Safi</strong>. All rights reserved.</p>
+    <p class="footer-copy">© <span id="yr"></span> <strong>Mkulima sokoni</strong>. All rights reserved.</p>
     <span class="footer-badge">Powered by TaiStat Firm</span>
   </div>
 </footer>
@@ -261,7 +261,7 @@ async function loadProfile() {
     renderSidebar(profile, user);
     renderAbout(profile);
     loadFarmerProducts(uid);
-    document.title = esc((profile.farm_name || user.first_name || 'Farmer')) + ' | Soko Safi';
+    document.title = esc((profile.farm_name || user.first_name || 'Farmer')) + ' | Mkulima sokoni';
   } catch(e) {
     document.getElementById('profileName').textContent = 'Could not load profile';
     document.getElementById('infoRows').textContent = e.message || 'Error loading profile.';
@@ -307,7 +307,7 @@ function renderSidebar(p, u) {
     var phone = u.phone_number || '';
     var clean = phone.replace(/\s/g,'');
     var name = ((u.first_name||p.first_name||'')+ ' '+(u.last_name||p.last_name||'')).trim();
-    var msg = encodeURIComponent('Hi ' + name + ', I found your profile on Soko Safi and would like to connect. ' + window.location.href);
+    var msg = encodeURIComponent('Hi ' + name + ', I found your profile on Mkulima sokoni and would like to connect. ' + window.location.href);
     var html = '';
     if (phone) {
       html += '<a href="https://wa.me/' + clean.replace('+','') + '?text=' + msg + '" target="_blank" class="btn btn-whatsapp" onclick="return requireAuthLink(event)" style="text-decoration:none;">💬 WhatsApp</a>';
@@ -360,7 +360,7 @@ function requireAuthLink(e) {
 function shareProfile(platform) {
   var url = window.location.href;
   var name = document.getElementById('profileName').textContent;
-  var text = name + ' on Soko Safi — Farmer profile';
+  var text = name + ' on Mkulima sokoni — Farmer profile';
   switch (platform) {
     case 'whatsapp': window.open('https://wa.me/?text=' + encodeURIComponent(text+' '+url),'_blank'); break;
     case 'facebook': window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),'_blank'); break;
