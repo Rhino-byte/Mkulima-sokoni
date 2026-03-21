@@ -53,11 +53,11 @@ def health():
 @app.route('/assets/<path:filename>')
 def serve_assets(filename: str):
     """
-    Serve shared assets (e.g. logos) from the project-level assets directory.
-    Frontend HTML can safely reference /assets/img/sokosafi_logo.png.
+    Serve static assets from frontend/assets (paths match HTML: /assets/img/...).
     """
     project_root = os.path.dirname(backend_dir)
-    assets_dir = os.path.join(project_root, 'assets')
+    frontend_dir = os.path.join(project_root, 'frontend')
+    assets_dir = os.path.join(frontend_dir, 'assets')
     return send_from_directory(assets_dir, filename)
 
 # Serve frontend static files
