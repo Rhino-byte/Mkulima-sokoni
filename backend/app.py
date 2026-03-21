@@ -60,6 +60,17 @@ def serve_assets(filename: str):
     assets_dir = os.path.join(frontend_dir, 'assets')
     return send_from_directory(assets_dir, filename)
 
+@app.route('/favicon.ico')
+def favicon():
+    """Browsers request /favicon.ico by default; serve the same logo as pages use."""
+    project_root = os.path.dirname(backend_dir)
+    frontend_dir = os.path.join(project_root, 'frontend')
+    return send_from_directory(
+        os.path.join(frontend_dir, 'assets', 'img'),
+        'logo.jpeg',
+        mimetype='image/jpeg',
+    )
+
 # Serve frontend static files
 @app.route('/')
 def serve_index():
